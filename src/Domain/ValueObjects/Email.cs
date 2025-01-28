@@ -5,7 +5,7 @@ namespace Domain.ValueObjects;
 /// <summary>
 /// Represents an email address as a value object.
 /// </summary>
-public class Email : ValueObject
+public sealed class Email : ValueObject
 {
     /// <summary>
     /// Gets the email address value.
