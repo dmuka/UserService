@@ -2,6 +2,8 @@
 
 public abstract class Entity
 {
+    public long Id { get; protected set; }
+    
     private readonly List<IDomainEvent> _domainEvents = [];
 
     public List<IDomainEvent> DomainEvents => [.. _domainEvents];
