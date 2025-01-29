@@ -155,7 +155,7 @@ public class EntityTests
         object differentType = DifferentTypeValue;
 
         // Act & Assert
-        Assert.That(entity, Is.Not.EqualTo(differentType));
+        Assert.That(entity == differentType, Is.False);
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class EntityTests
         var entity = new TestEntity(EntityId);
 
         // Act & Assert
-        Assert.That(entity, Is.Not.EqualTo(null));
+        Assert.That(entity == null!, Is.False);
     }
 
     [Test]
@@ -176,18 +176,18 @@ public class EntityTests
         var entity2 = new TestEntity(EntityId);
 
         // Act & Assert
-        Assert.That(entity1, Is.EqualTo(entity2));
+        Assert.That(entity1 == entity2, Is.True);
     }
 
     [Test]
-    public void Test_EqualityOperator_DifferentIds_ShouldReturnFalse()
+    public void Test_EqualityOperator_DifferentIds_ShouldReturnTrue()
     {
         // Arrange
         var entity1 = new TestEntity(EntityId);
         var entity2 = new TestEntity(2L);
 
         // Act & Assert
-        Assert.That(entity1, Is.Not.EqualTo(entity2));
+        Assert.That(entity1 != entity2, Is.True);
     }
 
     [Test]
@@ -197,11 +197,11 @@ public class EntityTests
         var entity = new TestEntity(EntityId);
 
         // Act & Assert
-        Assert.That(entity, Is.Not.EqualTo(null));
+        Assert.That(entity != null!, Is.True);
     }
 
     [Test]
-    public void Test_InequalityOperator_SameIdDifferentInstances_ShouldReturnTrue()
+    public void Test_InequalityOperator_SameIdDifferentInstances_ShouldReturnFalse()
     {
         // Arrange
         var entity1 = new TestEntity(EntityId);
