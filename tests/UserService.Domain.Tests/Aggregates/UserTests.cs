@@ -11,7 +11,7 @@ public class UserTests
     private const string ValidLastName = "Doe";
     private static readonly PasswordHash ValidPasswordHash = new ("hashedpassword");
     private static readonly Email ValidEmail = new ("test@example.com");
-    private static readonly Role ValidRole = new Role(name: "Admin");
+    private static readonly Role ValidRole = new (name: "Admin");
 
     [Test]
     public void Constructor_Should_Initialize_User_Correctly()
