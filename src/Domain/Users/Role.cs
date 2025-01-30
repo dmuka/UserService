@@ -1,4 +1,6 @@
-﻿namespace Domain.Users;
+﻿using Core;
+
+namespace Domain.Users;
 
 public class Role : Entity
 {

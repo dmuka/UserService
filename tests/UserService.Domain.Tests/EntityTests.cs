@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using Core;
+using Domain;
 
 namespace UserService.Domain.Tests;
 
@@ -10,7 +11,7 @@ public class EntityTests
         
     private class TestEntity : Entity
     {
-        public TestEntity(long id)
+        public TestEntity(ulong id)
         {
             Id = id;
         }

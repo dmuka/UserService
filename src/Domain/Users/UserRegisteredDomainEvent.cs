@@ -1,3 +1,5 @@
-﻿namespace Domain.Users;
+﻿using Core;
+
+namespace Domain.Users;
 
 public sealed record UserRegisteredDomainEvent(int UserId) : IDomainEvent;

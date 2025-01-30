@@ -1,0 +1,30 @@
+﻿using Application.Abstractions.Authentication;
+using Application.Abstractions.Messaging;
+using Core;
+using Domain.Users;
+
+namespace Application.Users.GetById;
+
+public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext userContext) : IQueryHandler<GetUserByIdQuery, UserResponse>
+{
+    public async Task<Result<UserResponse>> Handle(
+        GetUserByIdQuery query, 
+        CancellationToken cancellationToken)
+    {
+        if (query.UserId != userContext.UserId)
+        {
+            return Result.Failure<UserResponse>(UserErrors.Unauthorized());
+        }
+        
+        var user = await repository.GetUserByIdAsync(query.UserId);
+
+        if (user is null)
+        {
+            return Result.Failure<UserResponse>(UserErrors.NotFound(query.UserId));
+        }
+        
+        var userResponse = UserResponse.Create(user);
+
+        return userResponse;
+    }
+}

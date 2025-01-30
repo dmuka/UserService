@@ -1,7 +1,4 @@
-﻿namespace Domain;
-
-using System;
-using System.Collections.Generic;
+﻿namespace Core;
 
 public abstract class Entity
 {
@@ -9,6 +6,7 @@ public abstract class Entity
     /// Holds the requested hash code for this entity if it has been computed.
     /// </summary>
     private int? _requestedHashCode;
+    
     /// <summary>
     /// Prime number for better hash distribution
     /// </summary>
@@ -17,7 +15,7 @@ public abstract class Entity
     /// <summary>
     /// Gets the unique identifier for this entity.
     /// </summary>
-    public long Id { get; protected set; }
+    public ulong Id { get; protected set; }
 
     /// <summary>
     /// A private list to hold domain events associated with this entity.

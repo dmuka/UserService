@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Errors;
+﻿namespace Core;
 
 public enum ErrorType
 {
