@@ -955,3 +955,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+.qodo

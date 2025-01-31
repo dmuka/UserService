@@ -1,7 +1,6 @@
 ﻿using Core;
-using Domain;
 
-namespace UserService.Domain.Tests;
+namespace UserService.Core.Tests;
 
 [TestFixture]
 public class EntityTests
