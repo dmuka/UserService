@@ -5,7 +5,7 @@ namespace Domain.Users;
 
 public static class UserErrors
 {
-    public static Error NotFound(ulong userId) => Error.NotFound(
+    public static Error NotFound(long userId) => Error.NotFound(
         Codes.NotFound, 
         $"The user with the id = '{userId}' was not found.");
 

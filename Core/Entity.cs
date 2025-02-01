@@ -15,7 +15,7 @@ public abstract class Entity
     /// <summary>
     /// Gets the unique identifier for this entity.
     /// </summary>
-    public ulong Id { get; protected set; }
+    public long Id { get; protected set; }
 
     /// <summary>
     /// A private list to hold domain events associated with this entity.

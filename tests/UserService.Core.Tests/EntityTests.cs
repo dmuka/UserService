@@ -10,7 +10,7 @@ public class EntityTests
         
     private class TestEntity : Entity
     {
-        public TestEntity(ulong id)
+        public TestEntity(long id)
         {
             Id = id;
         }

@@ -10,8 +10,8 @@ namespace UserService.Application.Tests.Users.GetById;
 [TestFixture]
 public class GetUserByIdQueryHandlerTests
 {
-    private const ulong AuthorizedUserId = 123;
-    private const ulong UnauthorizedUserId = 456;
+    private const long AuthorizedUserId = 123;
+    private const long UnauthorizedUserId = 456;
     
     private Mock<IUserRepository> _mockRepository;
     private Mock<IUserContext> _mockUserContext;

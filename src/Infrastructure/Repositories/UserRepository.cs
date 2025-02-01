@@ -1,5 +1,7 @@
-﻿using Dapper;
+﻿using Application.Users.GetById;
+using Dapper;
 using Domain.Users;
+using Domain.ValueObjects;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 
@@ -8,8 +10,8 @@ namespace Infrastructure.Repositories;
 public class UserRepository(IConfiguration configuration) : IUserRepository
 {
     private readonly string? _connectionString = configuration.GetConnectionString("DefaultConnection");
-
-    public async Task<User?> GetUserByIdAsync(ulong userId, CancellationToken cancellationToken = default)
+    
+    public async Task<User?> GetUserByIdAsync(long userId, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -24,18 +26,22 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
-        var result = await connection.QueryAsync<User, Role, User>(
+        try
+        {
+            var result = await connection.QueryAsync<UserResponse, Role, User>(
             command,
-            (user, role) =>
-            {
-                user.ChangeRole(role);
-                return user;
-            },
+            (user, role) => new User(user.Username, user.FirstName, user.LastName, new PasswordHash(user.PasswordHash), new Email(user.Email), new Role(role.Name)),
             splitOn: "Id");
-
-        var user = result.FirstOrDefault();
-        
-        return user;
+            
+            var user = result.FirstOrDefault();
+            
+            return user;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
@@ -80,7 +86,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
         var users = await connection.QueryAsync<User, Role, User>(
-            query,
+            command,
             (user, role) =>
             {
                 user.ChangeRole(role);
@@ -91,7 +97,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         return users;
     }
 
-    public async Task<ulong> AddUserAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<long> AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -103,7 +109,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
         
-        var userId = await connection.ExecuteScalarAsync<ulong>(command);
+        var userId = await connection.ExecuteScalarAsync<int>(command);
         
         user.SetId(userId);
         

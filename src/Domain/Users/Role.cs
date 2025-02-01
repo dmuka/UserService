@@ -7,6 +7,8 @@ public class Role : Entity
     public string Name { get; private set; }
     public ICollection<User> Users { get; private set; }
 
+    protected Role() { }
+
     public Role(string name)
     {
         Name = name;
