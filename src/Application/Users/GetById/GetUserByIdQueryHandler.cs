@@ -11,10 +11,10 @@ public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext us
         GetUserByIdQuery query, 
         CancellationToken cancellationToken)
     {
-        // if (query.UserId != userContext.UserId)
-        // {
-        //     return Result.Failure<UserResponse>(UserErrors.Unauthorized());
-        // }
+        if (query.UserId != userContext.UserId)
+        {
+            return Result.Failure<UserResponse>(UserErrors.Unauthorized());
+        }
         
         var user = await repository.GetUserByIdAsync(query.UserId, cancellationToken);
 

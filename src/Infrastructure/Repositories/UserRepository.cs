@@ -1,7 +1,9 @@
 ﻿using Application.Users.GetById;
 using Dapper;
+using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
+using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 
@@ -28,7 +30,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
 
         try
         {
-            var result = await connection.QueryAsync<UserResponse, Role, User>(
+            var result = await connection.QueryAsync<UserDto, RoleDto, User>(
             command,
             (user, role) => new User(user.Username, user.FirstName, user.LastName, new PasswordHash(user.PasswordHash), new Email(user.Email), new Role(role.Name)),
             splitOn: "Id");

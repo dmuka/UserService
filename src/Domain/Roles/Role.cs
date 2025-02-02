@@ -1,6 +1,7 @@
 ﻿using Core;
+using Domain.Users;
 
-namespace Domain.Users;
+namespace Domain.Roles;
 
 public class Role : Entity
 {

@@ -5,5 +5,5 @@
 /// </summary>
 public interface IUserContext
 {
-    ulong UserId { get; }
+    long UserId { get; }
 }

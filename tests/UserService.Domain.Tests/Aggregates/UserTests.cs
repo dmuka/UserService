@@ -1,4 +1,5 @@
-﻿using Domain.Users;
+﻿using Domain.Roles;
+using Domain.Users;
 using Domain.ValueObjects;
 
 namespace UserService.Domain.Tests.Aggregates;

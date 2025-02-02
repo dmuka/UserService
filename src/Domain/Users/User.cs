@@ -1,4 +1,5 @@
 ﻿using Core;
+using Domain.Roles;
 using Domain.ValueObjects;
 
 namespace Domain.Users;
@@ -53,12 +54,7 @@ public class User : Entity, IAggregationRoot
         LastName = lastName;
         PasswordHash = passwordHash;
         Email = email;
-        SetRole(role);
-    }
-
-    public void SetId(long id)
-    {
-        Id = id;
+        Role = role;
     }
 
     /// <summary>

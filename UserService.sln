@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Domain.Tests", "tests\UserService.Domain.Tests\UserService.Domain.Tests.csproj", "{941EFD91-4777-429F-B572-E02440496D49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{7136219D-4F5D-42E0-AEF0-89C33D4763A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{7136219D-4F5D-42E0-AEF0-89C33D4763A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Application.Tests", "tests\UserService.Application.Tests\UserService.Application.Tests.csproj", "{908DDEC7-A127-4693-8438-BEEDD3619928}"
 EndProject

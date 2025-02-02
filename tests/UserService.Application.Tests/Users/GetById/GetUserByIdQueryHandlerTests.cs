@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.GetById;
+using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
 using Moq;
