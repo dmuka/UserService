@@ -7,4 +7,5 @@ public record UserDto(
     string LastName,
     string PasswordHash,
     string Email,
-    long RoleId) : IDto;
+    long RoleId,
+    string RoleName) : IDto;

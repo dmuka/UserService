@@ -16,13 +16,13 @@ public sealed record UserResponse
     {
         var userResponse = new UserResponse
         {
-            Id = user.Id,
+            Id = user.Id.Value,
             Username = user.Username,
             FirstName = user.FirstName,
             LastName = user.LastName,
             PasswordHash = user.PasswordHash,
             Email = user.Email,
-            RoleId = user.RoleId
+            RoleId = user.Role.Id.Value
         };
         
         return userResponse;

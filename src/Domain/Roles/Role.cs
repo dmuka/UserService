@@ -5,13 +5,15 @@ namespace Domain.Roles;
 
 public class Role : Entity
 {
+    public RoleId Id { get; private set; }
     public string Name { get; private set; }
     public ICollection<User> Users { get; private set; }
 
     protected Role() { }
 
-    public Role(string name)
+    public Role(RoleId id, string name)
     {
+        Id = id;
         Name = name;
         Users = new List<User>();
     }

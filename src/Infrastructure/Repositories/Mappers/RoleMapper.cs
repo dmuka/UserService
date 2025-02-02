@@ -5,12 +5,11 @@ namespace Infrastructure.Repositories.Mappers;
 
 public class RoleMapper : IMapper<Role, RoleDto>
 {
-    public RoleDto ToDto(Role role) => new (role.Id, role.Name);
+    public RoleDto ToDto(Role role) => new (role.Id.Value, role.Name);
 
     public Role ToEntity(RoleDto dto)
     {
-        var role = new Role(dto.Name);
-        role.SetId(dto.Id);
+        var role = new Role(new RoleId(dto.Id), dto.Name);
         
         return role;
     }

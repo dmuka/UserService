@@ -9,12 +9,12 @@ namespace Domain.Users;
 /// </summary>
 public class User : Entity, IAggregationRoot
 {
+    public UserId Id { get; private set; }
     public string Username { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
-    public long RoleId { get; private set; }
     public Role Role { get; private set; }
 
     /// <summary>
@@ -23,15 +23,19 @@ public class User : Entity, IAggregationRoot
     protected User() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="User"/> class.
+    /// Initializes a new instance of the <see cref="User"/> class with specified user details.
     /// </summary>
+    /// <param name="userId">The unique identifier for the user.</param>
     /// <param name="userName">The username of the user.</param>
     /// <param name="firstName">The first name of the user.</param>
     /// <param name="lastName">The last name of the user.</param>
     /// <param name="passwordHash">The hashed password of the user.</param>
     /// <param name="email">The email address of the user.</param>
     /// <param name="role">The role of the user.</param>
+    /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
     public User(
+        UserId userId,
         string userName,
         string firstName,
         string lastName,
@@ -49,6 +53,7 @@ public class User : Entity, IAggregationRoot
         ArgumentNullException.ThrowIfNull(email, nameof(email));
         ArgumentNullException.ThrowIfNull(role, nameof(role));
 
+        Id = userId;
         Username = userName;
         FirstName = firstName;
         LastName = lastName;
@@ -94,9 +99,5 @@ public class User : Entity, IAggregationRoot
     /// Sets the role of the user and updates the role ID.
     /// </summary>
     /// <param name="role">The role to set.</param>
-    private void SetRole(Role role)
-    {
-        Role = role;
-        RoleId = role.Id;
-    }
+    private void SetRole(Role role) => Role = role;
 }

@@ -1,4 +1,4 @@
-﻿using Application.Users.GetById;
+﻿using System.Data;
 using Dapper;
 using Domain.Roles;
 using Domain.Users;
@@ -30,10 +30,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
 
         try
         {
-            var result = await connection.QueryAsync<UserDto, RoleDto, User>(
-            command,
-            (user, role) => new User(user.Username, user.FirstName, user.LastName, new PasswordHash(user.PasswordHash), new Email(user.Email), new Role(role.Name)),
-            splitOn: "Id");
+            var result = await QueryUsers(connection, command);
             
             var user = result.FirstOrDefault();
             
@@ -41,7 +38,6 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             throw;
         }
     }
@@ -61,14 +57,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
-        var result = await connection.QueryAsync<User, Role, User>(
-            command,
-            (user, role) =>
-            {
-                user.ChangeRole(role);
-                return user;
-            },
-            splitOn: "Id");
+        var result = await QueryUsers(connection, command);
 
         var user = result.FirstOrDefault();
         
@@ -87,14 +76,7 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
-        var users = await connection.QueryAsync<User, Role, User>(
-            command,
-            (user, role) =>
-            {
-                user.ChangeRole(role);
-                return user;
-            },
-            splitOn: "Id");
+        var users = await QueryUsers(connection, command);
         
         return users;
     }
@@ -112,8 +94,6 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
         
         var userId = await connection.ExecuteScalarAsync<int>(command);
-        
-        user.SetId(userId);
         
         return userId;
     }
@@ -134,10 +114,28 @@ public class UserRepository(IConfiguration configuration) : IUserRepository
                         WHERE Users.Id = @Id
                     """;
         
-        var parameters = new { user.Id, user.Username, user.FirstName, user.LastName, user.PasswordHash, user.Email, user.RoleId };
+        var parameters = new { user.Id, user.Username, user.FirstName, user.LastName, user.PasswordHash, user.Email, user.Role.Id.Value };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         await connection.ExecuteAsync(command);
+    }
+
+    private async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)
+    {
+        var users = await connection.QueryAsync<UserDto, RoleDto, User>(
+            command,
+            (user, role) => 
+                new User(
+                    new UserId(user.Id), 
+                    user.Username, 
+                    user.FirstName, 
+                    user.LastName, 
+                    new PasswordHash(user.PasswordHash), 
+                    new Email(user.Email), 
+                    new Role(new RoleId(role.Id), role.Name)),
+            splitOn: "Id");
+        
+        return users;
     }
 }

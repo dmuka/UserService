@@ -13,6 +13,10 @@ public class GetUserByIdQueryHandlerTests
 {
     private const long AuthorizedUserId = 123;
     private const long UnauthorizedUserId = 456;
+    private const long RoleId = 1;
+    
+    private readonly UserId _userId = new(AuthorizedUserId);
+    private readonly RoleId _roleId = new(RoleId);
     
     private Mock<IUserRepository> _mockRepository;
     private Mock<IUserContext> _mockUserContext;
@@ -71,23 +75,23 @@ public class GetUserByIdQueryHandlerTests
         var query = new GetUserByIdQuery(AuthorizedUserId);
         _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);
         var user = new User(
+            _userId,
             "userName", 
             "John",
             "Doe", 
             new PasswordHash("hash"), 
             new Email("email@email.com"), 
-            new Role("Admin"));
-        user.SetId(AuthorizedUserId);
+            new Role(_roleId,"Admin"));
 
         var expected = new UserResponse
         {
-            Id = user.Id,
+            Id = user.Id.Value,
             Username = user.Username,
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
-            RoleId = user.RoleId
+            RoleId = user.Role.Id.Value,
         };
         
         _mockRepository.Setup(x => x.GetUserByIdAsync(AuthorizedUserId, CancellationToken.None)).ReturnsAsync(user);
