@@ -43,20 +43,34 @@ namespace UserService.Infrastructure.Tests.Repositories.Mappers
         public void ToEntity_ShouldMapUserDtoToUserCorrectly()
         {
             // Arrange
-            var userDto = new UserDto(1, "jdoe", "John", "Doe", "hashedPassword", "jdoe@example.com", 1, "Admin");
+            var userDto = new UserDto
+            {
+                Id = 1,
+                Username = "jdoe",
+                FirstName = "John",
+                LastName = "Doe",
+                PasswordHash = "hashedPassword",
+                Email = "jdoe@example.com",
+                RoleId = 1,
+                RoleName = "Admin"
+                    
+            };
 
             // Act
             var user = _userMapper.ToEntity(userDto);
 
-            // Assert
-            Assert.That(user.Id.Value, Is.EqualTo(userDto.Id));
-            Assert.That(user.Username, Is.EqualTo(userDto.Username));
-            Assert.That(user.FirstName, Is.EqualTo(userDto.FirstName));
-            Assert.That(user.LastName, Is.EqualTo(userDto.LastName));
-            Assert.That(user.PasswordHash.Value, Is.EqualTo(userDto.PasswordHash));
-            Assert.That(user.Email.Value, Is.EqualTo(userDto.Email));
-            Assert.That(user.Role.Id.Value, Is.EqualTo(userDto.RoleId));
-            Assert.That(user.Role.Name, Is.EqualTo(userDto.RoleName));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(user.Id.Value, Is.EqualTo(userDto.Id));
+                Assert.That(user.Username, Is.EqualTo(userDto.Username));
+                Assert.That(user.FirstName, Is.EqualTo(userDto.FirstName));
+                Assert.That(user.LastName, Is.EqualTo(userDto.LastName));
+                Assert.That(user.PasswordHash.Value, Is.EqualTo(userDto.PasswordHash));
+                Assert.That(user.Email.Value, Is.EqualTo(userDto.Email));
+                Assert.That(user.Role.Id.Value, Is.EqualTo(userDto.RoleId));
+                Assert.That(user.Role.Name, Is.EqualTo(userDto.RoleName));
+            }
         }
 
         [Test]

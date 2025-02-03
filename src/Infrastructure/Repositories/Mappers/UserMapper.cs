@@ -8,14 +8,17 @@ namespace Infrastructure.Repositories.Mappers;
 public class UserMapper : IMapper<User, UserDto>
 {
     public UserDto ToDto(User user) => 
-        new (user.Id.Value,
-            user.Username,
-            user.FirstName, 
-            user.LastName,
-            user.PasswordHash,
-            user.Email,
-            user.Role.Id.Value,
-            user.Role.Name);
+        new()
+        {
+            Id = user.Id.Value,
+            Username = user.Username,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PasswordHash = user.PasswordHash,
+            Email = user.Email,
+            RoleId = user.Role.Id.Value,
+            RoleName = user.Role.Name
+        };
 
     public User ToEntity(UserDto dto)
     {

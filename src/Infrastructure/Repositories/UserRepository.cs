@@ -3,15 +3,17 @@ using Dapper;
 using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
+using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository(IConfiguration configuration) : IUserRepository
+public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRepository
 {
-    private readonly string? _connectionString = configuration.GetConnectionString("DefaultConnection");
+    private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
     
     public async Task<User?> GetUserByIdAsync(long userId, CancellationToken cancellationToken = default)
     {

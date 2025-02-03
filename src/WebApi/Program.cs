@@ -1,8 +1,8 @@
 using System.Reflection;
 using Application;
-using Domain.Users;
 using Infrastructure;
-using Infrastructure.Repositories;
+using Infrastructure.Options.Db;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
@@ -16,7 +16,10 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configu
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddOptions<PostgresOptions>()
+    .BindConfiguration("DbConnections:Postgres")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services
     .AddApplication()

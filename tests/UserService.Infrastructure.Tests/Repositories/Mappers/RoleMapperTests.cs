@@ -38,7 +38,7 @@ public class RoleMapperTests
     public void ToEntity_ShouldMapRoleDtoToRoleCorrectly()
     {
         // Arrange
-        var roleDto = new RoleDto(1, "Admin");
+        var roleDto = new RoleDto { Id = 1, Name = "Admin" };
 
         // Act
         var role = _roleMapper.ToEntity(roleDto);
