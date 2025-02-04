@@ -1,10 +1,8 @@
 ﻿namespace Core;
 
-public abstract class TypedId : IEquatable<TypedId>
+public abstract class TypedId(Guid value) : IEquatable<TypedId>
 {
-    public long Value { get; }
-
-    protected TypedId(long value) => Value = value;
+    public Guid Value { get; } = value;
 
     public override bool Equals(object? obj)
     {

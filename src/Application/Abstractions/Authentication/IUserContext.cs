@@ -5,5 +5,7 @@
 /// </summary>
 public interface IUserContext
 {
-    long UserId { get; }
+    Guid UserId { get; }
+    string UserName { get; }
+    string UserRole { get; }
 }

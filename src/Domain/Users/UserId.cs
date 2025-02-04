@@ -2,4 +2,4 @@
 
 namespace Domain.Users;
 
-public class UserId(long value) : TypedId(value);
+public class UserId(Guid value) : TypedId(value);

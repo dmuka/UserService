@@ -34,7 +34,26 @@ public class User : Entity, IAggregationRoot
     /// <param name="role">The role of the user.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
-    public User(
+    public static User CreateUser(
+        Guid userId,
+        string userName,
+        string firstName,
+        string lastName,
+        PasswordHash passwordHash, 
+        Email email, 
+        Role role)
+    {
+        return new User(
+            new UserId(userId), 
+            userName, 
+            firstName, 
+            lastName, 
+            passwordHash, 
+            email, 
+            role);
+    }    
+    
+    private User(
         UserId userId,
         string userName,
         string firstName,
@@ -43,15 +62,7 @@ public class User : Entity, IAggregationRoot
         Email email, 
         Role role)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("Username can't be null or empty.", nameof(userName));
-        if (string.IsNullOrWhiteSpace(firstName))
-            throw new ArgumentException("First name can't be null or empty.", nameof(firstName));
-        if (string.IsNullOrWhiteSpace(lastName))
-            throw new ArgumentException("Last name can't be null or empty.", nameof(lastName));
-        ArgumentNullException.ThrowIfNull(passwordHash, nameof(passwordHash));
-        ArgumentNullException.ThrowIfNull(email, nameof(email));
-        ArgumentNullException.ThrowIfNull(role, nameof(role));
+        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, role);
 
         Id = userId;
         Username = userName;
@@ -69,7 +80,6 @@ public class User : Entity, IAggregationRoot
     public void ChangeEmail(Email newEmail)
     {
         ArgumentNullException.ThrowIfNull(newEmail, nameof(newEmail));
-
         Email = newEmail;
     }
 
@@ -80,7 +90,6 @@ public class User : Entity, IAggregationRoot
     public void ChangePassword(PasswordHash newPasswordHash)
     {
         ArgumentNullException.ThrowIfNull(newPasswordHash, nameof(newPasswordHash));
-
         PasswordHash = newPasswordHash;
     }
 
@@ -91,7 +100,6 @@ public class User : Entity, IAggregationRoot
     public void ChangeRole(Role newRole)
     {
         ArgumentNullException.ThrowIfNull(newRole, nameof(newRole));
-
         SetRole(newRole);
     }
 
@@ -100,4 +108,26 @@ public class User : Entity, IAggregationRoot
     /// </summary>
     /// <param name="role">The role to set.</param>
     private void SetRole(Role role) => Role = role;
+
+    /// <summary>
+    /// Validates user details.
+    /// </summary>
+    private static void ValidateUserDetails(
+        string userName,
+        string firstName,
+        string lastName,
+        PasswordHash passwordHash,
+        Email email,
+        Role role)
+    {
+        if (string.IsNullOrWhiteSpace(userName))
+            throw new ArgumentException("Username can't be null or empty.", nameof(userName));
+        if (string.IsNullOrWhiteSpace(firstName))
+            throw new ArgumentException("First name can't be null or empty.", nameof(firstName));
+        if (string.IsNullOrWhiteSpace(lastName))
+            throw new ArgumentException("Last name can't be null or empty.", nameof(lastName));
+        ArgumentNullException.ThrowIfNull(passwordHash, nameof(passwordHash));
+        ArgumentNullException.ThrowIfNull(email, nameof(email));
+        ArgumentNullException.ThrowIfNull(role, nameof(role));
+    }
 }

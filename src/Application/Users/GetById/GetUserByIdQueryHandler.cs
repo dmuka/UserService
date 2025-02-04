@@ -5,7 +5,8 @@ using Domain.Users;
 
 namespace Application.Users.GetById;
 
-public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext userContext) : IQueryHandler<GetUserByIdQuery, UserResponse>
+public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext userContext) 
+    : IQueryHandler<GetUserByIdQuery, UserResponse>
 {
     public async Task<Result<UserResponse>> Handle(
         GetUserByIdQuery query, 

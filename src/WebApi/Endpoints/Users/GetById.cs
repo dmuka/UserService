@@ -9,7 +9,7 @@ internal sealed class GetById : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("users/{userId}", async (int userId, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapGet("users/{userId:Guid}", async (Guid userId, ISender sender, CancellationToken cancellationToken) =>
         {
             var query = new GetUserByIdQuery(userId);
 

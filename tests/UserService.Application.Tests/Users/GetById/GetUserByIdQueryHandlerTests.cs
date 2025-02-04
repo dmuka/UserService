@@ -11,12 +11,12 @@ namespace UserService.Application.Tests.Users.GetById;
 [TestFixture]
 public class GetUserByIdQueryHandlerTests
 {
-    private const long AuthorizedUserId = 123;
-    private const long UnauthorizedUserId = 456;
-    private const long RoleId = 1;
+    private static readonly Guid AuthorizedUserId = Guid.NewGuid();
+    private static readonly Guid UnauthorizedUserId = Guid.NewGuid();
+    private static readonly Guid RId = Guid.NewGuid();
     
     private readonly UserId _userId = new(AuthorizedUserId);
-    private readonly RoleId _roleId = new(RoleId);
+    private readonly RoleId _roleId = new(RId);
     
     private Mock<IUserRepository> _mockRepository;
     private Mock<IUserContext> _mockUserContext;
@@ -44,7 +44,7 @@ public class GetUserByIdQueryHandlerTests
         {
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error.Code, Is.EqualTo("Users.Unauthorized"));
+            Assert.That(result.Error.Code, Is.EqualTo("UserUnauthorized"));
         }
     }
 
@@ -74,8 +74,8 @@ public class GetUserByIdQueryHandlerTests
         // Arrange
         var query = new GetUserByIdQuery(AuthorizedUserId);
         _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);
-        var user = new User(
-            _userId,
+        var user = User.CreateUser(
+            _userId.Value,
             "userName", 
             "John",
             "Doe", 

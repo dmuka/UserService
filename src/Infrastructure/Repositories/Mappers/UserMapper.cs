@@ -22,8 +22,8 @@ public class UserMapper : IMapper<User, UserDto>
 
     public User ToEntity(UserDto dto)
     {
-        var user = new User(
-            new UserId(dto.Id), 
+        var user = User.CreateUser(
+            dto.Id, 
             dto.Username, 
             dto.FirstName, 
             dto.LastName, 

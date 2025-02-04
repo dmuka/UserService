@@ -5,7 +5,6 @@ using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -14,8 +13,60 @@ namespace Infrastructure.Repositories;
 public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRepository
 {
     private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
+
+    public async Task<bool> IsUsernameExistsAsync(string userName, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        SELECT COUNT(users.username)
+                        FROM Users users
+                        WHERE users.username = @UserName
+                    """;
+        
+        var parameters = new { UserId = userName };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var result = await connection.ExecuteScalarAsync<int>(command);
+            
+            return result > 0;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
     
-    public async Task<User?> GetUserByIdAsync(long userId, CancellationToken cancellationToken = default)
+    public async Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        SELECT COUNT(users.email)
+                        FROM Users users
+                        WHERE users.username = @Email
+                    """;
+        
+        var parameters = new { UserId = email };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var result = await connection.ExecuteScalarAsync<int>(command);
+            
+            return result > 0;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
+    
+    public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -83,7 +134,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         return users;
     }
 
-    public async Task<long> AddUserAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<Guid> AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -95,7 +146,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
         
-        var userId = await connection.ExecuteScalarAsync<int>(command);
+        var userId = await connection.ExecuteScalarAsync<Guid>(command);
         
         return userId;
     }
@@ -123,13 +174,13 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await connection.ExecuteAsync(command);
     }
 
-    private async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)
+    private static async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)
     {
         var users = await connection.QueryAsync<UserDto, RoleDto, User>(
             command,
             (user, role) => 
-                new User(
-                    new UserId(user.Id), 
+                User.CreateUser(
+                    user.Id, 
                     user.Username, 
                     user.FirstName, 
                     user.LastName, 

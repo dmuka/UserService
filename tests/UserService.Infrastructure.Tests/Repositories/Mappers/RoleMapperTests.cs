@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Domain.Roles;
+﻿using Domain.Roles;
 using Infrastructure.Repositories.Dtos;
 using Infrastructure.Repositories.Mappers;
 
@@ -20,7 +19,7 @@ public class RoleMapperTests
     public void ToDto_ShouldMapRoleToRoleDtoCorrectly()
     {
         // Arrange
-        var roleId = new RoleId(1);
+        var roleId = new RoleId(Guid.NewGuid());
         var role = new Role(roleId, "Admin");
 
         // Act
@@ -38,7 +37,7 @@ public class RoleMapperTests
     public void ToEntity_ShouldMapRoleDtoToRoleCorrectly()
     {
         // Arrange
-        var roleDto = new RoleDto { Id = 1, Name = "Admin" };
+        var roleDto = new RoleDto { Id = Guid.NewGuid(), Name = "Admin" };
 
         // Act
         var role = _roleMapper.ToEntity(roleDto);

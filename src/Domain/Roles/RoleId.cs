@@ -2,4 +2,4 @@
 
 namespace Domain.Roles;
 
-public class RoleId(long value) : TypedId(value);
+public class RoleId(Guid value) : TypedId(value);
