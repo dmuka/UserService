@@ -1,6 +1,5 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
-using Application.Users.GetById;
 using Core;
 using Domain.Users;
 
@@ -22,7 +21,7 @@ public class GetUserByNameQueryHandler(IUserRepository repository, IUserContext 
 
         if (user is null)
         {
-            return Result.Failure<UserResponse>(UserErrors.NotFound(query.UserName));
+            return Result.Failure<UserResponse>(UserErrors.NotFoundByUsername(query.UserName));
         }
         
         var userResponse = UserResponse.Create(user);

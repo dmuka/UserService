@@ -21,7 +21,9 @@
          IConfiguration configuration) =>
          services
              .AddAuthentication(configuration)
+             .AddAuth()
              .AddDbConnectionOptions()
+             .AddHealthCheck()
              .AddRepositories();
 
      private static IServiceCollection AddRepositories(this IServiceCollection services)
@@ -68,7 +70,22 @@
          
          services.AddHttpContextAccessor();
          services.AddScoped<IUserContext, UserContext>();
+         services.AddSingleton<ITokenProvider, TokenProvider>();
          services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+         return services;
+     }
+
+     private static IServiceCollection AddHealthCheck(this IServiceCollection services)
+     {
+         services.AddHealthChecks();
+
+         return services;
+     }
+
+     private static IServiceCollection AddAuth(this IServiceCollection services)
+     {
+         services.AddAuthorization();
 
          return services;
      }

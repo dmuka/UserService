@@ -9,9 +9,17 @@ public static class UserErrors
         Codes.NotFound, 
         $"The user with the id = '{userId}' was not found.");
     
-    public static Error NotFound(string userName) => Error.NotFound(
+    public static Error NotFoundByUsername(string userName) => Error.NotFound(
         Codes.NotFound, 
         $"The user with the user name = '{userName}' was not found.");
+    
+    public static Error NotFoundByEmail(string email) => Error.NotFound(
+        Codes.NotFound, 
+        $"The user with the email = '{email}' was not found.");
+    
+    public static Error WrongPassword() => Error.Failure(
+        Codes.WrongPassword, 
+        "You are entered the wrong password.");
 
     public static Error Unauthorized() => Error.Failure(
         Codes.Unauthorized,

@@ -24,7 +24,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                         WHERE users.username = @UserName
                     """;
         
-        var parameters = new { UserId = userName };
+        var parameters = new { UserName = userName };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
@@ -39,7 +39,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
             throw;
         }
     }
-    
+
     public async Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -47,10 +47,10 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         var query = """
                         SELECT COUNT(users.email)
                         FROM Users users
-                        WHERE users.username = @Email
+                        WHERE users.email = @Email
                     """;
         
-        var parameters = new { UserId = email };
+        var parameters = new { Email = email };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
@@ -65,7 +65,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
             throw;
         }
     }
-    
+
     public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -117,6 +117,28 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         return user;
     }
 
+    public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        SELECT users.*, roles.*
+                        FROM Users users
+                            INNER JOIN Roles roles ON users.RoleId = roles.Id
+                        WHERE users.email = @Email
+                    """;
+        
+        var parameters = new { Email = email };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        var result = await QueryUsers(connection, command);
+
+        var user = result.FirstOrDefault();
+        
+        return user;
+    }
+
     public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -139,12 +161,23 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        INSERT INTO Users (Username, FirstName, LastName, PasswordHash, Email, RoleId)
-                        VALUES (@Username, @FirstName, @LastName, @PasswordHash, @Email, @RoleId)
+                        INSERT INTO Users (Id, Username, FirstName, LastName, PasswordHash, Email, RoleId)
+                        VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @RoleId)
                         RETURNING Id
                     """;
         
-        var command = new CommandDefinition(query, cancellationToken: cancellationToken);
+        var parameters = new
+        {
+            Id = user.Id.Value, 
+            user.Username, 
+            user.FirstName, 
+            user.LastName, 
+            PasswordHash = user.PasswordHash.Value, 
+            Email = user.Email.Value, 
+            RoleId = user.Role.Id.Value
+        };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         var userId = await connection.ExecuteScalarAsync<Guid>(command);
         

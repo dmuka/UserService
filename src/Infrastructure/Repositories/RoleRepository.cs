@@ -53,10 +53,16 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         var parameters = new { RoleName = roleName };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+        try
+        {
+            var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
 
-        var role = await connection.QuerySingleOrDefaultAsync<Role>(command);
-        
-        return role;
+            return roleDto is not null ? new Role(new RoleId(roleDto.Id), roleDto.Name) : null;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
     }
 
     public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken = default)
