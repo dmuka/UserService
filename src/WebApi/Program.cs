@@ -1,8 +1,6 @@
 using System.Reflection;
 using Application;
 using Infrastructure;
-using Infrastructure.Options.Db;
-using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
@@ -33,6 +31,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseRequestContextLogging();
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 

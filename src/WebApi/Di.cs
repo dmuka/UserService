@@ -1,4 +1,6 @@
-﻿namespace WebApi;
+﻿using WebApi.Infrastructure;
+
+namespace WebApi;
 
 public static class Di
 {
@@ -7,6 +9,8 @@ public static class Di
         services.AddEndpointsApiExplorer();
         services.AddProblemDetails();
 
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        
         return services;
     }
 }
