@@ -19,9 +19,9 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT COUNT(users.username)
+                        SELECT COUNT(users.user_name)
                         FROM Users users
-                        WHERE users.username = @UserName
+                        WHERE users.user_name = @UserName
                     """;
         
         var parameters = new { UserName = userName };
@@ -71,9 +71,18 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT users.*, roles.*
+                        SELECT
+                            users.id,
+                            users.user_name as Username,
+                            users.first_name as FirstName,
+                            users.last_name as LastName,
+                            users.email as Email,
+                            users.password_hash as PasswordHash,
+                            users.role_id as RoleId,
+                            roles.id,
+                            roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.RoleId = roles.Id
+                            INNER JOIN Roles roles ON users.role_id = roles.Id
                         WHERE users.Id = @UserId
                     """;
         
@@ -100,10 +109,19 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT users.*, roles.*
+                        SELECT
+                            users.id,
+                            users.user_name as Username,
+                            users.first_name as FirstName,
+                            users.last_name as LastName,
+                            users.email as Email,
+                            users.password_hash as PasswordHash,
+                            users.role_id as RoleId,
+                            roles.id,
+                            roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.RoleId = roles.Id
-                        WHERE users.Username = @Username
+                            INNER JOIN Roles roles ON users.role_id = roles.Id
+                        WHERE users.user_name = @Username
                     """;
         
         var parameters = new { Username = username };
@@ -122,9 +140,18 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT users.*, roles.*
+                        SELECT
+                            users.id,
+                            users.user_name as Username,
+                            users.first_name as FirstName,
+                            users.last_name as LastName,
+                            users.email as Email,
+                            users.password_hash as PasswordHash,
+                            users.role_id as RoleId,
+                            roles.id,
+                            roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.RoleId = roles.Id
+                            INNER JOIN Roles roles ON users.role_id = roles.Id
                         WHERE users.email = @Email
                     """;
         
@@ -144,9 +171,18 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT users.*, roles.*
+                        SELECT
+                            users.id,
+                            users.user_name as Username,
+                            users.first_name as FirstName,
+                            users.last_name as LastName,
+                            users.email as Email,
+                            users.password_hash as PasswordHash,
+                            users.role_id as RoleId,
+                            roles.id,
+                            roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.RoleId = roles.Id
+                            INNER JOIN Roles roles ON users.role_id = roles.Id
                     """;
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
@@ -161,7 +197,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        INSERT INTO Users (Id, Username, FirstName, LastName, PasswordHash, Email, RoleId)
+                        INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email, role_id)
                         VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @RoleId)
                         RETURNING Id
                     """;
@@ -191,12 +227,12 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         var query = """
                         UPDATE Users 
                         SET 
-                            Username = @Username, 
-                            FirstName = @FirstName, 
-                            LastName = @LastName, 
-                            PasswordHash = @PasswordHash, 
-                            Email = @Email, 
-                            RoleId = @RoleId
+                            user_name = @Username, 
+                            first_name = @FirstName, 
+                            last_name = @LastName, 
+                            password_hash = @PasswordHash, 
+                            email = @Email, 
+                            role_id = @RoleId
                         WHERE Users.Id = @Id
                     """;
         

@@ -1,23 +1,21 @@
 ﻿using Application.Users.SignIn;
+using Application.Users.SignInByToken;
 using MediatR;
 using WebApi.Extensions;
 using WebApi.Infrastructure;
 
 namespace WebApi.Endpoints.Users;
 
-internal sealed class SignIn : IEndpoint
+internal sealed class SignInByRefreshToken : IEndpoint
 {
-    public sealed record Request(string Username, string Password, string? Email = null);
+    public sealed record Request(string RefreshToken);
     public sealed record Response(string AccessToken, string RefreshToken);
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("users/signin", async (Request request, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapPost("users/signinbytoken", async (Request request, ISender sender, CancellationToken cancellationToken) =>
         {
-            var command = new SignInUserCommand(
-                request.Username,
-                request.Password,
-                request.Email);
+            var command = new SignInUserByTokenCommand(request.RefreshToken);
 
             var result = await sender.Send(command, cancellationToken);
 

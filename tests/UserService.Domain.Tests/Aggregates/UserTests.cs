@@ -7,8 +7,8 @@ namespace UserService.Domain.Tests.Aggregates;
 [TestFixture]
 public class UserTests
 {
-    private static readonly Guid AuthorizedUserId = Guid.NewGuid();
-    private static readonly Guid RoleId = Guid.NewGuid();
+    private static readonly Guid AuthorizedUserId = Guid.CreateVersion7();
+    private static readonly Guid RoleId = Guid.CreateVersion7();
     
     private readonly UserId _userId = new(AuthorizedUserId);
     private readonly RoleId _roleId = new(RoleId);

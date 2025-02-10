@@ -21,8 +21,8 @@ public class UserMapperTests
     public void ToDto_ShouldMapUserToUserDtoCorrectly()
     {
         // Arrange
-        var userId = new UserId(Guid.NewGuid());
-        var role = new Role(new RoleId(Guid.NewGuid()), "Admin");
+        var userId = new UserId(Guid.CreateVersion7());
+        var role = new Role(new RoleId(Guid.CreateVersion7()), "Admin");
         var user = User.CreateUser(userId.Value, "jdoe", "John", "Doe", new PasswordHash("hashedPassword"), new Email("jdoe@example.com"), role);
 
         // Act
@@ -45,13 +45,13 @@ public class UserMapperTests
         // Arrange
         var userDto = new UserDto
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             Username = "jdoe",
             FirstName = "John",
             LastName = "Doe",
             PasswordHash = "hashedPassword",
             Email = "jdoe@example.com",
-            RoleId = Guid.NewGuid(),
+            RoleId = Guid.CreateVersion7(),
             RoleName = "Admin"
         };
 

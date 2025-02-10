@@ -30,7 +30,7 @@ internal sealed class SignUpUserCommandHandler(
         var passwordHash = passwordHasher.GetHash(command.Password);
         
         var user = User.CreateUser(
-            Guid.NewGuid(),
+            Guid.CreateVersion7(),
             command.Username, 
             command.FirstName, 
             command.LastName, 

@@ -11,9 +11,9 @@ namespace UserService.Application.Tests.Users.GetById;
 [TestFixture]
 public class GetUserByIdQueryHandlerTests
 {
-    private static readonly Guid AuthorizedUserId = Guid.NewGuid();
-    private static readonly Guid UnauthorizedUserId = Guid.NewGuid();
-    private static readonly Guid RId = Guid.NewGuid();
+    private static readonly Guid AuthorizedUserId = Guid.CreateVersion7();
+    private static readonly Guid UnauthorizedUserId = Guid.CreateVersion7();
+    private static readonly Guid RId = Guid.CreateVersion7();
     
     private readonly UserId _userId = new(AuthorizedUserId);
     private readonly RoleId _roleId = new(RId);

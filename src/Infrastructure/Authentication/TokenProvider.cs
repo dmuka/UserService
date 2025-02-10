@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Application.Abstractions.Authentication;
 using Domain.Users;
@@ -11,7 +12,7 @@ namespace Infrastructure.Authentication;
 
 internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenProvider
 {
-    public string Create(User user)
+    public string CreateAccessToken(User user)
     {
         var secretKey = authOptions.Value.Secret;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -38,5 +39,10 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenP
         var token = handler.CreateToken(tokenDescriptor);
 
         return token;
+    }
+
+    public string CreateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     }
 }

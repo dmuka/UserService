@@ -7,10 +7,11 @@ namespace Application.Users.SignIn;
 
 internal sealed class SignInUserCommandHandler(
     IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher passwordHasher,
-    ITokenProvider tokenProvider) : ICommandHandler<SignInUserCommand, string>
+    ITokenProvider tokenProvider) : ICommandHandler<SignInUserCommand, SignInResponse>
 {
-    public async Task<Result<string>> Handle(SignInUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result<SignInResponse>> Handle(SignInUserCommand command, CancellationToken cancellationToken)
     {
         var user = command.Email is null 
             ? await userRepository.GetUserByUsernameAsync(command.Username, cancellationToken)
@@ -19,16 +20,26 @@ internal sealed class SignInUserCommandHandler(
         if (user is null)
         {
             return command.Email is null
-                ? Result.Failure<string>(UserErrors.NotFoundByUsername(command.Username))
-                : Result.Failure<string>(UserErrors.NotFoundByEmail(command.Email));
+                ? Result.Failure<SignInResponse>(UserErrors.NotFoundByUsername(command.Username))
+                : Result.Failure<SignInResponse>(UserErrors.NotFoundByEmail(command.Email));
         }
 
         var isPasswordCorrect = passwordHasher.CheckPassword(command.Password, user.PasswordHash);
 
-        if (!isPasswordCorrect) return Result.Failure<string>(UserErrors.WrongPassword());
+        if (!isPasswordCorrect) return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
 
-        var token = tokenProvider.Create(user);
+        var accessToken = tokenProvider.CreateAccessToken(user);
 
-        return token;
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.CreateVersion7(),
+            User = user,
+            ExpiresUtc = DateTime.UtcNow.AddHours(1),
+            Value = tokenProvider.CreateRefreshToken()
+        };
+        
+        await refreshTokenRepository.AddTokenAsync(refreshToken, cancellationToken);
+
+        return new SignInResponse(accessToken, refreshToken.Value);
     }
 }
