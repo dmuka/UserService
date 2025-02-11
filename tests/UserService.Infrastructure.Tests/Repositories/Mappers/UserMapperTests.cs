@@ -22,8 +22,8 @@ public class UserMapperTests
     {
         // Arrange
         var userId = new UserId(Guid.CreateVersion7());
-        var role = new Role(new RoleId(Guid.CreateVersion7()), "Admin");
-        var user = User.CreateUser(userId.Value, "jdoe", "John", "Doe", new PasswordHash("hashedPassword"), new Email("jdoe@example.com"), role);
+        var roles = new List<Role> { new Role(new RoleId(Guid.CreateVersion7()), "Admin") };
+        var user = User.CreateUser(userId.Value, "jdoe", "John", "Doe", new PasswordHash("hashedPassword"), new Email("jdoe@example.com"), roles);
 
         // Act
         var userDto = _userMapper.ToDto(user);
@@ -35,8 +35,6 @@ public class UserMapperTests
         Assert.That(userDto.LastName, Is.EqualTo(user.LastName));
         Assert.That(userDto.PasswordHash, Is.EqualTo(user.PasswordHash.Value));
         Assert.That(userDto.Email, Is.EqualTo(user.Email.Value));
-        Assert.That(userDto.RoleId, Is.EqualTo(role.Id.Value));
-        Assert.That(userDto.RoleName, Is.EqualTo(role.Name));
     }
 
     [Test]
@@ -50,13 +48,12 @@ public class UserMapperTests
             FirstName = "John",
             LastName = "Doe",
             PasswordHash = "hashedPassword",
-            Email = "jdoe@example.com",
-            RoleId = Guid.CreateVersion7(),
-            RoleName = "Admin"
+            Email = "jdoe@example.com"
         };
 
         // Act
         var user = _userMapper.ToEntity(userDto);
+        user.AddRole(new Role(new RoleId(Guid.CreateVersion7()), "Admin"));
 
         using (Assert.EnterMultipleScope())
         {
@@ -67,8 +64,7 @@ public class UserMapperTests
             Assert.That(user.LastName, Is.EqualTo(userDto.LastName));
             Assert.That(user.PasswordHash.Value, Is.EqualTo(userDto.PasswordHash));
             Assert.That(user.Email.Value, Is.EqualTo(userDto.Email));
-            Assert.That(user.Role.Id.Value, Is.EqualTo(userDto.RoleId));
-            Assert.That(user.Role.Name, Is.EqualTo(userDto.RoleName));
+            Assert.That(user.Roles, Has.Count.EqualTo(1));
         }
     }
 

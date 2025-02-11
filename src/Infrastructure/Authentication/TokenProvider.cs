@@ -19,15 +19,18 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenP
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        var claims = new List<Claim>(
+        [
+            new Claim(JwtRegisteredClaimNames.Jti, user.Id.Value.ToString()),
+            new Claim(JwtRegisteredClaimNames.Name, user.Username),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email)
+        ]);
+
+        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
+        
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(
-            [
-                new Claim(JwtRegisteredClaimNames.Jti, user.Id.Value.ToString()),
-                new Claim(JwtRegisteredClaimNames.Name, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.Name),
-            ]),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.ExpirationInMinutes),
             SigningCredentials = credentials,
             Issuer = authOptions.Value.Issuer,

@@ -81,7 +81,7 @@ public class GetUserByIdQueryHandlerTests
             "Doe", 
             new PasswordHash("hash"), 
             new Email("email@email.com"), 
-            new Role(_roleId,"Admin"));
+            new List<Role> { new (_roleId,"Admin") });
 
         var expected = new UserResponse
         {
@@ -91,7 +91,7 @@ public class GetUserByIdQueryHandlerTests
             LastName = user.LastName,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
-            RoleId = user.Role.Id.Value,
+            Roles = user.Roles.Select(role => role.Name).ToArray(),
         };
         
         _mockRepository.Setup(x => x.GetUserByIdAsync(AuthorizedUserId, CancellationToken.None)).ReturnsAsync(user);

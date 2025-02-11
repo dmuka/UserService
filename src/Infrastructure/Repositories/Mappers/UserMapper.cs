@@ -1,4 +1,5 @@
-﻿using Domain.Roles;
+﻿using Core;
+using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Repositories.Dtos;
@@ -15,9 +16,7 @@ public class UserMapper : IMapper<User, UserDto>
             FirstName = user.FirstName,
             LastName = user.LastName,
             PasswordHash = user.PasswordHash,
-            Email = user.Email,
-            RoleId = user.Role.Id.Value,
-            RoleName = user.Role.Name
+            Email = user.Email
         };
 
     public User ToEntity(UserDto dto)
@@ -29,7 +28,7 @@ public class UserMapper : IMapper<User, UserDto>
             dto.LastName, 
             new PasswordHash(dto.PasswordHash), 
             new Email(dto.Email), 
-            new Role(new RoleId(dto.RoleId), dto.RoleName));
+            new List<Role>());
         
         return user;
     }

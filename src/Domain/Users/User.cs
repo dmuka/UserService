@@ -15,7 +15,7 @@ public class User : Entity, IAggregationRoot
     public string LastName { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
-    public Role Role { get; private set; }
+    public ICollection<Role> Roles { get; private set; }
 
     /// <summary>
     /// Default constructor for ORM compatibility.
@@ -31,7 +31,7 @@ public class User : Entity, IAggregationRoot
     /// <param name="lastName">The last name of the user.</param>
     /// <param name="passwordHash">The hashed password of the user.</param>
     /// <param name="email">The email address of the user.</param>
-    /// <param name="role">The role of the user.</param>
+    /// <param name="roles">Collection of the user roles.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
     public static User CreateUser(
@@ -41,7 +41,7 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash, 
         Email email, 
-        Role role)
+        ICollection<Role> roles)
     {
         return new User(
             new UserId(userId), 
@@ -50,7 +50,7 @@ public class User : Entity, IAggregationRoot
             lastName, 
             passwordHash, 
             email, 
-            role);
+            roles);
     }    
     
     private User(
@@ -60,9 +60,9 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash, 
         Email email, 
-        Role role)
+        ICollection<Role> roles)
     {
-        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, role);
+        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, roles);
 
         Id = userId;
         Username = userName;
@@ -70,7 +70,7 @@ public class User : Entity, IAggregationRoot
         LastName = lastName;
         PasswordHash = passwordHash;
         Email = email;
-        Role = role;
+        Roles = roles;
     }
 
     /// <summary>
@@ -94,20 +94,23 @@ public class User : Entity, IAggregationRoot
     }
 
     /// <summary>
-    /// Changes the role of the user.
+    /// Removes the role of the user.
     /// </summary>
-    /// <param name="newRole">The new role.</param>
-    public void ChangeRole(Role newRole)
+    /// <param name="role">The role to remove.</param>
+    public void RemoveRole(Role role)
     {
-        ArgumentNullException.ThrowIfNull(newRole, nameof(newRole));
-        SetRole(newRole);
+        ArgumentNullException.ThrowIfNull(role, nameof(role));
+        if (Roles.Count == 1)
+            throw new ArgumentException("User must have at least one role.", nameof(role));
+        
+        Roles.Remove(role);
     }
 
     /// <summary>
-    /// Sets the role of the user and updates the role ID.
+    /// Adds the role of the user.
     /// </summary>
-    /// <param name="role">The role to set.</param>
-    private void SetRole(Role role) => Role = role;
+    /// <param name="role">The role to add.</param>
+    public void AddRole(Role role) => Roles.Add(role);
 
     /// <summary>
     /// Validates user details.
@@ -118,7 +121,7 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash,
         Email email,
-        Role role)
+        ICollection<Role> roles)
     {
         if (string.IsNullOrWhiteSpace(userName))
             throw new ArgumentException("Username can't be null or empty.", nameof(userName));
@@ -128,6 +131,6 @@ public class User : Entity, IAggregationRoot
             throw new ArgumentException("Last name can't be null or empty.", nameof(lastName));
         ArgumentNullException.ThrowIfNull(passwordHash, nameof(passwordHash));
         ArgumentNullException.ThrowIfNull(email, nameof(email));
-        ArgumentNullException.ThrowIfNull(role, nameof(role));
+        ArgumentNullException.ThrowIfNull(roles, nameof(roles));
     }
 }

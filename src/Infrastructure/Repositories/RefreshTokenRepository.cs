@@ -80,7 +80,7 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
                             user.LastName, 
                             new PasswordHash(user.PasswordHash), 
                             new Email(user.Email), 
-                            new Role(new RoleId(role.Id), role.Name))
+                            new List<Role>())
                     });
             
             var token = tokens.FirstOrDefault();

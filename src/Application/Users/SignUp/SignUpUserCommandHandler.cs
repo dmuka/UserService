@@ -4,7 +4,7 @@ using Core;
 using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
-using Role = Domain.Roles.Constants.Roles;
+using RoleConstants = Domain.Roles.Constants.Roles;
 
 namespace Application.Users.SignUp;
 
@@ -25,7 +25,7 @@ internal sealed class SignUpUserCommandHandler(
             return Result.Failure<Guid>(UserErrors.EmailAlreadyExists);
         }
 
-        var defaultUserRole = await roleRepository.GetRoleByNameAsync(Role.DefaultUserRole, cancellationToken);
+        var defaultUserRole = await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken);
 
         var passwordHash = passwordHasher.GetHash(command.Password);
         
@@ -36,7 +36,7 @@ internal sealed class SignUpUserCommandHandler(
             command.LastName, 
             new PasswordHash(passwordHash),
             new Email(command.Email),
-            defaultUserRole!);
+            new List<Role> { defaultUserRole! });
 
         var userId = await userRepository.AddUserAsync(user, cancellationToken);
 

@@ -78,11 +78,11 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             users.last_name as LastName,
                             users.email as Email,
                             users.password_hash as PasswordHash,
-                            users.role_id as RoleId,
-                            roles.id,
-                            roles.name
+                            roles.id as RoleId,
+                            roles.name as RoleName
                         FROM Users users
-                            INNER JOIN Roles roles ON users.role_id = roles.Id
+                            INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
+                            INNER JOIN roles ON UserRoles.role_id = roles.Id
                         WHERE users.Id = @UserId
                     """;
         
@@ -116,11 +116,11 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             users.last_name as LastName,
                             users.email as Email,
                             users.password_hash as PasswordHash,
-                            users.role_id as RoleId,
                             roles.id,
                             roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.role_id = roles.Id
+                            INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
+                            INNER JOIN roles ON UserRoles.role_id = roles.Id
                         WHERE users.user_name = @Username
                     """;
         
@@ -147,11 +147,11 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             users.last_name as LastName,
                             users.email as Email,
                             users.password_hash as PasswordHash,
-                            users.role_id as RoleId,
                             roles.id,
                             roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.role_id = roles.Id
+                            INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
+                            INNER JOIN roles ON UserRoles.role_id = roles.Id
                         WHERE users.email = @Email
                     """;
         
@@ -178,11 +178,11 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             users.last_name as LastName,
                             users.email as Email,
                             users.password_hash as PasswordHash,
-                            users.role_id as RoleId,
                             roles.id,
                             roles.name
                         FROM Users users
-                            INNER JOIN Roles roles ON users.role_id = roles.Id
+                            INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
+                            INNER JOIN roles ON UserRoles.role_id = roles.Id
                     """;
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
@@ -197,8 +197,8 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email, role_id)
-                        VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @RoleId)
+                        INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email)
+                        VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email)
                         RETURNING Id
                     """;
         
@@ -209,8 +209,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
             user.FirstName, 
             user.LastName, 
             PasswordHash = user.PasswordHash.Value, 
-            Email = user.Email.Value, 
-            RoleId = user.Role.Id.Value
+            Email = user.Email.Value
         };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
@@ -231,12 +230,11 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             first_name = @FirstName, 
                             last_name = @LastName, 
                             password_hash = @PasswordHash, 
-                            email = @Email, 
-                            role_id = @RoleId
+                            email = @Email
                         WHERE Users.Id = @Id
                     """;
         
-        var parameters = new { user.Id, user.Username, user.FirstName, user.LastName, user.PasswordHash, user.Email, user.Role.Id.Value };
+        var parameters = new { user.Id, user.Username, user.FirstName, user.LastName, user.PasswordHash, user.Email };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
@@ -245,19 +243,30 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
 
     private static async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)
     {
+        var userDictionary = new Dictionary<Guid, User>();
+        
         var users = await connection.QueryAsync<UserDto, RoleDto, User>(
             command,
-            (user, role) => 
-                User.CreateUser(
-                    user.Id, 
-                    user.Username, 
-                    user.FirstName, 
-                    user.LastName, 
-                    new PasswordHash(user.PasswordHash), 
-                    new Email(user.Email), 
-                    new Role(new RoleId(role.Id), role.Name)),
+            (user, role) =>
+            {
+                if (!userDictionary.TryGetValue(user.Id, out var userEntry))
+                {
+                    userEntry = User.CreateUser(
+                        user.Id,
+                        user.Username,
+                        user.FirstName,
+                        user.LastName,
+                        new PasswordHash(user.PasswordHash),
+                        new Email(user.Email),
+                        new List<Role>());
+                    userDictionary.Add(user.Id, userEntry);
+                }
+                userEntry.Roles.Add(new Role(new RoleId(role.Id), role.Name));
+                
+                return userEntry;
+            },
             splitOn: "Id");
         
-        return users;
+        return users.Distinct();
     }
 }
