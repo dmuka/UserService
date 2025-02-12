@@ -195,28 +195,58 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
     public async Task<Guid> AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
-            
-        var query = """
-                        INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email)
-                        VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email)
-                        RETURNING Id
-                    """;
         
-        var parameters = new
+        await connection.OpenAsync(cancellationToken);
+        
+        var transaction = await connection.BeginTransactionAsync(cancellationToken);
+
+        try
         {
-            Id = user.Id.Value, 
-            user.Username, 
-            user.FirstName, 
-            user.LastName, 
-            PasswordHash = user.PasswordHash.Value, 
-            Email = user.Email.Value
-        };
-        
-        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
-        
-        var userId = await connection.ExecuteScalarAsync<Guid>(command);
-        
-        return userId;
+            var query = """
+                            INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email)
+                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email)
+                            RETURNING Id
+                        """;
+            
+            var parameters = new
+            {
+                Id = user.Id.Value, 
+                user.Username, 
+                user.FirstName, 
+                user.LastName, 
+                PasswordHash = user.PasswordHash.Value, 
+                Email = user.Email.Value
+            };
+            
+            var command = new CommandDefinition(query, parameters, transaction, cancellationToken: cancellationToken);
+            
+            var userId = await connection.ExecuteScalarAsync<Guid>(command);
+            
+            query = """
+                        INSERT INTO user_roles (user_id, role_id)
+                        VALUES (@UserId, @RoleId);
+                    """;
+
+            foreach (var role in user.Roles)
+            {
+                command = new CommandDefinition(
+                    query, 
+                    new { UserId = user.Id.Value, RoleId = role.Id.Value }, 
+                    transaction, 
+                    cancellationToken: cancellationToken);
+                
+                await connection.ExecuteAsync(command);
+            }
+            
+            await transaction.CommitAsync(cancellationToken);
+            
+            return userId;
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)

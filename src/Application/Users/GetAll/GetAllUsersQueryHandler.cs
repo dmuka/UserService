@@ -12,7 +12,7 @@ public class GetAllUsersQueryHandler(IUserRepository repository, IUserContext us
         GetAllUsersQuery query, 
         CancellationToken cancellationToken)
     {
-        if (userContext.UserRole != "Admin")
+        if (userContext.UserRole != "User")
         {
             return Result.Failure<IEnumerable<UserResponse>>(UserErrors.Unauthorized());
         }

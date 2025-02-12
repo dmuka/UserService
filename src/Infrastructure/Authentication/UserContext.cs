@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Http;
-
+    
 namespace Infrastructure.Authentication;
 
 internal sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
@@ -14,6 +14,10 @@ internal sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IU
     
     public string UserName =>
         httpContextAccessor.HttpContext?.User.GetUserClaimValue(ClaimTypes.Name) ??
+        throw new ApplicationException(ContextUnavailable);
+    
+    public string Email =>
+        httpContextAccessor.HttpContext?.User.GetUserClaimValue(ClaimTypes.Email) ??
         throw new ApplicationException(ContextUnavailable);
     
     public string UserRole =>

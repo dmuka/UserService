@@ -21,9 +21,9 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenP
 
         var claims = new List<Claim>(
         [
-            new Claim(JwtRegisteredClaimNames.Jti, user.Id.Value.ToString()),
-            new Claim(JwtRegisteredClaimNames.Name, user.Username),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email)
+            new Claim(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email)
         ]);
 
         claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
