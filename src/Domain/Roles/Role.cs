@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Domain.Roles;
 
-public class Role : Entity
+public class Role : Entity, IAggregationRoot
 {
     public RoleId Id { get; private set; }
     public string Name { get; private set; }

@@ -53,41 +53,74 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
-                        SELECT refresh_tokens.*, users.*
+                        SELECT 
+                            refresh_tokens.id AS Id,
+                            refresh_tokens.value AS Value,
+                            refresh_tokens.expires_utc AS ExpiresUtc,
+                            refresh_tokens.user_id AS UserId,
+                            users.id AS Id,
+                            users.user_name AS Username,
+                            users.first_name AS FirstName,
+                            users.last_name AS LastName,
+                            users.email AS Email,
+                            users.password_hash AS PasswordHash,
+                            roles.id AS Id,
+                            roles.name AS Name
                         FROM refresh_tokens
-                        INNER JOIN users ON users.id = refresh_tokens.user_id
+                            INNER JOIN users ON users.id = refresh_tokens.user_id
+                            LEFT JOIN user_roles ON user_roles.user_id = users.id
+                            LEFT JOIN roles ON roles.id = user_roles.role_id
                         WHERE refresh_tokens.value = @Value
+                        ORDER BY refresh_tokens.expires_utc DESC
                     """;
         
         var parameters = new { Value = value };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
+        var tokenDictionary = new Dictionary<Guid, RefreshToken>();
+        
         try
         {
             var tokens = await connection
                 .QueryAsync<RefreshTokenDto, UserDto, RoleDto, RefreshToken>(
                     command,
-                    (token, user, role) => new RefreshToken
+                    (token, user, role) =>
                     {
-                        Id = token.Id,
-                        Value = token.Value,
-                        ExpiresUtc = token.ExpiresUtc,
-                        User = User.CreateUser(
-                            user.Id, 
-                            user.Username, 
-                            user.FirstName, 
-                            user.LastName, 
-                            new PasswordHash(user.PasswordHash), 
-                            new Email(user.Email), 
-                            new List<Role>())
-                    });
+                        if (!tokenDictionary.TryGetValue(token.Id, out var refreshToken))
+                        {
+                            refreshToken = new RefreshToken
+                            {
+                                Id = token.Id,
+                                Value = token.Value,
+                                ExpiresUtc = token.ExpiresUtc,
+                                User = User.CreateUser(
+                                    user.Id, 
+                                    user.Username, 
+                                    user.FirstName, 
+                                    user.LastName, 
+                                    new PasswordHash(user.PasswordHash), 
+                                    new Email(user.Email), 
+                                    new List<Role>())
+                            };
+                            
+                            tokenDictionary.Add(token.Id, refreshToken);
+                        }
+
+                        if (role is not null)
+                        {
+                            refreshToken.User.Roles.Add(new Role(new RoleId(role.Id), role.Name));
+                        }
+                        
+                        return refreshToken;
+                    },
+                    splitOn: "Id,Id");
             
             var token = tokens.FirstOrDefault();
             
-            if (token == null || token.ExpiresUtc <= DateTime.UtcNow)
+            if (token is not null && token.ExpiresUtc <= DateTime.UtcNow)
             {
-                throw new ApplicationException("Refresh token has expired.");
+                token = null;
             }
             
             return token;
@@ -134,7 +167,7 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
         var parameters = new { token.Id, token.Value, token.ExpiresUtc };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
-
+        
         try
         {
             await connection.ExecuteAsync(command);
