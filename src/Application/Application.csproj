@@ -23,4 +23,7 @@
       <PackageVersion Update="Serilog" Version="4.2.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="UserService.Application.Tests" />
+    </ItemGroup>
 </Project>
