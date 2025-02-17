@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Infrastructure.Options.Db;
-using Microsoft.Extensions.Options;
 
 namespace UserService.Infrastructure.Tests.Options.Db
 {
