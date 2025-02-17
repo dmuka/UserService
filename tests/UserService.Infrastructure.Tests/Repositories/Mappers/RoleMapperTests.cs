@@ -7,6 +7,9 @@ namespace UserService.Infrastructure.Tests.Repositories.Mappers;
 [TestFixture]
 public class RoleMapperTests
 {
+    private static readonly Guid Id = Guid.CreateVersion7();
+    private readonly RoleId _roleId = new(Id); 
+    
     private RoleMapper _roleMapper;
 
     [SetUp]
@@ -19,8 +22,7 @@ public class RoleMapperTests
     public void ToDto_ShouldMapRoleToRoleDtoCorrectly()
     {
         // Arrange
-        var roleId = new RoleId(Guid.CreateVersion7());
-        var role = new Role(roleId, "Admin");
+        var role = Role.CreateRole(Id, "Admin");
 
         // Act
         var roleDto = _roleMapper.ToDto(role);
@@ -28,7 +30,7 @@ public class RoleMapperTests
         using (Assert.EnterMultipleScope())
         {
             // Assert
-            Assert.That(roleDto.Id, Is.EqualTo(roleId.Value));
+            Assert.That(roleDto.Id, Is.EqualTo(Id));
             Assert.That(roleDto.Name, Is.EqualTo(role.Name));
         }
     }
@@ -37,7 +39,7 @@ public class RoleMapperTests
     public void ToEntity_ShouldMapRoleDtoToRoleCorrectly()
     {
         // Arrange
-        var roleDto = new RoleDto { Id = Guid.CreateVersion7(), Name = "Admin" };
+        var roleDto = new RoleDto { Id = Id, Name = "Admin" };
 
         // Act
         var role = _roleMapper.ToEntity(roleDto);
@@ -45,7 +47,7 @@ public class RoleMapperTests
         using (Assert.EnterMultipleScope())
         {
             // Assert
-            Assert.That(role.Id.Value, Is.EqualTo(roleDto.Id));
+            Assert.That(role.Id.Value, Is.EqualTo(Id));
             Assert.That(role.Name, Is.EqualTo(roleDto.Name));
         }
     }

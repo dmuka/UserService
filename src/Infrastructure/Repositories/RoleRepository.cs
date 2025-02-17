@@ -54,7 +54,7 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         {
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
 
-            return roleDto is not null ? new Role(new RoleId(roleDto.Id), roleDto.Name) : null;
+            return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
         }
         catch (Exception e)
         {

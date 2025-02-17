@@ -9,11 +9,36 @@ namespace UserService.Infrastructure.Tests.Repositories.Mappers;
 [TestFixture]
 public class UserMapperTests
 {
+    private static readonly Guid Id = Guid.CreateVersion7();
+
+    private readonly RoleId _roleId = new(Id);
+    
+    private const string Username = "jdoe";
+    private const string FirstName = "John";
+    private const string LastName = "Doe";
+    private const string Email = "jdoe@example.com";
+    private const string Hash = "hashedPassword";
+    
+    private User _user;
+    private List<Role> _roles;
+    
+    
     private UserMapper _userMapper;
 
     [SetUp]
     public void Setup()
     {
+        _roles = [Role.CreateRole(Id, "Admin")];
+        
+        _user = User.CreateUser(
+            Id,
+            Username,
+            FirstName,
+            LastName,
+            new PasswordHash(Hash),
+            new Email(Email),
+            _roles);
+        
         _userMapper = new UserMapper();
     }
 
@@ -21,20 +46,19 @@ public class UserMapperTests
     public void ToDto_ShouldMapUserToUserDtoCorrectly()
     {
         // Arrange
-        var userId = new UserId(Guid.CreateVersion7());
-        var roles = new List<Role> { new Role(new RoleId(Guid.CreateVersion7()), "Admin") };
-        var user = User.CreateUser(userId.Value, "jdoe", "John", "Doe", new PasswordHash("hashedPassword"), new Email("jdoe@example.com"), roles);
-
         // Act
-        var userDto = _userMapper.ToDto(user);
+        var userDto = _userMapper.ToDto(_user);
 
-        // Assert
-        Assert.That(userDto.Id, Is.EqualTo(userId.Value));
-        Assert.That(userDto.Username, Is.EqualTo(user.Username));
-        Assert.That(userDto.FirstName, Is.EqualTo(user.FirstName));
-        Assert.That(userDto.LastName, Is.EqualTo(user.LastName));
-        Assert.That(userDto.PasswordHash, Is.EqualTo(user.PasswordHash.Value));
-        Assert.That(userDto.Email, Is.EqualTo(user.Email.Value));
+        using (Assert.EnterMultipleScope())
+        {
+            // Assert
+            Assert.That(userDto.Id, Is.EqualTo(Id));
+            Assert.That(userDto.Username, Is.EqualTo(Username));
+            Assert.That(userDto.FirstName, Is.EqualTo(FirstName));
+            Assert.That(userDto.LastName, Is.EqualTo(LastName));
+            Assert.That(userDto.PasswordHash, Is.EqualTo(Hash));
+            Assert.That(userDto.Email, Is.EqualTo(Email));
+        }
     }
 
     [Test]
@@ -43,17 +67,17 @@ public class UserMapperTests
         // Arrange
         var userDto = new UserDto
         {
-            Id = Guid.CreateVersion7(),
-            Username = "jdoe",
-            FirstName = "John",
-            LastName = "Doe",
-            PasswordHash = "hashedPassword",
-            Email = "jdoe@example.com"
+            Id = Id,
+            Username = Username,
+            FirstName = FirstName,
+            LastName = LastName,
+            PasswordHash = Hash,
+            Email = Email
         };
 
         // Act
         var user = _userMapper.ToEntity(userDto);
-        user.AddRole(new Role(new RoleId(Guid.CreateVersion7()), "Admin"));
+        user.AddRole(_roles[0]);
 
         using (Assert.EnterMultipleScope())
         {

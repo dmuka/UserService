@@ -11,7 +11,12 @@ public class Role : Entity, IAggregationRoot
 
     protected Role() { }
 
-    public Role(RoleId id, string name)
+    public static Role CreateRole(Guid id, string name)
+    {
+        return new Role(new RoleId(id), name);
+    }
+
+    private Role(RoleId id, string name)
     {
         Id = id;
         Name = name;

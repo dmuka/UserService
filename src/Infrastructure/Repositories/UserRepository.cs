@@ -291,7 +291,7 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                         new List<Role>());
                     userDictionary.Add(user.Id, userEntry);
                 }
-                userEntry.Roles.Add(new Role(new RoleId(role.Id), role.Name));
+                userEntry.Roles.Add(Role.CreateRole(role.Id, role.Name));
                 
                 return userEntry;
             },

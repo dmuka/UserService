@@ -13,8 +13,8 @@ internal sealed class PasswordHasher : IPasswordHasher
 
     public string GetHash(string password)
     {
-        byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
-        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, HashSize);
+        var salt = RandomNumberGenerator.GetBytes(SaltSize);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, HashSize);
 
         return $"{Convert.ToHexString(hash)}-{Convert.ToHexString(salt)}";
     }

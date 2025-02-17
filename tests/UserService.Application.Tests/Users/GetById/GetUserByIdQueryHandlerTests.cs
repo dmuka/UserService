@@ -13,10 +13,9 @@ public class GetUserByIdQueryHandlerTests
 {
     private static readonly Guid AuthorizedUserId = Guid.CreateVersion7();
     private static readonly Guid UnauthorizedUserId = Guid.CreateVersion7();
-    private static readonly Guid RId = Guid.CreateVersion7();
+    private static readonly Guid RoleId = Guid.CreateVersion7();
     
     private readonly UserId _userId = new(AuthorizedUserId);
-    private readonly RoleId _roleId = new(RId);
     
     private Mock<IUserRepository> _mockRepository;
     private Mock<IUserContext> _mockUserContext;
@@ -81,7 +80,7 @@ public class GetUserByIdQueryHandlerTests
             "Doe", 
             new PasswordHash("hash"), 
             new Email("email@email.com"), 
-            new List<Role> { new (_roleId,"Admin") });
+            new List<Role> { Role.CreateRole(RoleId,"Admin") });
 
         var expected = new UserResponse
         {

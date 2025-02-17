@@ -11,8 +11,7 @@ public class UserTests
     private static readonly Guid RoleId = Guid.CreateVersion7();
     
     private readonly UserId _userId = new(AuthorizedUserId);
-    private readonly RoleId _roleId = new(RoleId);
-    private readonly ICollection<Role> _validRoles = new List<Role> { new(new RoleId(RoleId), "Admin") };
+    private readonly ICollection<Role> _validRoles = new List<Role> { Role.CreateRole(RoleId, "Admin") };
 
     private const string ValidUsername = "testuser";
     private const string ValidFirstName = "John";
@@ -137,7 +136,7 @@ public class UserTests
     {
         // Arrange
         var user = User.CreateUser(_userId.Value, ValidUsername, ValidFirstName, ValidLastName, ValidPasswordHash, ValidEmail, _validRoles);
-        var newRole = new Role(_roleId,"User");
+        var newRole = Role.CreateRole(RoleId,"User");
         user.AddRole(newRole);
 
         // Act

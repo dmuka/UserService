@@ -109,7 +109,7 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
 
                         if (role is not null)
                         {
-                            refreshToken.User.Roles.Add(new Role(new RoleId(role.Id), role.Name));
+                            refreshToken.User.Roles.Add(Role.CreateRole(role.Id, role.Name));
                         }
                         
                         return refreshToken;
