@@ -1,0 +1,45 @@
+﻿syntax = "proto3";
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "Grpc.Protos";
+package UserService;
+
+service UserService 
+{
+  rpc SignUp (SignUpRequest) returns (SignUpResponse);
+  rpc SignIn (SignInRequest) returns (SignInResponse);
+  rpc SignInByToken (SignInByTokenRequest) returns (SignInResponse); 
+}
+
+message SignUpRequest 
+{ 
+  string username = 1; 
+  string password = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string email = 5; 
+  int32 role_id = 6; 
+}
+
+message SignUpResponse 
+{ 
+  string id = 1; 
+}
+
+message SignInRequest 
+{ 
+  string username = 1; 
+  string password = 2;
+  google.protobuf.StringValue email = 3;
+}
+
+message SignInResponse 
+{ 
+  string access_token = 1; 
+  string refresh_token = 2; 
+}
+
+message SignInByTokenRequest
+{ 
+  string refresh_token = 1; 
+}

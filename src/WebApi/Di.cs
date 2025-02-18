@@ -9,6 +9,8 @@ public static class Di
         services.AddEndpointsApiExplorer();
         services.AddProblemDetails();
 
+        services.AddGrpc();
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         
         return services;

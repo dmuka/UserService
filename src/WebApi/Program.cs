@@ -1,5 +1,6 @@
 using System.Reflection;
 using Application;
+using Grpc.Services;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -48,5 +49,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapGrpcService<UserGrpcService>();
 
 await app.RunAsync();
