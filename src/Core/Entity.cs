@@ -2,7 +2,8 @@
 
 public abstract class Entity
 {
-
+    public TypedId Id { get; set; }
+    
     /// <summary>
     /// A private list to hold domain events associated with this entity.
     /// </summary>

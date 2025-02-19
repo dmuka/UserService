@@ -3,6 +3,7 @@ using Dapper;
 using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
+using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Options;
@@ -10,12 +11,18 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRepository
+public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : IUserRepository
 {
+    private const string Users = $"{nameof(User)}s";
+    
     private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
 
     public async Task<bool> IsUsernameExistsAsync(string userName, CancellationToken cancellationToken = default)
     {
+        var users = cache.Get<User>(Users);
+        
+        if (users is not null) return users.Count(user => user.Username == userName) > 1;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -42,6 +49,10 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
 
     public async Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
+        var users = cache.Get<User>(Users);
+        
+        if (users is not null) return users.Count(user => user.Email == email) > 1;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -78,8 +89,8 @@ public class UserRepository(IOptions<PostgresOptions> postgresOptions) : IUserRe
                             users.last_name as LastName,
                             users.email as Email,
                             users.password_hash as PasswordHash,
-                            roles.id as RoleId,
-                            roles.name as RoleName
+                            roles.id,
+                            roles.name
                         FROM Users users
                             INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
                             INNER JOIN roles ON UserRoles.role_id = roles.Id

@@ -1,5 +1,7 @@
-﻿using Dapper;
+﻿using Core;
+using Dapper;
 using Domain.Roles;
+using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Options;
@@ -7,12 +9,17 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRepository
+public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : BaseRepository(cache), IRoleRepository
 {
+    private const string Roles = $"{nameof(Role)}";
+    
     private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
 
     public async Task<Role?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
+        var role = GetFromCache<Role>(role => role.Id.Value == roleId);
+        if (role is not null) return role;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -27,9 +34,10 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
 
         try
         {
-            var role = await connection.QuerySingleOrDefaultAsync<Role>(command);
-            
-            return role;
+            var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
+            cache.Remove(Roles);
+
+            return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
         }
         catch (Exception e)
         {
@@ -39,6 +47,9 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
 
     public async Task<Role?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
     {
+        var role = GetFromCache<Role>(role => role.Name == roleName);
+        if (role is not null) return role;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -53,6 +64,7 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         try
         {
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
+            cache.Remove(Roles);
 
             return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
         }
@@ -62,8 +74,12 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         }
     }
 
-    public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken = default)
+    public async Task<IList<Role>> GetAllRolesAsync(CancellationToken cancellationToken = default)
     {
+        var roles = GetFromCache<Role>();
+        
+        if (roles is not null) return roles;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         const string query = """
@@ -73,7 +89,8 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
-        var roles = await connection.QueryAsync<Role>(command);
+        roles = (await connection.QueryAsync<Role>(command)).ToList();
+        cache.Create(Roles, roles);
         
         return roles;
     }
@@ -91,6 +108,7 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
         
         var roleId = await connection.ExecuteScalarAsync<Guid>(command);
+        cache.Remove(Roles);
         
         return roleId;
     }
@@ -111,5 +129,6 @@ public class RoleRepository(IOptions<PostgresOptions> postgresOptions) : IRoleRe
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         await connection.ExecuteAsync(command);
+        cache.Remove(Roles);
     }
 }

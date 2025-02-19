@@ -3,6 +3,9 @@
  using Domain.Roles;
  using Domain.Users;
  using Infrastructure.Authentication;
+ using Infrastructure.Caching;
+ using Infrastructure.Caching.Interfaces;
+ using Infrastructure.HealthChecks;
  using Infrastructure.Options.Authentication;
  using Infrastructure.Options.Db;
  using Infrastructure.Repositories;
@@ -24,8 +27,19 @@
              .AddAuth()
              .AddDbConnectionOptions()
              .AddHealthCheck()
-             .AddRepositories();
+             .AddRepositories()
+             .AddCache();
 
+     private static IServiceCollection AddCache(this IServiceCollection services)
+     {
+         services.AddMemoryCache();
+         services.AddResponseCaching();
+
+         services.AddScoped<ICacheService, CacheService>();
+         
+         return services;
+     }
+     
      private static IServiceCollection AddRepositories(this IServiceCollection services)
      {
          services.AddScoped<IUserRepository, UserRepository>();
@@ -79,7 +93,9 @@
 
      private static IServiceCollection AddHealthCheck(this IServiceCollection services)
      {
-         services.AddHealthChecks();
+         services.AddHealthChecks()
+             .AddCheck<PostgresHealthCheck>(nameof(PostgresHealthCheck), tags: ["postgres"])
+             .AddCheck<CacheHealthCheck>(nameof(CacheHealthCheck), tags: ["cache"]);
 
          return services;
      }
