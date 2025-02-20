@@ -23,7 +23,4 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\WebApi\WebApi.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageVersion Update="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
-    </ItemGroup>
 </Project>
