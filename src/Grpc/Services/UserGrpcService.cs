@@ -10,7 +10,7 @@ using SignInResponse = Grpc.Protos.SignInResponse;
 
 namespace Grpc.Services;
 
-public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : UserService.UserServiceBase
+public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : Auth.AuthBase
 {
     public override async Task<SignUpResponse> SignUp(SignUpRequest request, ServerCallContext context) 
     { 
