@@ -1,21 +1,24 @@
-﻿using Infrastructure.Options.Db;
+﻿using System.Data;
+using Infrastructure.Options.Db;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Infrastructure.HealthChecks;
 
-public class PostgresHealthCheck(IOptions<PostgresOptions> options) : IHealthCheck
+public class PostgresHealthCheck(INpgsqlConnectionFactory npgsqlConnectionFactory, IOptions<PostgresOptions> options) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         try
         {
-            await using var connection = new NpgsqlConnection(options.Value.GetConnectionString());
-            await connection.OpenAsync(cancellationToken);
-
-            await using var command = new NpgsqlCommand("SELECT 1", connection);
-            await command.ExecuteScalarAsync(cancellationToken);
+            using var connection = npgsqlConnectionFactory.CreateConnection(options.Value.GetConnectionString());
+            connection.Open();
+            
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT 1";
+            
+            command.ExecuteScalar();
 
             return HealthCheckResult.Healthy("PostgreSQL instance is healthy.");
         }
@@ -23,5 +26,18 @@ public class PostgresHealthCheck(IOptions<PostgresOptions> options) : IHealthChe
         {
             return HealthCheckResult.Unhealthy("PostgreSQL instance is unhealthy.", ex);
         }
+    }
+}
+
+public interface INpgsqlConnectionFactory
+{
+    IDbConnection CreateConnection(string connectionString);
+}
+
+public class NpgsqlConnectionFactory : INpgsqlConnectionFactory
+{
+    public IDbConnection CreateConnection(string connectionString)
+    {
+        return new NpgsqlConnection(connectionString);
     }
 }
