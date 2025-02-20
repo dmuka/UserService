@@ -16,4 +16,14 @@ public class BaseRepository(ICacheService cache)
     {
         return cache.Get<T>(nameof(T)) ?? new List<T>();
     }
+
+    protected void RemoveFromCache<T>() where T : Entity
+    {
+        cache.Remove(nameof(T));
+    }
+
+    protected void CreateInCache<T>(ICollection<T> entities) where T : Entity
+    {
+        cache.Create(nameof(T), entities);
+    }
 }

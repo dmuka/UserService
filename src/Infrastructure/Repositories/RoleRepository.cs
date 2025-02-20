@@ -9,12 +9,15 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : BaseRepository(cache), IRoleRepository
+public class RoleRepository : BaseRepository, IRoleRepository
 {
-    private const string Roles = $"{nameof(Role)}";
-    
-    private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
+    private readonly string? _connectionString;
 
+    public RoleRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : base(cache)
+    {
+        _connectionString = postgresOptions.Value.GetConnectionString();
+    }
+    
     public async Task<Role?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
         var role = GetFromCache<Role>(role => role.Id.Value == roleId);
@@ -35,7 +38,7 @@ public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postg
         try
         {
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
-            cache.Remove(Roles);
+            RemoveFromCache<Role>();
 
             return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
         }
@@ -64,7 +67,7 @@ public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postg
         try
         {
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
-            cache.Remove(Roles);
+            RemoveFromCache<Role>();
 
             return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
         }
@@ -90,7 +93,7 @@ public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postg
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
         roles = (await connection.QueryAsync<Role>(command)).ToList();
-        cache.Create(Roles, roles);
+        CreateInCache(roles);
         
         return roles;
     }
@@ -108,7 +111,7 @@ public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postg
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
         
         var roleId = await connection.ExecuteScalarAsync<Guid>(command);
-        cache.Remove(Roles);
+        RemoveFromCache<Role>();
         
         return roleId;
     }
@@ -129,6 +132,6 @@ public class RoleRepository(ICacheService cache, IOptions<PostgresOptions> postg
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         await connection.ExecuteAsync(command);
-        cache.Remove(Roles);
+        RemoveFromCache<Role>();
     }
 }
