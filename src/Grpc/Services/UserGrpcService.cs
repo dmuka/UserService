@@ -38,8 +38,8 @@ public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : 
 
     public override async Task<SignInResponse> SignIn(SignInRequest request, ServerCallContext context) 
     { 
-        try 
-        { 
+        try
+        {
             var command = new SignInUserCommand(
                 request.Username,
                 request.Password,

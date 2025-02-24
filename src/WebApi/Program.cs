@@ -1,4 +1,3 @@
-using System.Reflection;
 using Application;
 using Grpc.Services;
 using HealthChecks.UI.Client;
@@ -37,6 +36,18 @@ app.MapHealthChecks("healthch", new HealthCheckOptions
 {
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
+// Prevent 404 log entry
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/favicon.ico")
+    {
+        context.Response.StatusCode = StatusCodes.Status204NoContent;
+        return;
+    }
+
+    await next();
 });
 
 app.UseRequestContextLogging();

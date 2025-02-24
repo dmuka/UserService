@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Grpc.Infrastructure.Interceptors;
 using WebApi.Extensions;
 using WebApi.Infrastructure;
 
@@ -9,7 +10,11 @@ public static class Di
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
         services.AddEndpoints(Assembly.GetExecutingAssembly());
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            options.EnableDetailedErrors = true;
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
         services.AddEndpointsApiExplorer();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
