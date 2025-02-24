@@ -26,5 +26,5 @@ internal sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IU
 
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ??
-        throw new ApplicationException("User context is unavailable");
+        throw new ApplicationException(ContextUnavailable);
 }
