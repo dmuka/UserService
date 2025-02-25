@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Options.Db;
 
-public class PostgresOptions
+public record PostgresOptions
 {
     [Required, MinLength(2)]
     public required string Host { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Options.Authentication;
 
-public class AuthOptions
+public record AuthOptions
 {
     [Required, MinLength(32)]
     public required string Secret { get; set; }
