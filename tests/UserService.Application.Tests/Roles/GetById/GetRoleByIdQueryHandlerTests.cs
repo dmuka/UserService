@@ -48,7 +48,7 @@ public class GetRoleByIdQueryHandlerTests
     {
         // Arrange
         _roleRepositoryMock.Setup(x => 
-            x.GetRoleByIdAsync(_role.Id.Value, _cancellationToken)).ReturnsAsync((Role)null);
+            x.GetRoleByIdAsync(_role.Id.Value, _cancellationToken)).ReturnsAsync((Role)null!);
 
         // Act
         var result = await _handler.Handle(new GetRoleByIdQuery(_role.Id.Value), _cancellationToken);

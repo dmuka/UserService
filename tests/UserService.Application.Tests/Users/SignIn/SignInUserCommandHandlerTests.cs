@@ -72,7 +72,7 @@ public class SignInUserCommandHandlerTests
         // Arrange
         var command = new SignInUserCommand(NonExistingUsername, CorrectPassword);
         _userRepositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User)null!);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -91,7 +91,7 @@ public class SignInUserCommandHandlerTests
         // Arrange
         var command = new SignInUserCommand(ExistingUsername, NonExistingEmail, ExistingEmail);
         _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User)null!);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -100,7 +100,7 @@ public class SignInUserCommandHandlerTests
         {
             // Assert
             Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo(UserErrors.NotFoundByEmail(command.Email)));
+            Assert.That(result.Error, Is.EqualTo(UserErrors.NotFoundByEmail(command.Email!)));
         }
     }
 

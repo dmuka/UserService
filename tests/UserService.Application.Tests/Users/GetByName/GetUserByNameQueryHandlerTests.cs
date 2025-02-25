@@ -51,7 +51,7 @@ public class GetUserByNameQueryHandlerTests
         var query = new GetUserByNameQuery(NonExistingUsername);
         _userContextMock.Setup(uc => uc.UserName).Returns(NonExistingUsername);
         _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User)null!);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

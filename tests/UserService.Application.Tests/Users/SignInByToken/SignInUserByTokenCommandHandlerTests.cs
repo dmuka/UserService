@@ -63,7 +63,7 @@ public class SignInUserByTokenCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_ExpiredRefreshToken_ShouldThrowApplicationException()
+    public void Handle_ExpiredRefreshToken_ShouldThrowApplicationException()
     {
         // Arrange
         var command = new SignInUserByTokenCommand(ExpiredToken);
@@ -76,7 +76,7 @@ public class SignInUserByTokenCommandHandlerTests
         {
             var ex = Assert.ThrowsAsync<ApplicationException>(async () => 
                 await _handler.Handle(command, CancellationToken.None));
-            Assert.That(ex.Message, Is.EqualTo("Refresh token has expired."));
+            Assert.That(ex?.Message, Is.EqualTo("Refresh token has expired."));
         }
     }
 

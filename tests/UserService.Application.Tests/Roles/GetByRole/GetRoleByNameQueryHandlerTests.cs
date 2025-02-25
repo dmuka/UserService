@@ -48,7 +48,7 @@ public class GetRoleByNameQueryHandlerTests
     {
         // Arrange
         _roleRepositoryMock.Setup(x => x.GetRoleByNameAsync(NonExistentRoleName, _cancellationToken))
-            .ReturnsAsync((Role)null);
+            .ReturnsAsync((Role)null!);
 
         // Act
         var result = await _handler.Handle(new GetRoleByNameQuery(NonExistentRoleName), _cancellationToken);
