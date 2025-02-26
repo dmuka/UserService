@@ -1,8 +1,10 @@
 ﻿using Application.Abstractions.Authentication;
 using Dapper;
+using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
+using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Options;
@@ -10,12 +12,21 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) : IRefreshTokenRepository
+public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
 {
-    private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
+    private readonly string? _connectionString;
 
+    public RefreshTokenRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : base(cache)
+    {
+        _connectionString = postgresOptions.Value.GetConnectionString();
+    }
+    
     public async Task<RefreshToken?> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default)
     {
+        var tokens = GetFromCache<RefreshToken>();
+        
+        if (tokens is not null) return tokens.FirstOrDefault(token => token.User.Id.Value == user.Id.Value);
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -33,14 +44,12 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
             var token = await connection.QuerySingleOrDefaultAsync<RefreshTokenDto>(command);
             
             if (token == null) return null;
-            
-            return new RefreshToken
-            {
-                Id = token.Id,
-                Value = token.Value,
-                ExpiresUtc = token.ExpiresUtc,
-                User = user
-            };
+
+            return RefreshToken.Create(
+                token.Id,
+                token.Value,
+                token.ExpiresUtc,
+                user);
         }
         catch (Exception e)
         {
@@ -89,20 +98,18 @@ public class RefreshTokenRepository(IOptions<PostgresOptions> postgresOptions) :
                     {
                         if (!tokenDictionary.TryGetValue(token.Id, out var refreshToken))
                         {
-                            refreshToken = new RefreshToken
-                            {
-                                Id = token.Id,
-                                Value = token.Value,
-                                ExpiresUtc = token.ExpiresUtc,
-                                User = User.CreateUser(
+                            refreshToken = RefreshToken.Create(
+                                token.Id,
+                                token.Value,
+                                token.ExpiresUtc,
+                                User.CreateUser(
                                     user.Id, 
                                     user.Username, 
                                     user.FirstName, 
                                     user.LastName, 
                                     new PasswordHash(user.PasswordHash), 
                                     new Email(user.Email), 
-                                    new List<Role>())
-                            };
+                                    new List<Role>()));
                             
                             tokenDictionary.Add(token.Id, refreshToken);
                         }

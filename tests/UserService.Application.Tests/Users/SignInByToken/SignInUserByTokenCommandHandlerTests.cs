@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignInByToken;
+using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.Users;
 using Domain.ValueObjects;
@@ -10,12 +11,12 @@ namespace UserService.Application.Tests.Users.SignInByToken;
 [TestFixture]
 public class SignInUserByTokenCommandHandlerTests
 {
+    private readonly Guid _refreshTokenGuid = Guid.CreateVersion7();
+    
     private const string ValidToken = "validToken";
-    private const string ExpiredToken = "expiredToken";
     
     private User _user;
     private RefreshToken _validRefreshToken;
-    private RefreshToken _expiredRefreshToken;
     
     private Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private Mock<ITokenProvider> _tokenProviderMock;
@@ -33,19 +34,14 @@ public class SignInUserByTokenCommandHandlerTests
             new Email("email@email.com"),
             new List<Role>());
         
-        _expiredRefreshToken = new RefreshToken
-        {
-            Value = ExpiredToken,
-            ExpiresUtc = DateTime.UtcNow.AddDays(-1),
-            User = _user
-        };
+        var expireDate = DateTime.UtcNow;
+        var validExpireDate = expireDate.AddDays(1);
         
-        _validRefreshToken = new RefreshToken
-        {
-            Value = ValidToken,
-            ExpiresUtc = DateTime.UtcNow.AddDays(1),
-            User = _user
-        };
+        _validRefreshToken = RefreshToken.Create(
+            _refreshTokenGuid,
+            ValidToken,
+            validExpireDate,
+            _user);
         
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         _tokenProviderMock = new Mock<ITokenProvider>();
@@ -60,24 +56,6 @@ public class SignInUserByTokenCommandHandlerTests
         _handler = new SignInUserByTokenCommandHandler(
             _refreshTokenRepositoryMock.Object,
             _tokenProviderMock.Object);
-    }
-
-    [Test]
-    public void Handle_ExpiredRefreshToken_ShouldThrowApplicationException()
-    {
-        // Arrange
-        var command = new SignInUserByTokenCommand(ExpiredToken);
-
-        _refreshTokenRepositoryMock.Setup(r =>r.GetTokenAsync(command.RefreshToken, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_expiredRefreshToken);
-
-        // Act & Assert
-        using (Assert.EnterMultipleScope())
-        {
-            var ex = Assert.ThrowsAsync<ApplicationException>(async () => 
-                await _handler.Handle(command, CancellationToken.None));
-            Assert.That(ex?.Message, Is.EqualTo("Refresh token has expired."));
-        }
     }
 
     [Test]

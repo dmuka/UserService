@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
 using Core;
+using Domain.RefreshTokens;
 using Domain.Users;
 
 namespace Application.Users.SignIn;
@@ -30,13 +31,11 @@ internal sealed class SignInUserCommandHandler(
 
         var accessToken = tokenProvider.CreateAccessToken(user);
 
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.CreateVersion7(),
-            User = user,
-            ExpiresUtc = DateTime.UtcNow.AddHours(1),
-            Value = tokenProvider.CreateRefreshToken()
-        };
+        var refreshToken = RefreshToken.Create(
+            Guid.CreateVersion7(),
+            tokenProvider.CreateRefreshToken(),
+            DateTime.UtcNow.AddHours(1),
+            user);
         
         await refreshTokenRepository.AddTokenAsync(refreshToken, cancellationToken);
 

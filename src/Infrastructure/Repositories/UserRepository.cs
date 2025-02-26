@@ -11,15 +11,18 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : IUserRepository
+public class UserRepository : BaseRepository, IUserRepository
 {
-    private const string Users = $"{nameof(User)}s";
-    
-    private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
+    private readonly string? _connectionString; 
+
+    public UserRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : base(cache)
+    {
+        _connectionString = postgresOptions.Value.GetConnectionString();
+    }
 
     public async Task<bool> IsUsernameExistsAsync(string userName, CancellationToken cancellationToken = default)
     {
-        var users = cache.Get<User>(Users);
+        var users = GetFromCache<User>();
         
         if (users is not null) return users.Count(user => user.Username == userName) > 1;
         
@@ -49,7 +52,7 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
 
     public async Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
-        var users = cache.Get<User>(Users);
+        var users = GetFromCache<User>();
         
         if (users is not null) return users.Count(user => user.Email == email) > 1;
         
@@ -79,6 +82,10 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
 
     public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
+        var users = GetFromCache<User>();
+        
+        if (users is not null) return users.FirstOrDefault(user => user.Id.Value == userId);
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -117,6 +124,10 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
 
     public async Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
+        var users = GetFromCache<User>();
+        
+        if (users is not null) return users.FirstOrDefault(user => user.Username == username);
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -148,6 +159,10 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
 
     public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        var users = GetFromCache<User>();
+        
+        if (users is not null) return users.FirstOrDefault(user => user.Email.Value == email);
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -179,6 +194,10 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
 
     public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default)
     {
+        var users = GetFromCache<User>();
+        
+        if (users is not null) return users;
+        
         await using var connection = new NpgsqlConnection(_connectionString);
             
         var query = """
@@ -198,7 +217,8 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
-        var users = await QueryUsers(connection, command);
+        users = (await QueryUsers(connection, command)).ToList();
+        CreateInCache(users);
         
         return users;
     }
@@ -250,6 +270,7 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
             }
             
             await transaction.CommitAsync(cancellationToken);
+            RemoveFromCache<User>();
             
             return userId;
         }
@@ -280,6 +301,7 @@ public class UserRepository(ICacheService cache, IOptions<PostgresOptions> postg
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         await connection.ExecuteAsync(command);
+        RemoveFromCache<User>();
     }
 
     private static async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)

@@ -20,8 +20,8 @@ internal sealed class SignInUserByTokenCommandHandler(
         
         var accessToken = tokenProvider.CreateAccessToken(refreshToken.User);
 
-        refreshToken.Value = tokenProvider.CreateRefreshToken();
-        refreshToken.ExpiresUtc = DateTime.UtcNow.AddDays(7);
+        refreshToken.ChangeValue(tokenProvider.CreateRefreshToken());
+        refreshToken.ChangeExpireDate(DateTime.UtcNow.AddDays(7));
         
         await refreshTokenRepository.UpdateTokenAsync(refreshToken, cancellationToken);
 
