@@ -1,5 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
-using Application.Users.GetById;
+using Application.Roles.GetByUserId;
 
 namespace Application.Roles.GetById;
 

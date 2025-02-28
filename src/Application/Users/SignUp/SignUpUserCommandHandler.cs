@@ -2,6 +2,7 @@
 using Application.Abstractions.Messaging;
 using Core;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using RoleConstants = Domain.Roles.Constants.Roles;
@@ -36,7 +37,8 @@ internal sealed class SignUpUserCommandHandler(
             command.LastName, 
             new PasswordHash(passwordHash),
             new Email(command.Email),
-            new List<Role> { defaultUserRole! });
+            new List<RoleId> { defaultUserRole.Id },
+            new List<UserPermissionId>());
 
         var userId = await userRepository.AddUserAsync(user, cancellationToken);
 

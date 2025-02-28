@@ -1,11 +1,15 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
 using Core;
+using Domain.Roles;
 using Domain.Users;
 
 namespace Application.Users.GetById;
 
-public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext userContext) 
+public class GetUserByIdQueryHandler(
+    IUserRepository repository, 
+    IRoleRepository roleRepository,
+    IUserContext userContext) 
     : IQueryHandler<GetUserByIdQuery, UserResponse>
 {
     public async Task<Result<UserResponse>> Handle(
@@ -24,7 +28,9 @@ public class GetUserByIdQueryHandler(IUserRepository repository, IUserContext us
             return Result.Failure<UserResponse>(UserErrors.NotFound(query.UserId));
         }
         
-        var userResponse = UserResponse.Create(user);
+        var roles = await roleRepository.GetRolesByUserIdAsync(query.UserId, cancellationToken);
+        
+        var userResponse = UserResponse.Create(user, roles.Select(role => role.Name).ToArray());
 
         return userResponse;
     }

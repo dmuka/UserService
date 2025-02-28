@@ -1,8 +1,10 @@
 ﻿using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Repositories.Dtos;
 using Infrastructure.Repositories.Mappers;
+using Moq;
 
 namespace UserService.Infrastructure.Tests.Repositories.Mappers;
 
@@ -20,15 +22,21 @@ public class UserMapperTests
     private const string Hash = "hashedPassword";
     
     private User _user;
-    private List<Role> _roles;
+    private IList<RoleId> _roleIds;
+    private IList<UserPermissionId> _userPermissionIds;
     
+    private Mock<IRoleRepository> _roleRepositoryMock;
     
     private UserMapper _userMapper;
 
     [SetUp]
     public void Setup()
     {
-        _roles = [Role.CreateRole(Id, "Admin")];
+        _roleIds = [new RoleId(Id)];
+        _userPermissionIds = [new UserPermissionId(Id)];
+        
+        _roleRepositoryMock = new Mock<IRoleRepository>();
+        _roleRepositoryMock.Setup(repository => repository.GetRoleByNameAsync("User", CancellationToken.None)).ReturnsAsync(Role.CreateRole(Id, "User"));
         
         _user = User.CreateUser(
             Id,
@@ -37,9 +45,10 @@ public class UserMapperTests
             LastName,
             new PasswordHash(Hash),
             new Email(Email),
-            _roles);
+            _roleIds,
+            _userPermissionIds);
         
-        _userMapper = new UserMapper();
+        _userMapper = new UserMapper(_roleRepositoryMock.Object);
     }
 
     [Test]
@@ -77,7 +86,7 @@ public class UserMapperTests
 
         // Act
         var user = _userMapper.ToEntity(userDto);
-        user.AddRole(_roles[0]);
+        user.AddRole(_roleIds[0]);
 
         using (Assert.EnterMultipleScope())
         {
@@ -88,7 +97,7 @@ public class UserMapperTests
             Assert.That(user.LastName, Is.EqualTo(userDto.LastName));
             Assert.That(user.PasswordHash.Value, Is.EqualTo(userDto.PasswordHash));
             Assert.That(user.Email.Value, Is.EqualTo(userDto.Email));
-            Assert.That(user.Roles, Has.Count.EqualTo(1));
+            Assert.That(user.RoleIds, Has.Count.EqualTo(2));
         }
     }
 

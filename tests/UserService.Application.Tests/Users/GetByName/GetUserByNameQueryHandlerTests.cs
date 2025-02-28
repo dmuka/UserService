@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.GetByName;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Moq;
@@ -14,16 +15,25 @@ public class GetUserByNameQueryHandlerTests
     private const string AnotherExistingUsername = "anotherExistingUser";
     private const string NonExistingUsername = "nonExistingUser";
     
+    private IList<Role> _roles;
+    
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
+    
     private Mock<IUserRepository> _repositoryMock;
+    private Mock<IRoleRepository> _roleRepositoryMock;
     private Mock<IUserContext> _userContextMock;
     private GetUserByNameQueryHandler _handler;
 
     [SetUp]
     public void SetUp()
     {
+        _roles = new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Role") };
+        
         _repositoryMock = new Mock<IUserRepository>();
+        _roleRepositoryMock = new Mock<IRoleRepository>();
+        
         _userContextMock = new Mock<IUserContext>();
-        _handler = new GetUserByNameQueryHandler(_repositoryMock.Object, _userContextMock.Object);
+        _handler = new GetUserByNameQueryHandler(_repositoryMock.Object, _roleRepositoryMock.Object, _userContextMock.Object);
     }
 
     [Test]
@@ -34,7 +44,7 @@ public class GetUserByNameQueryHandlerTests
         _userContextMock.Setup(uc => uc.UserName).Returns(AnotherExistingUsername);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await _handler.Handle(query, _cancellationToken);
 
         using (Assert.EnterMultipleScope())
         {
@@ -50,11 +60,11 @@ public class GetUserByNameQueryHandlerTests
         // Arrange
         var query = new GetUserByNameQuery(NonExistingUsername);
         _userContextMock.Setup(uc => uc.UserName).Returns(NonExistingUsername);
-        _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))
             .ReturnsAsync((User)null!);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await _handler.Handle(query, _cancellationToken);
 
         using (Assert.EnterMultipleScope())
         {
@@ -76,14 +86,17 @@ public class GetUserByNameQueryHandlerTests
             "lastName",
             new PasswordHash("hash"),
             new Email("email@email.com"),
-            new List<Role>());
+            _roles.Select(role => role.Id).ToList(),
+            new List<UserPermissionId>());
         
         _userContextMock.Setup(uc => uc.UserName).Returns(ExistingUsername);
-        _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))
             .ReturnsAsync(user);
+        _roleRepositoryMock.Setup(repository => repository.GetRolesByUserIdAsync(user.Id.Value, _cancellationToken))
+            .ReturnsAsync(_roles);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await _handler.Handle(query, _cancellationToken);
 
         using (Assert.EnterMultipleScope())
         {

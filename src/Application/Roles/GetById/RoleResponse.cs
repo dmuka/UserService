@@ -1,20 +1,15 @@
 ﻿using Domain.Roles;
 
-namespace Application.Roles.GetById;
+namespace Application.Roles.GetByUserId;
 
 public sealed record RoleResponse
 {
-    public required Guid Id { get; init; }    
-    public required string Name { get; init; }
+    public required Role Role { get; init; }
 
     public static RoleResponse Create(Role role)
     {
-        var roleResponse = new RoleResponse
-        {
-            Id = role.Id.Value,
-            Name = role.Name
-        };
+        var rolesResponse = new RoleResponse { Role = role };
         
-        return roleResponse;
+        return rolesResponse;
     }
 }

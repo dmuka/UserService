@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.GetAll;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Moq;
@@ -10,7 +11,21 @@ namespace UserService.Application.Tests.Users.GetAll;
 [TestFixture]
 public class GetAllUsersQueryHandlerTests
 {
+    private readonly User _user = 
+        User.CreateUser(
+            Guid.CreateVersion7(), 
+            "name", 
+            "First Name", 
+            "Last Name", 
+            new PasswordHash("hash"), 
+            new Email("email@email.com"), 
+            new List<RoleId> { new (Guid.CreateVersion7()) }, 
+            new List<UserPermissionId>());
+    
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
+    
     private Mock<IUserRepository> _userRepositoryMock;
+    private Mock<IRoleRepository> _roleRepositoryMock;
     private Mock<IUserContext> _userContextMock;
     private GetAllUsersQueryHandler _handler;
 
@@ -18,8 +33,9 @@ public class GetAllUsersQueryHandlerTests
     public void SetUp()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
+        _roleRepositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new GetAllUsersQueryHandler(_userRepositoryMock.Object, _userContextMock.Object);
+        _handler = new GetAllUsersQueryHandler(_userRepositoryMock.Object, _roleRepositoryMock.Object, _userContextMock.Object);
     }
 
     [Test]
@@ -29,7 +45,7 @@ public class GetAllUsersQueryHandlerTests
         _userContextMock.Setup(x => x.UserRole).Returns("Admin");
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(), _cancellationToken);
 
         using (Assert.EnterMultipleScope())
         {
@@ -44,15 +60,14 @@ public class GetAllUsersQueryHandlerTests
     {
         // Arrange
         _userContextMock.Setup(x => x.UserRole).Returns("User");
-        var users = new List<User>
-        {
-            User.CreateUser(Guid.CreateVersion7(), "name", "First Name", "Last Name", new PasswordHash("hash"), new Email("email@email.com"), new List<Role>()),
-            User.CreateUser(Guid.CreateVersion7(), "name", "First Name", "Last Name", new PasswordHash("hash"), new Email("email@email.com"), new List<Role>())
-        };
-        _userRepositoryMock.Setup(x => x.GetAllUsersAsync(It.IsAny<CancellationToken>())).ReturnsAsync(users);
+        var users = new List<User> { _user, _user };
+        _userRepositoryMock.Setup(x => x.GetAllUsersAsync(_cancellationToken))
+            .ReturnsAsync(users);
+        _roleRepositoryMock.Setup(x => x.GetRolesByUserIdAsync(_user.Id.Value, _cancellationToken))
+            .ReturnsAsync(new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Admin") });
 
         // Act
-        var result = await _handler.Handle(new GetAllUsersQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetAllUsersQuery(), _cancellationToken);
 
         using (Assert.EnterMultipleScope())
         {

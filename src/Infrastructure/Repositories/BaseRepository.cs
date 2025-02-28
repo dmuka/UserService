@@ -5,16 +5,23 @@ namespace Infrastructure.Repositories;
 
 public class BaseRepository(ICacheService cache)
 {
-    protected T? GetFromCache<T>(Func<T, bool> predicate) where T : Entity
+    protected T? GetFirstFromCache<T>(Func<T, bool> predicate) where T : Entity
     {
-        var entities = GetFromCache<T>();
+        var entities = GetFromCache<T>() ?? [];
         
         return entities.FirstOrDefault(predicate);
     }
-
-    protected IList<T> GetFromCache<T>() where T : Entity
+    
+    protected IList<T> GetFromCache<T>(Func<T, bool> predicate) where T : Entity
     {
-        return cache.Get<T>(nameof(T)) ?? new List<T>();
+        var entities = GetFromCache<T>() ?? [];
+        
+        return entities.Where(predicate).ToList();
+    }
+
+    protected IList<T>? GetFromCache<T>() where T : Entity
+    {
+        return cache.Get<T>(nameof(T));
     }
 
     protected void RemoveFromCache<T>() where T : Entity

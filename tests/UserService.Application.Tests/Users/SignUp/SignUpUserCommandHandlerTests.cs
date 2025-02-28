@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignUp;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Moq;
@@ -18,6 +19,10 @@ public class SignUpUserCommandHandlerTests
     private const string Email = "email@email.com";
     private const string ExistingEmail = "exiatingEmail@email.com";
     private const string Password = "email@email.com";
+    
+    private IList<Role> _roles;
+    
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
 
     private User _user;
     
@@ -29,6 +34,7 @@ public class SignUpUserCommandHandlerTests
     [SetUp]
     public void SetUp()
     {
+        _roles = new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Role") };
         _user = User.CreateUser(
             Guid.CreateVersion7(),
             Username,
@@ -36,22 +42,23 @@ public class SignUpUserCommandHandlerTests
             "lastName",
             new PasswordHash("hash"),
             new Email(Email),
-            new List<Role>());
+            _roles.Select(role => role.Id).ToList(),
+            new List<UserPermissionId>());
         
         _userRepositoryMock = new Mock<IUserRepository>();
-        _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(Username, It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(Username, _cancellationToken))
             .ReturnsAsync(false);
-        _userRepositoryMock.Setup(r => r.IsEmailExistsAsync(Email, It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.IsEmailExistsAsync(Email, _cancellationToken))
             .ReturnsAsync(false);
-        _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(ExistingUsername, It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(ExistingUsername, _cancellationToken))
             .ReturnsAsync(true);
-        _userRepositoryMock.Setup(r => r.IsEmailExistsAsync(ExistingEmail, It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.IsEmailExistsAsync(ExistingEmail, _cancellationToken))
             .ReturnsAsync(true);
-        _userRepositoryMock.Setup(r => r.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.AddUserAsync(It.IsAny<User>(), _cancellationToken))
             .ReturnsAsync(Guid.CreateVersion7);
         
         _roleRepositoryMock = new Mock<IRoleRepository>();
-        _roleRepositoryMock.Setup(repo => repo.GetRoleByNameAsync(RoleConstants.DefaultUserRole, It.IsAny<CancellationToken>()))
+        _roleRepositoryMock.Setup(repo => repo.GetRoleByNameAsync(RoleConstants.DefaultUserRole, _cancellationToken))
             .ReturnsAsync(Role.CreateRole(Guid.CreateVersion7(), RoleConstants.DefaultUserRole));
         
         _passwordHasherMock = new Mock<IPasswordHasher>();
@@ -71,7 +78,7 @@ public class SignUpUserCommandHandlerTests
         var command = new SignUpUserCommand(ExistingUsername, Email, FirstName, LastName, Password);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, _cancellationToken);
 
         // Assert
         using (Assert.EnterMultipleScope())
@@ -88,7 +95,7 @@ public class SignUpUserCommandHandlerTests
         var command = new SignUpUserCommand(Username, ExistingEmail, FirstName, LastName, Password);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, _cancellationToken);
 
         // Assert
         using (Assert.EnterMultipleScope())
@@ -105,7 +112,7 @@ public class SignUpUserCommandHandlerTests
         var command = new SignUpUserCommand(Username, Email, FirstName, LastName, Password);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, _cancellationToken);
 
         // Assert
         using (Assert.EnterMultipleScope())

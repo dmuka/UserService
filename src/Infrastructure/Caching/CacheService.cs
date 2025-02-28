@@ -33,11 +33,11 @@ public class CacheService(IMemoryCache cache) : ICacheService
         return entity;
     }
     
-    public IList<T> Get<T>(string cacheKey) where T : Entity
+    public IList<T>? Get<T>(string cacheKey) where T : Entity
     {
         var entities = cache.Get<IList<T>>(cacheKey);
 
-        return entities ?? [];
+        return entities;
     }
     
     public T? GetEntity<T>(string cacheKey) where T : Entity

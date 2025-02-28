@@ -1,4 +1,5 @@
 ﻿using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 
@@ -38,8 +39,9 @@ public class RoleTests
             "firstName", 
             "lastName", 
             new PasswordHash("hash"), 
-            new Email("email@email.com"), 
-            new List<Role>()); 
+            new Email("email@email.com"),
+            new List<RoleId> { new (Guid.CreateVersion7()) },
+            new List<UserPermissionId>()); 
 
         // Act
         role.AddUser(user);

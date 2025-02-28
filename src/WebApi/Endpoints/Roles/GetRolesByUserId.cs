@@ -1,17 +1,17 @@
-﻿using Application.Roles.GetById;
+﻿using Application.Roles.GetByUserId;
 using MediatR;
 using WebApi.Extensions;
 using WebApi.Infrastructure;
 
 namespace WebApi.Endpoints.Roles;
 
-internal sealed class GetById : IEndpoint
+internal sealed class GetRolesByUserId : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("roles/{roleId:Guid}", async (Guid roleId, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapGet("roles/{userId:Guid}", async (Guid userId, ISender sender, CancellationToken cancellationToken) =>
         {
-            var query = new GetRoleByIdQuery(roleId);
+            var query = new GetRolesByUserIdQuery(userId);
 
             var result = await sender.Send(query, cancellationToken);
 

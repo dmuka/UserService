@@ -1,4 +1,5 @@
 ﻿using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Authentication;
@@ -40,7 +41,8 @@ public class TokenProviderTests
             "lastName",
             new PasswordHash("hashedPassword"),
             new Email("testuser@example.com"),
-            new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Admin") });
+            new List<RoleId> { new (Guid.CreateVersion7()) },
+            new List<UserPermissionId>());
 
         // Act
         var token = _tokenProvider.CreateAccessToken(user);

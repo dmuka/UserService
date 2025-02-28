@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
+using Application.Roles.GetByUserId;
 using Core;
 using Domain.Roles;
 using Domain.Users;

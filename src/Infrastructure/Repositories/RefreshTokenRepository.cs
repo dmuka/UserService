@@ -2,6 +2,7 @@
 using Dapper;
 using Domain.RefreshTokens;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Caching.Interfaces;
@@ -109,14 +110,15 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                                     user.LastName, 
                                     new PasswordHash(user.PasswordHash), 
                                     new Email(user.Email), 
-                                    new List<Role>()));
+                                    new List<RoleId>(),
+                                    new List<UserPermissionId>()));
                             
                             tokenDictionary.Add(token.Id, refreshToken);
                         }
 
                         if (role is not null)
                         {
-                            refreshToken.User.Roles.Add(Role.CreateRole(role.Id, role.Name));
+                            refreshToken.User.RoleIds.Add(new RoleId(role.Id));
                         }
                         
                         return refreshToken;
@@ -147,7 +149,7 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                         VALUES (@Id, @Value, @ExpiresUtc, @UserId)
                     """;
         
-        var parameters = new { token.Id, token.Value, token.ExpiresUtc, UserId = token.User.Id.Value };
+        var parameters = new { Id = token.Id.Value, token.Value, token.ExpiresUtc, UserId = token.User.Id.Value };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 

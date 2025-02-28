@@ -3,6 +3,7 @@
  using Domain.Roles;
  using Domain.Users;
  using Infrastructure.Authentication;
+ using Infrastructure.Authorization;
  using Infrastructure.Caching;
  using Infrastructure.Caching.Interfaces;
  using Infrastructure.HealthChecks;
@@ -23,7 +24,7 @@
          IConfiguration configuration) =>
          services
              .AddAuthentication(configuration)
-             .AddAuth()
+             .AddAuthorizationLogic()
              .AddDbConnectionOptions()
              .AddHealthCheck()
              .AddRepositories()
@@ -101,9 +102,11 @@
          return services;
      }
 
-     private static IServiceCollection AddAuth(this IServiceCollection services)
+     private static IServiceCollection AddAuthorizationLogic(this IServiceCollection services)
      {
          services.AddAuthorization();
+
+         services.AddScoped<PermissionProvider>();
 
          return services;
      }

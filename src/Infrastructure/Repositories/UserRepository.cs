@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Caching.Interfaces;
@@ -82,9 +83,9 @@ public class UserRepository : BaseRepository, IUserRepository
 
     public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var users = GetFromCache<User>();
+        var user = GetFirstFromCache<User>(user => user.Id.Value == userId);
         
-        if (users is not null) return users.FirstOrDefault(user => user.Id.Value == userId);
+        if (user is not null) return user;
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -112,7 +113,7 @@ public class UserRepository : BaseRepository, IUserRepository
         {
             var result = await QueryUsers(connection, command);
             
-            var user = result.FirstOrDefault();
+            user = result.FirstOrDefault();
             
             return user;
         }
@@ -124,9 +125,9 @@ public class UserRepository : BaseRepository, IUserRepository
 
     public async Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var users = GetFromCache<User>();
+        var user = GetFirstFromCache<User>(user => user.Username == username);
         
-        if (users is not null) return users.FirstOrDefault(user => user.Username == username);
+        if (user is not null) return user;
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -152,16 +153,16 @@ public class UserRepository : BaseRepository, IUserRepository
 
         var result = await QueryUsers(connection, command);
 
-        var user = result.FirstOrDefault();
+        user = result.FirstOrDefault();
         
         return user;
     }
 
     public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var users = GetFromCache<User>();
+        var user = GetFirstFromCache<User>(user => user.Email.Value == email);
         
-        if (users is not null) return users.FirstOrDefault(user => user.Email.Value == email);
+        if (user is not null) return user;
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
@@ -187,7 +188,7 @@ public class UserRepository : BaseRepository, IUserRepository
 
         var result = await QueryUsers(connection, command);
 
-        var user = result.FirstOrDefault();
+        user = result.FirstOrDefault();
         
         return user;
     }
@@ -258,11 +259,11 @@ public class UserRepository : BaseRepository, IUserRepository
                         VALUES (@UserId, @RoleId);
                     """;
 
-            foreach (var role in user.Roles)
+            foreach (var roleId in user.RoleIds)
             {
                 command = new CommandDefinition(
                     query, 
-                    new { UserId = user.Id.Value, RoleId = role.Id.Value }, 
+                    new { UserId = user.Id.Value, RoleId = roleId.Value }, 
                     transaction, 
                     cancellationToken: cancellationToken);
                 
@@ -321,10 +322,14 @@ public class UserRepository : BaseRepository, IUserRepository
                         user.LastName,
                         new PasswordHash(user.PasswordHash),
                         new Email(user.Email),
-                        new List<Role>());
+                        new List<RoleId> { new (role.Id) },
+                        new List<UserPermissionId>());
                     userDictionary.Add(user.Id, userEntry);
                 }
-                userEntry.Roles.Add(Role.CreateRole(role.Id, role.Name));
+                else
+                {
+                    userEntry.RoleIds.Add(new RoleId(role.Id));
+                }
                 
                 return userEntry;
             },

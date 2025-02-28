@@ -5,6 +5,7 @@ namespace Domain.Roles;
 public interface IRoleRepository
 {
     Task<Role?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+    Task<IList<Role>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<Role?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default);
     Task<IList<Role>> GetAllRolesAsync(CancellationToken cancellationToken = default);
     Task<Guid> AddRoleAsync(Role role, CancellationToken cancellationToken = default);

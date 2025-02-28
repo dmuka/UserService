@@ -26,7 +26,7 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenP
             new Claim(ClaimTypes.Email, user.Email)
         ]);
 
-        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
+        claims.AddRange(user.RoleIds.Select(roleId => new Claim(ClaimTypes.Role, roleId.Value.ToString())));
         
         var tokenDescriptor = new SecurityTokenDescriptor
         {

@@ -39,7 +39,7 @@ public class GetRoleByIdQueryHandlerTests
         {
             // Assert
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value.Id, Is.EqualTo(_role.Id.Value));
+            Assert.That(result.Value.Role.Id.Value, Is.EqualTo(_role.Id.Value));
         }
     }
 

@@ -12,7 +12,7 @@ public sealed record UserResponse
     public required string Email { get; init; }
     public required string[] Roles { get; init; }
 
-    public static UserResponse Create(User user)
+    public static UserResponse Create(User user, string[] roles)
     {
         var userResponse = new UserResponse
         {
@@ -22,7 +22,7 @@ public sealed record UserResponse
             LastName = user.LastName,
             PasswordHash = user.PasswordHash,
             Email = user.Email,
-            Roles = user.Roles.Select(role => role.Name).ToArray()
+            Roles = roles
         };
         
         return userResponse;

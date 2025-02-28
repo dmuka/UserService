@@ -1,5 +1,7 @@
 ﻿using Core;
+using Domain.Permissions;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.ValueObjects;
 
 namespace Domain.Users;
@@ -15,7 +17,8 @@ public class User : Entity, IAggregationRoot
     public string LastName { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
-    public ICollection<Role> Roles { get; private set; }
+    public ICollection<RoleId> RoleIds { get; private set; }
+    public ICollection<UserPermissionId> UserPermissionIds { get; private set; }
 
     /// <summary>
     /// Default constructor for ORM compatibility.
@@ -31,7 +34,8 @@ public class User : Entity, IAggregationRoot
     /// <param name="lastName">The last name of the user.</param>
     /// <param name="passwordHash">The hashed password of the user.</param>
     /// <param name="email">The email address of the user.</param>
-    /// <param name="roles">Collection of the user roles.</param>
+    /// <param name="roleIds">Collection of the user role ids.</param>
+    /// <param name="userPermissionIds">Collection of the user permission ids.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
     public static User CreateUser(
@@ -41,7 +45,8 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash, 
         Email email, 
-        ICollection<Role> roles)
+        ICollection<RoleId> roleIds,
+        ICollection<UserPermissionId> userPermissionIds)
     {
         return new User(
             new UserId(userId), 
@@ -50,7 +55,8 @@ public class User : Entity, IAggregationRoot
             lastName, 
             passwordHash, 
             email, 
-            roles);
+            roleIds,
+            userPermissionIds);
     }    
     
     private User(
@@ -60,9 +66,10 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash, 
         Email email, 
-        ICollection<Role> roles)
+        ICollection<RoleId> roleIds,
+        ICollection<UserPermissionId> userPermissionIds)
     {
-        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, roles);
+        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, roleIds, userPermissionIds);
 
         Id = userId;
         Username = userName;
@@ -70,7 +77,8 @@ public class User : Entity, IAggregationRoot
         LastName = lastName;
         PasswordHash = passwordHash;
         Email = email;
-        Roles = roles;
+        RoleIds = roleIds;
+        UserPermissionIds = userPermissionIds;
     }
 
     /// <summary>
@@ -96,21 +104,39 @@ public class User : Entity, IAggregationRoot
     /// <summary>
     /// Removes the role of the user.
     /// </summary>
-    /// <param name="role">The role to remove.</param>
-    public void RemoveRole(Role role)
+    /// <param name="roleId">The role id to remove.</param>
+    public void RemoveRole(RoleId roleId)
     {
-        ArgumentNullException.ThrowIfNull(role, nameof(role));
-        if (Roles.Count == 1)
-            throw new ArgumentException("User must have at least one role.", nameof(role));
+        ArgumentNullException.ThrowIfNull(roleId, nameof(roleId));
         
-        Roles.Remove(role);
+        if (RoleIds.Count == 1)
+            throw new ArgumentException("User must have at least one role.", nameof(roleId));
+        
+        RoleIds.Remove(roleId);
+    }
+
+    /// <summary>
+    /// Removes the permission of the user.
+    /// </summary>
+    /// <param name="userPermissionId">The permission to remove.</param>
+    public void RemovePermission(UserPermissionId userPermissionId)
+    {
+        ArgumentNullException.ThrowIfNull(userPermissionId, nameof(userPermissionId));
+        
+        UserPermissionIds.Remove(userPermissionId);
     }
 
     /// <summary>
     /// Adds the role of the user.
     /// </summary>
-    /// <param name="role">The role to add.</param>
-    public void AddRole(Role role) => Roles.Add(role);
+    /// <param name="roleId">The role id to add.</param>
+    public void AddRole(RoleId roleId) => RoleIds.Add(roleId);
+
+    /// <summary>
+    /// Adds the permission to the user.
+    /// </summary>
+    /// <param name="userPermissionId">The permission id to add.</param>
+    public void AddPermission(UserPermissionId userPermissionId) => UserPermissionIds.Add(userPermissionId);
 
     /// <summary>
     /// Validates user details.
@@ -121,7 +147,8 @@ public class User : Entity, IAggregationRoot
         string lastName,
         PasswordHash passwordHash,
         Email email,
-        ICollection<Role> roles)
+        ICollection<RoleId> roleIds,
+        ICollection<UserPermissionId> userPermissionIds)
     {
         if (string.IsNullOrWhiteSpace(userName))
             throw new ArgumentException("Username can't be null or empty.", nameof(userName));
@@ -131,6 +158,9 @@ public class User : Entity, IAggregationRoot
             throw new ArgumentException("Last name can't be null or empty.", nameof(lastName));
         ArgumentNullException.ThrowIfNull(passwordHash, nameof(passwordHash));
         ArgumentNullException.ThrowIfNull(email, nameof(email));
-        ArgumentNullException.ThrowIfNull(roles, nameof(roles));
+        ArgumentNullException.ThrowIfNull(roleIds, nameof(roleIds));
+        if (roleIds.Count == 0)
+            throw new ArgumentException("User must have at least one role.", nameof(roleIds));
+        ArgumentNullException.ThrowIfNull(userPermissionIds, nameof(userPermissionIds));
     }
 }

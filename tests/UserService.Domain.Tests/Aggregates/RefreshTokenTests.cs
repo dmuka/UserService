@@ -1,5 +1,6 @@
 ﻿using Domain.RefreshTokens;
 using Domain.Roles;
+using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 
@@ -10,14 +11,16 @@ public class RefreshTokenTests
 {
     private static readonly Guid Id = Guid.CreateVersion7();
     private const string SampleTokenValue = "Sample Token";
+    
     private readonly User _user = User.CreateUser(
         Id, 
         "username", 
         "firstName", 
         "lastName", 
         new PasswordHash("hash"), 
-        new Email("email@email.com"), 
-        new List<Role>());
+        new Email("email@email.com"),
+        new List<RoleId> { new (Guid.CreateVersion7()) },
+        new List<UserPermissionId>());
     
     [Test]
     public void Create_ShouldInitializeProperties()

@@ -4,6 +4,7 @@ using Domain.Roles;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -12,15 +13,20 @@ namespace Infrastructure.Repositories;
 public class RoleRepository : BaseRepository, IRoleRepository
 {
     private readonly string? _connectionString;
+    private readonly ILogger<RoleRepository> _logger;
 
-    public RoleRepository(ICacheService cache, IOptions<PostgresOptions> postgresOptions) : base(cache)
+    public RoleRepository(
+        ICacheService cache, 
+        ILogger<RoleRepository> logger, 
+        IOptions<PostgresOptions> postgresOptions) : base(cache)
     {
         _connectionString = postgresOptions.Value.GetConnectionString();
+        _logger = logger;
     }
     
     public async Task<Role?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
-        var role = GetFromCache<Role>(role => role.Id.Value == roleId);
+        var role = GetFirstFromCache<Role>(role => role.Id.Value == roleId);
         if (role is not null) return role;
         
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -38,19 +44,50 @@ public class RoleRepository : BaseRepository, IRoleRepository
         try
         {
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
-            RemoveFromCache<Role>();
+            if (roleDto is null) return null;
 
-            return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
+            RemoveFromCache<Role>();
+            
+            return Role.CreateRole(roleDto.Id, roleDto.Name);
         }
         catch (Exception e)
         {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the role by id: {RoleId}.", e, e.Message, roleId);
+            throw;
+        }
+    }
+    
+    public async Task<IList<Role>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        SELECT roles.*
+                        FROM roles
+                        LEFT JOIN user_roles ON roles.Id = user_roles.role_id
+                        WHERE user_roles.user_id = @UserId
+                    """;
+        
+        var parameters = new { UserId = userId };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var roleDtos = await connection.QueryAsync<RoleDto>(command);
+            
+            return roleDtos.Select(dto => Role.CreateRole(dto.Id, dto.Name)).ToList();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the roles by user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }
 
     public async Task<Role?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken = default)
     {
-        var role = GetFromCache<Role>(role => role.Name == roleName);
+        var role = GetFirstFromCache<Role>(role => role.Name == roleName);
         if (role is not null) return role;
         
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -107,8 +144,9 @@ public class RoleRepository : BaseRepository, IRoleRepository
                                  VALUES (@Name)
                                  RETURNING Id
                              """;
+        var parameters = new { role.Name };
         
-        var command = new CommandDefinition(query, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
         var roleId = await connection.ExecuteScalarAsync<Guid>(command);
         RemoveFromCache<Role>();
