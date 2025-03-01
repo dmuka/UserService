@@ -24,7 +24,7 @@ public class RoleTests
             // Assert
             Assert.That(role.Id, Is.EqualTo(new RoleId(_id)));
             Assert.That(role.Name, Is.EqualTo(roleName));
-            Assert.That(role.Users, Is.Empty);
+            Assert.That(role.UserIds, Is.Empty);
         }
     }
 
@@ -33,21 +33,16 @@ public class RoleTests
     {
         // Arrange
         var role = Role.CreateRole(_id, "User");
-        var user = User.CreateUser(
-            _id, 
-            "username", 
-            "firstName", 
-            "lastName", 
-            new PasswordHash("hash"), 
-            new Email("email@email.com"),
-            new List<RoleId> { new (Guid.CreateVersion7()) },
-            new List<UserPermissionId>()); 
+        var userId = new UserId(_id);
 
         // Act
-        role.AddUser(user);
+        role.AddUser(userId);
 
-        // Assert
-        Assert.That(role.Users, Contains.Item(user));
-        Assert.That(role.Users, Has.Count.EqualTo(1));
+        using (Assert.EnterMultipleScope())
+        {
+            // Assert
+            Assert.That(role.UserIds.ElementAt(0).Value, Is.EqualTo(_id));
+            Assert.That(role.UserIds, Has.Count.EqualTo(1));
+        }
     }
 }

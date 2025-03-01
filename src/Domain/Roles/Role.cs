@@ -7,7 +7,7 @@ public class Role : Entity, IAggregationRoot
 {
     public RoleId Id { get; private set; }
     public string Name { get; private set; }
-    public ICollection<User> Users { get; private set; }
+    public ICollection<UserId> UserIds { get; private set; }
 
     protected Role() { }
 
@@ -20,11 +20,11 @@ public class Role : Entity, IAggregationRoot
     {
         Id = id;
         Name = name;
-        Users = new List<User>();
+        UserIds = new List<UserId>();
     }
         
-    public void AddUser(User user)
+    public void AddUser(UserId userId)
     {
-        Users.Add(user);
+        UserIds.Add(userId);
     }
 }

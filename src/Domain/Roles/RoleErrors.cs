@@ -1,5 +1,5 @@
 ﻿using Core;
-using Domain.Users.Constants;
+using Domain.Roles.Constants;
 
 namespace Domain.Roles;
 
@@ -18,6 +18,6 @@ public static class RoleErrors
         "You are not authorized to perform this action.");
 
     public static readonly Error RoleNameAlreadyExists = Error.Conflict(
-        Codes.UsernameExists,
+        Codes.RoleNameExists,
         "The provided role name already exists.");
 }
