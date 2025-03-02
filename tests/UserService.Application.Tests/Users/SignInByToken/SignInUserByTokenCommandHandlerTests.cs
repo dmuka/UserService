@@ -49,17 +49,16 @@ public class SignInUserByTokenCommandHandlerTests
             _user);
         
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        
         _tokenProviderMock = new Mock<ITokenProvider>();
 
-        _tokenProviderMock.Setup(provider => provider.CreateAccessToken(_validRefreshToken.User))
-            .Returns("newAccessToken");
+        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_validRefreshToken.User, _cancellationToken))
+            .Returns(Task.FromResult("newAccessToken"));
 
         _tokenProviderMock.Setup(provider => provider.CreateRefreshToken())
             .Returns("newRefreshToken");
         
-        _handler = new SignInUserByTokenCommandHandler(
-            _refreshTokenRepositoryMock.Object,
-            _tokenProviderMock.Object);
+        _handler = new SignInUserByTokenCommandHandler(_refreshTokenRepositoryMock.Object, _tokenProviderMock.Object);
     }
 
     [Test]

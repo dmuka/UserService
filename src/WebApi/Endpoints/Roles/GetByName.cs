@@ -1,4 +1,4 @@
-﻿using Application.Users.GetByName;
+﻿using Application.Roles.GetByName;
 using MediatR;
 using WebApi.Extensions;
 using WebApi.Infrastructure;
@@ -11,7 +11,7 @@ internal sealed class GetByName : IEndpoint
     {
         builder.MapGet("roles/{roleName}", async (string roleName, ISender sender, CancellationToken cancellationToken) =>
         {
-            var query = new GetUserByNameQuery(roleName);
+            var query = new GetRoleByNameQuery(roleName);
 
             var result = await sender.Send(query, cancellationToken);
 

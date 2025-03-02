@@ -2,17 +2,19 @@
 using System.Security.Cryptography;
 using System.Text;
 using Application.Abstractions.Authentication;
+using Domain.Roles;
 using Domain.Users;
 using Infrastructure.Options.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenProvider
+internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceScopeFactory scopeFactory) : ITokenProvider
 {
-    public string CreateAccessToken(User user)
+    public async Task<string> CreateAccessTokenAsync(User user, CancellationToken cancellationToken = default)
     {
         var secretKey = authOptions.Value.Secret;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -26,7 +28,11 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions) : ITokenP
             new Claim(ClaimTypes.Email, user.Email)
         ]);
 
-        claims.AddRange(user.RoleIds.Select(roleId => new Claim(ClaimTypes.Role, roleId.Value.ToString())));
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var roleRepository = scope.ServiceProvider.GetRequiredService<IRoleRepository>();
+        var roles = await roleRepository.GetRolesByUserIdAsync(user.Id.Value, cancellationToken);
+        
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
         
         var tokenDescriptor = new SecurityTokenDescriptor
         {

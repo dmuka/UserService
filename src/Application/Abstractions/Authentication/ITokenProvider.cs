@@ -12,7 +12,7 @@ public interface ITokenProvider
     /// </summary>
     /// <param name="user">The user for whom the access token is created.</param>
     /// <returns>A JWT access token as a string.</returns>
-    string CreateAccessToken(User user);
+    Task<string> CreateAccessTokenAsync(User user, CancellationToken cancellationToken);
 
     /// <summary>
     /// Creates a new refresh token.

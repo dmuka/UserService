@@ -29,7 +29,7 @@ internal sealed class SignInUserCommandHandler(
 
         if (!isPasswordCorrect) return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
 
-        var accessToken = tokenProvider.CreateAccessToken(user);
+        var accessToken = await tokenProvider.CreateAccessTokenAsync(user, cancellationToken);
 
         var refreshToken = RefreshToken.Create(
             Guid.CreateVersion7(),

@@ -1,7 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
 using Core;
-using Domain.Users;
 
 namespace Application.Users.SignInByToken;
 
@@ -18,7 +17,7 @@ internal sealed class SignInUserByTokenCommandHandler(
             throw new ApplicationException("Refresh token has expired.");
         }
         
-        var accessToken = tokenProvider.CreateAccessToken(refreshToken.User);
+        var accessToken = await tokenProvider.CreateAccessTokenAsync(refreshToken.User, cancellationToken);
 
         refreshToken.ChangeValue(tokenProvider.CreateRefreshToken());
         refreshToken.ChangeExpireDate(DateTime.UtcNow.AddDays(7));

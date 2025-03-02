@@ -61,8 +61,8 @@ public class SignInUserCommandHandlerTests
             .Returns(true);
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-        _tokenProviderMock.Setup(tp => tp.CreateAccessToken(_existingUser))
-            .Returns(AccessToken);
+        _tokenProviderMock.Setup(tp => tp.CreateAccessTokenAsync(_existingUser, _cancellationToken))
+            .Returns(Task.FromResult(AccessToken));
         _tokenProviderMock.Setup(tp => tp.CreateRefreshToken())
             .Returns(RefreshTokenValue);
         

@@ -4,6 +4,7 @@ using Domain.Users;
 using Domain.ValueObjects;
 using Infrastructure.Authentication;
 using Infrastructure.Options.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -12,7 +13,13 @@ namespace UserService.Infrastructure.Tests.Authentication;
 [TestFixture]
 public class TokenProviderTests
 {
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
+    
     private Mock<IOptions<AuthOptions>> _authOptionsMock;
+    private Mock<IServiceProvider> _serviceProviderMock;
+    private Mock<IRoleRepository> _roleRepositoryMock;
+    private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
+    private Mock<IServiceScope> _serviceScopeMock;
     private TokenProvider _tokenProvider;
 
     [SetUp]
@@ -26,12 +33,24 @@ public class TokenProviderTests
             Issuer = "TestIssuer",
             Audience = "TestAudience"
         });
-
-        _tokenProvider = new TokenProvider(_authOptionsMock.Object);
+        
+        _roleRepositoryMock = new Mock<IRoleRepository>();
+        _roleRepositoryMock.Setup(repository => repository.GetRolesByUserIdAsync(It.IsAny<Guid>(), CancellationToken.None)).ReturnsAsync(new List<Role>());
+        
+        _serviceProviderMock = new Mock<IServiceProvider>();
+        _serviceProviderMock.Setup(provider => provider.GetService(typeof(IRoleRepository))).Returns(_roleRepositoryMock.Object);
+        
+        _serviceScopeMock = new Mock<IServiceScope>();
+        _serviceScopeMock.Setup(s => s.ServiceProvider).Returns(_serviceProviderMock.Object);
+        
+        _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
+        _serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(_serviceScopeMock.Object);
+    
+        _tokenProvider = new TokenProvider(_authOptionsMock.Object, _serviceScopeFactoryMock.Object);
     }
 
     [Test]
-    public void CreateAccessToken_ValidUser_ReturnsToken()
+    public async Task CreateAccessToken_ValidUser_ReturnsToken()
     {
         // Arrange
         var user = User.CreateUser(
@@ -45,7 +64,7 @@ public class TokenProviderTests
             new List<UserPermissionId>());
 
         // Act
-        var token = _tokenProvider.CreateAccessToken(user);
+        var token = await _tokenProvider.CreateAccessTokenAsync(user, _cancellationToken);
 
         // Assert
         Assert.That(token, Is.Not.Empty);

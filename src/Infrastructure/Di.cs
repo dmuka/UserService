@@ -14,6 +14,7 @@
  using Microsoft.Extensions.Configuration;
  using Microsoft.Extensions.DependencyInjection;
  using Microsoft.IdentityModel.Tokens;
+ using Serilog;
 
  namespace Infrastructure;
 
@@ -74,12 +75,28 @@
              .AddJwtBearer(jwtBearerOptions =>
              {
                  jwtBearerOptions.RequireHttpsMetadata = false;
+                 jwtBearerOptions.SaveToken = true;
                  jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                  {
                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
                      ValidIssuer = configuration["Jwt:Issuer"],
                      ValidAudience = configuration["Jwt:Audience"],
                      ClockSkew = TimeSpan.Zero
+                 };
+
+                 jwtBearerOptions.Events = new JwtBearerEvents
+                 {
+                     OnTokenValidated = context =>
+                     {
+                         var user = context.Principal;
+                         Log.Information("Token validated for user: {UserName}", user?.Identity?.Name);
+                         return Task.CompletedTask;
+                     },
+                     OnAuthenticationFailed = context =>
+                     {
+                         Log.Error(context.Exception, "Authentication failed");
+                         return Task.CompletedTask;
+                     }
                  };
              });
          
@@ -105,6 +122,8 @@
      private static IServiceCollection AddAuthorizationLogic(this IServiceCollection services)
      {
          services.AddAuthorization();
+         
+         services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
          services.AddScoped<PermissionProvider>();
 

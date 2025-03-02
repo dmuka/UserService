@@ -9,7 +9,7 @@ internal sealed class GetRolesByUserId : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("roles/{userId:Guid}", async (Guid userId, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapGet("roles/user/{userId:Guid}", async (Guid userId, ISender sender, CancellationToken cancellationToken) =>
         {
             var query = new GetRolesByUserIdQuery(userId);
 
