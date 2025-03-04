@@ -323,7 +323,7 @@ public class UserRepository : BaseRepository, IUserRepository
                         new PasswordHash(user.PasswordHash),
                         new Email(user.Email),
                         new List<RoleId> { new (role.Id) },
-                        new List<UserPermissionId>());
+                        new List<UserPermissionId>()).Value;
                     userDictionary.Add(user.Id, userEntry);
                 }
                 else

@@ -111,7 +111,7 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                                     new PasswordHash(user.PasswordHash), 
                                     new Email(user.Email), 
                                     new List<RoleId>(),
-                                    new List<UserPermissionId>()));
+                                    new List<UserPermissionId>()).Value);
                             
                             tokenDictionary.Add(token.Id, refreshToken);
                         }

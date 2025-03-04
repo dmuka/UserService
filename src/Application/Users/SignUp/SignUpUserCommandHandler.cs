@@ -40,7 +40,7 @@ internal sealed class SignUpUserCommandHandler(
             new List<RoleId> { defaultUserRole.Id },
             new List<UserPermissionId>());
 
-        var userId = await userRepository.AddUserAsync(user, cancellationToken);
+        var userId = await userRepository.AddUserAsync(user.Value, cancellationToken);
 
         return userId;
     }

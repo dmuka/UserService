@@ -43,7 +43,7 @@ public class SignUpUserCommandHandlerTests
             new PasswordHash("hash"),
             new Email(Email),
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
         
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(Username, _cancellationToken))

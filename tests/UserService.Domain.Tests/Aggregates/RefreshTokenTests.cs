@@ -20,7 +20,7 @@ public class RefreshTokenTests
         new PasswordHash("hash"), 
         new Email("email@email.com"),
         new List<RoleId> { new (Guid.CreateVersion7()) },
-        new List<UserPermissionId>());
+        new List<UserPermissionId>()).Value;
     
     [Test]
     public void Create_ShouldInitializeProperties()

@@ -37,7 +37,7 @@ public class SignInUserByTokenCommandHandlerTests
             new PasswordHash("hash"),
             new Email("email@email.com"),
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
         
         var expireDate = DateTime.UtcNow;
         var validExpireDate = expireDate.AddDays(1);

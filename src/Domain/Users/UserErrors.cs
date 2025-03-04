@@ -32,4 +32,24 @@ public static class UserErrors
     public static readonly Error UsernameAlreadyExists = Error.Conflict(
         Codes.UsernameExists,
         "The provided username already exists.");
+
+    public static readonly Error InvalidUsername = Error.Problem(
+        Codes.InvalidUsername,
+        "The provided username is invalid.");
+
+    public static readonly Error InvalidFirstName = Error.Problem(
+        Codes.InvalidFirstName,
+        "The provided first name is invalid.");
+
+    public static readonly Error InvalidLastName = Error.Problem(
+        Codes.InvalidLastName,
+        "The provided last name is invalid.");
+
+    public static readonly Error EmptyRolesCollection = Error.Problem(
+        Codes.EmptyRolesCollection,
+        "User must have at least one role.");
+
+    public static readonly Error LastRoleRemove = Error.Problem(
+        Codes.LastRoleRemove,
+        "User must have at least one role after remove role.");
 }

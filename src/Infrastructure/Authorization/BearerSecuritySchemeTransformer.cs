@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Models;
 
+namespace Infrastructure.Authorization;
+
 internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider)
     : IOpenApiDocumentTransformer
 {
@@ -16,7 +18,7 @@ internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvi
         {
             var requirements = new Dictionary<string, OpenApiSecurityScheme>
             {
-                ["Bearer"] = new OpenApiSecurityScheme
+                ["Bearer"] = new()
                 {
                     Type = SecuritySchemeType.Http,
                     Scheme = "bearer",

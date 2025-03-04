@@ -1,4 +1,5 @@
-﻿using Domain.Roles;
+﻿using Core;
+using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
@@ -34,7 +35,7 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
 
         using (Assert.EnterMultipleScope())
         {
@@ -48,11 +49,14 @@ public class UserTests
         }
     }
 
-    [Test]
-    public void Constructor_Should_Throw_ArgumentException_For_Null_Or_Empty_Username()
+    
+
+    [TestCase("")]
+    [TestCase(null!)]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyUsername(string username)
     {
-        // Act & Arrange & Assert
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
+        // Act & Arrange
+        var user = User.CreateUser(
             _userId.Value, 
             "", 
             ValidFirstName, 
@@ -60,101 +64,126 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds));
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
-            _userId.Value, 
-            null!, 
-            ValidFirstName, 
-            ValidLastName, 
-            ValidPasswordHash, 
-            ValidEmail, 
-            _validRolesIds,
-            _userPermissionIds));
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
-    [Test]
-    public void Constructor_Should_Throw_ArgumentException_For_Null_Or_Empty_FirstName()
+    [TestCase("")]
+    [TestCase(null!)]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyFirstName(string firstName)
     {
-        // Act & Arrange & Assert
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
-            _userId.Value, 
-            ValidUsername, 
-            "", 
-            ValidLastName, 
-            ValidPasswordHash, 
-            ValidEmail, 
+        // Act & Arrange
+        var user = User.CreateUser(
+            _userId.Value,
+            ValidUsername,
+            firstName,
+            ValidLastName,
+            ValidPasswordHash,
+            ValidEmail,
             _validRolesIds,
-            _userPermissionIds));
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
-            _userId.Value, 
-            ValidUsername, 
-            null!, 
-            ValidLastName, 
-            ValidPasswordHash, 
-            ValidEmail, 
-            _validRolesIds,
-            _userPermissionIds));
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
-    [Test]
-    public void Constructor_Should_Throw_ArgumentException_For_Null_Or_Empty_LastName()
+    [TestCase("")]
+    [TestCase(null!)]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyLastName(string lastName)
     {
-        // Act & Arrange & Assert
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
-            _userId.Value, 
-            ValidUsername, 
-            ValidFirstName, 
-            "", 
-            ValidPasswordHash, 
-            ValidEmail, 
-            _validRolesIds,
-            _userPermissionIds));
-        Assert.Throws<ArgumentException>(() => _ = User.CreateUser(
+        // Act & Arrange
+        var user = User.CreateUser(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
-            null!, 
+            lastName, 
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds));
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
-    [Test]
-    public void Constructor_Should_Throw_ArgumentNullException_For_Null_PasswordHash()
+    [TestCase(null!)]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullPasswordHash(PasswordHash passwordHash)
     {
-        // Act & Arrange & Assert
-        Assert.Throws<ArgumentNullException>(() => _ = User.CreateUser(
-            _userId.Value, 
-            ValidUsername, 
-            ValidFirstName, 
-            ValidLastName, 
-            null!, 
-            ValidEmail, 
-            _validRolesIds,
-            _userPermissionIds));
-    }
-
-    [Test]
-    public void Constructor_Should_Throw_ArgumentNullException_For_Null_Email()
-    {
-        // Act & Arrange & Assert
-        Assert.Throws<ArgumentNullException>(() => _ = User.CreateUser(
+        // Act & Arrange
+        var user = User.CreateUser(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
             ValidLastName, 
-            ValidPasswordHash, 
-            null!, 
+            passwordHash, 
+            ValidEmail, 
             _validRolesIds,
-            _userPermissionIds));
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
     [Test]
-    public void Constructor_Should_Throw_ArgumentNullException_For_Null_Role()
+    public void Constructor_ShouldReturnResultWithFailure_ForNullEmail()
     {
         // Act & Arrange & Assert
-        Assert.Throws<ArgumentNullException>(() => _ = User.CreateUser(
+        var user = User.CreateUser(
+            _userId.Value, 
+            ValidUsername, 
+            ValidFirstName, 
+            ValidLastName, 
+            ValidPasswordHash, 
+            null!, 
+            _validRolesIds,
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
+    }
+
+    [Test]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullRole()
+    {
+        // Act & Arrange
+        var user = User.CreateUser(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -162,7 +191,17 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             null!,
-            _userPermissionIds));
+            _userPermissionIds);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(user.IsFailure, Is.True);
+            Assert.That(user.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(user.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(user.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
     [Test]
@@ -177,7 +216,7 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
         var newEmail = new Email("newemail@example.com");
 
         // Act
@@ -188,7 +227,7 @@ public class UserTests
     }
 
     [Test]
-    public void ChangeEmail_Should_Throw_ArgumentNullException_For_Null_Email()
+    public void ChangeEmail_ShouldReturnFailureResult_ForNullEmail()
     {
         // Arrange
         var user = User.CreateUser(
@@ -199,10 +238,19 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
+        
+        // Act
+        var result = user.ChangeEmail(null!);
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => user.ChangeEmail(null!));
+        using (Assert.EnterMultipleScope())
+        {
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Null"));
+            Assert.That(result.Error.Description, Is.EqualTo("Null value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
@@ -217,7 +265,7 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
         var newPasswordHash = new PasswordHash("newhashedpassword");
 
         // Act
@@ -239,10 +287,20 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
+        
+        // Act
+        var result = user.ChangePassword(null!);
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => user.ChangePassword(null!));
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            // Act & Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Null"));
+            Assert.That(result.Error.Description, Is.EqualTo("Null value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
@@ -257,7 +315,7 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
         var newRoleId = new RoleId(RoleId);
         user.AddRole(newRoleId);
 
@@ -280,9 +338,19 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => user.RemoveRole(null!));
+        // Act
+        var result = user.RemoveRole(null!);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            // Act & Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Null"));
+            Assert.That(result.Error.Description, Is.EqualTo("Null value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 }

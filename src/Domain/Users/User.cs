@@ -1,7 +1,7 @@
 ﻿using Core;
-using Domain.Permissions;
 using Domain.Roles;
 using Domain.UserPermissions;
+using Domain.Users.Specifications;
 using Domain.ValueObjects;
 
 namespace Domain.Users;
@@ -38,7 +38,7 @@ public class User : Entity, IAggregationRoot
     /// <param name="userPermissionIds">Collection of the user permission ids.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
-    public static User CreateUser(
+    public static Result<User> CreateUser(
         Guid userId,
         string userName,
         string firstName,
@@ -48,6 +48,21 @@ public class User : Entity, IAggregationRoot
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
+        var resultsWithFailures = ValidateUserDetails(
+            userId,
+            userName, 
+            firstName, 
+            lastName,
+            passwordHash,
+            email,
+            roleIds,
+            userPermissionIds);
+
+        if (resultsWithFailures.Length != 0)
+        {
+            return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
+        }
+
         return new User(
             new UserId(userId), 
             userName, 
@@ -69,8 +84,6 @@ public class User : Entity, IAggregationRoot
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
-        ValidateUserDetails(userName, firstName, lastName, passwordHash, email, roleIds, userPermissionIds);
-
         Id = userId;
         Username = userName;
         FirstName = firstName;
@@ -85,52 +98,68 @@ public class User : Entity, IAggregationRoot
     /// Changes the email address of the user.
     /// </summary>
     /// <param name="newEmail">The new email address.</param>
-    public void ChangeEmail(Email newEmail)
+    public Result ChangeEmail(Email newEmail)
     {
-        ArgumentNullException.ThrowIfNull(newEmail, nameof(newEmail));
+        if (newEmail is null) return Result.Failure<Email>(Error.NullValue);
+        
         Email = newEmail;
+        
+        return Result.Success();
     }
 
     /// <summary>
     /// Changes the password hash of the user.
     /// </summary>
     /// <param name="newPasswordHash">The new password hash.</param>
-    public void ChangePassword(PasswordHash newPasswordHash)
+    public Result ChangePassword(PasswordHash newPasswordHash)
     {
-        ArgumentNullException.ThrowIfNull(newPasswordHash, nameof(newPasswordHash));
+        if (newPasswordHash is null) return Result.Failure<PasswordHash>(Error.NullValue);
+        
         PasswordHash = newPasswordHash;
+        
+        return Result.Success();
     }
 
     /// <summary>
     /// Removes the role of the user.
     /// </summary>
     /// <param name="roleId">The role id to remove.</param>
-    public void RemoveRole(RoleId roleId)
+    public Result RemoveRole(RoleId roleId)
     {
-        ArgumentNullException.ThrowIfNull(roleId, nameof(roleId));
-        
-        if (RoleIds.Count == 1)
-            throw new ArgumentException("User must have at least one role.", nameof(roleId));
+        if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
+        var validationResult = new UserMustHaveAtLeastOneRoleAfterRemoveRole(RoleIds).IsSatisfied();
+        if (validationResult.IsFailure) return validationResult;
         
         RoleIds.Remove(roleId);
+        
+        return Result.Success();
     }
 
     /// <summary>
     /// Removes the permission of the user.
     /// </summary>
     /// <param name="userPermissionId">The permission to remove.</param>
-    public void RemovePermission(UserPermissionId userPermissionId)
+    public Result RemovePermission(UserPermissionId userPermissionId)
     {
-        ArgumentNullException.ThrowIfNull(userPermissionId, nameof(userPermissionId));
+        if (userPermissionId is null) return Result.Failure<UserPermissionId>(Error.NullValue);  
         
         UserPermissionIds.Remove(userPermissionId);
+        
+        return Result.Success();
     }
 
     /// <summary>
     /// Adds the role of the user.
     /// </summary>
     /// <param name="roleId">The role id to add.</param>
-    public void AddRole(RoleId roleId) => RoleIds.Add(roleId);
+    public Result AddRole(RoleId roleId)
+    {
+        if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
+        
+        RoleIds.Add(roleId); 
+        
+        return Result.Success();
+    }
 
     /// <summary>
     /// Adds the permission to the user.
@@ -141,7 +170,8 @@ public class User : Entity, IAggregationRoot
     /// <summary>
     /// Validates user details.
     /// </summary>
-    private static void ValidateUserDetails(
+    private static Result[] ValidateUserDetails(
+        Guid userId,
         string userName,
         string firstName,
         string lastName,
@@ -150,17 +180,18 @@ public class User : Entity, IAggregationRoot
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("Username can't be null or empty.", nameof(userName));
-        if (string.IsNullOrWhiteSpace(firstName))
-            throw new ArgumentException("First name can't be null or empty.", nameof(firstName));
-        if (string.IsNullOrWhiteSpace(lastName))
-            throw new ArgumentException("Last name can't be null or empty.", nameof(lastName));
-        ArgumentNullException.ThrowIfNull(passwordHash, nameof(passwordHash));
-        ArgumentNullException.ThrowIfNull(email, nameof(email));
-        ArgumentNullException.ThrowIfNull(roleIds, nameof(roleIds));
-        if (roleIds.Count == 0)
-            throw new ArgumentException("User must have at least one role.", nameof(roleIds));
-        ArgumentNullException.ThrowIfNull(userPermissionIds, nameof(userPermissionIds));
+        var validationResults = new []
+        {
+            new MustBeNonNull<Guid>(userId).IsSatisfied(),
+            new UserNameMustBeValid(userName).IsSatisfied(),
+            new FirstNameMustBeValid(firstName).IsSatisfied(),
+            new LastNameMustBeValid(lastName).IsSatisfied(),
+            new MustBeNonNull<PasswordHash>(passwordHash).IsSatisfied(),
+            new MustBeNonNull<Email>(email).IsSatisfied(),
+            new UserMustHaveAtLeastOneRole(roleIds).IsSatisfied(),
+            new MustBeNonNull<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
+        }.Where(result => result.IsFailure);
+
+        return validationResults.ToArray();
     }
 }

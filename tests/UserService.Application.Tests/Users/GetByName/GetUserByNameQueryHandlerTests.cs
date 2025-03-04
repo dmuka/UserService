@@ -87,7 +87,7 @@ public class GetUserByNameQueryHandlerTests
             new PasswordHash("hash"),
             new Email("email@email.com"),
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
         
         _userContextMock.Setup(uc => uc.UserName).Returns(ExistingUsername);
         _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))

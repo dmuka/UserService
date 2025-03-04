@@ -61,7 +61,7 @@ public class TokenProviderTests
             new PasswordHash("hashedPassword"),
             new Email("testuser@example.com"),
             new List<RoleId> { new (Guid.CreateVersion7()) },
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
 
         // Act
         var token = await _tokenProvider.CreateAccessTokenAsync(user, _cancellationToken);

@@ -33,7 +33,7 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserDto>
             new PasswordHash(dto.PasswordHash), 
             new Email(dto.Email), 
             new List<RoleId> { role.Id },
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
         
         return user;
     }

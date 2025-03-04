@@ -46,7 +46,7 @@ public class UserMapperTests
             new PasswordHash(Hash),
             new Email(Email),
             _roleIds,
-            _userPermissionIds);
+            _userPermissionIds).Value;
         
         _userMapper = new UserMapper(_roleRepositoryMock.Object);
     }

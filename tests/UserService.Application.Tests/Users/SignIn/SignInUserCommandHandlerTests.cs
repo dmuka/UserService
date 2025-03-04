@@ -47,7 +47,7 @@ public class SignInUserCommandHandlerTests
             new PasswordHash("hash"),
             new Email("email@email.com"),
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>());
+            new List<UserPermissionId>()).Value;
         
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRepositoryMock.Setup(repo => repo.GetUserByUsernameAsync(ExistingUsername, _cancellationToken))

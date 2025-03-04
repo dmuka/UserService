@@ -7,4 +7,9 @@ public static class Codes
     public const string WrongPassword = "UserWrongPassword";
     public const string EmailExists = "EmailAlreadyExists";
     public const string UsernameExists = "UsernameAlreadyExists";
+    public const string InvalidUsername = "InvalidUsername";
+    public const string InvalidFirstName = "InvalidFirstName";
+    public const string InvalidLastName = "InvalidLastName";
+    public const string EmptyRolesCollection = "EmptyRolesCollection";
+    public const string LastRoleRemove = "LastRoleRemove";
 }
