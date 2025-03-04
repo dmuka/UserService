@@ -1,7 +1,8 @@
 ﻿using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Infrastructure.Authentication;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,8 +59,8 @@ public class TokenProviderTests
             "testuser",
             "firstName",
             "lastName",
-            new PasswordHash("hashedPassword"),
-            new Email("testuser@example.com"),
+            PasswordHash.Create("hashedPassword"),
+            Email.Create("testuser@example.com"),
             new List<RoleId> { new (Guid.CreateVersion7()) },
             new List<UserPermissionId>()).Value;
 

@@ -4,6 +4,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Moq;
 
 namespace UserService.Application.Tests.Users.SignIn;
@@ -44,8 +46,8 @@ public class SignInUserCommandHandlerTests
             ExistingUsername,
             "firstName",
             "lastName",
-            new PasswordHash("hash"),
-            new Email("email@email.com"),
+            PasswordHash.Create("hash"),
+            Email.Create("email@email.com"),
             _roles.Select(role => role.Id).ToList(),
             new List<UserPermissionId>()).Value;
         

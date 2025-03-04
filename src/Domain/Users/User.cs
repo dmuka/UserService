@@ -3,6 +3,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users.Specifications;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 
 namespace Domain.Users;
 
@@ -43,8 +45,8 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        PasswordHash passwordHash, 
-        Email email, 
+        Result<PasswordHash> passwordHash, 
+        Result<Email> email, 
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -79,8 +81,8 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        PasswordHash passwordHash, 
-        Email email, 
+        Result<PasswordHash> passwordHash, 
+        Result<Email> email, 
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -88,8 +90,8 @@ public class User : Entity, IAggregationRoot
         Username = userName;
         FirstName = firstName;
         LastName = lastName;
-        PasswordHash = passwordHash;
-        Email = email;
+        PasswordHash = passwordHash.Value;
+        Email = email.Value;
         RoleIds = roleIds;
         UserPermissionIds = userPermissionIds;
     }
@@ -175,21 +177,21 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        PasswordHash passwordHash,
-        Email email,
+        Result<PasswordHash> passwordHash,
+        Result<Email> email,
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
         var validationResults = new []
         {
-            new MustBeNonNull<Guid>(userId).IsSatisfied(),
+            new MustBeNonNullValue<Guid>(userId).IsSatisfied(),
             new UserNameMustBeValid(userName).IsSatisfied(),
             new FirstNameMustBeValid(firstName).IsSatisfied(),
             new LastNameMustBeValid(lastName).IsSatisfied(),
-            new MustBeNonNull<PasswordHash>(passwordHash).IsSatisfied(),
-            new MustBeNonNull<Email>(email).IsSatisfied(),
+            new MustBeNonNull<Result<PasswordHash>>(passwordHash).IsSatisfied(),
+            new MustBeNonNull<Result<Email>>(email).IsSatisfied(),
             new UserMustHaveAtLeastOneRole(roleIds).IsSatisfied(),
-            new MustBeNonNull<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
+            new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
         }.Where(result => result.IsFailure);
 
         return validationResults.ToArray();

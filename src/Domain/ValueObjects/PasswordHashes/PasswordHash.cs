@@ -1,4 +1,7 @@
-﻿namespace Domain.ValueObjects;
+﻿using Core;
+using Domain.ValueObjects.Emails;
+
+namespace Domain.ValueObjects.PasswordHashes;
 
 public sealed class PasswordHash : ValueObject
 {
@@ -16,13 +19,26 @@ public sealed class PasswordHash : ValueObject
     /// Initializes a new instance of the <see cref="PasswordHash"/> class.
     /// </summary>
     /// <param name="value">The password hash value.</param>
-    /// <exception cref="ArgumentException">Thrown when the value is null or whitespace.</exception>
-    public PasswordHash(string value)
+    private PasswordHash(string value) => Value = value;
+    
+    /// <summary>
+    /// Creates a new PasswordHash instance if the provided value is valid.
+    /// </summary>
+    /// <param name="value">The password hash value to validate and store.</param>
+    /// <returns>A Result containing the PasswordHash instance or a validation error.</returns>
+    public static Result<PasswordHash> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Password hash can't be empty.", nameof(value));
+        if (value is null)
+        {
+            return Result.Failure<PasswordHash>(Error.NullValue);
+        }
 
-        Value = value;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Result.Failure<PasswordHash>(Error.EmptyValue);
+        }
+
+        return Result.Success(new PasswordHash(value));
     }
 
     /// <summary>

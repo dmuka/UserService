@@ -4,6 +4,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Moq;
 
 namespace UserService.Application.Tests.Users.GetAll;
@@ -17,8 +19,8 @@ public class GetAllUsersQueryHandlerTests
             "name", 
             "First Name", 
             "Last Name", 
-            new PasswordHash("hash"), 
-            new Email("email@email.com"), 
+            PasswordHash.Create("hash").Value, 
+            Email.Create("email@email.com").Value, 
             new List<RoleId> { new (Guid.CreateVersion7()) }, 
             new List<UserPermissionId>()).Value;
     

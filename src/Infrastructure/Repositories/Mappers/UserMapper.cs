@@ -2,6 +2,8 @@
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -30,8 +32,8 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserDto>
             dto.Username, 
             dto.FirstName, 
             dto.LastName, 
-            new PasswordHash(dto.PasswordHash), 
-            new Email(dto.Email), 
+            PasswordHash.Create(dto.PasswordHash), 
+            Email.Create(dto.Email), 
             new List<RoleId> { role.Id },
             new List<UserPermissionId>()).Value;
         

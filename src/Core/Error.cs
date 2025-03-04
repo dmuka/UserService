@@ -20,6 +20,14 @@ public record Error(string Code, string Description, ErrorType Type)
         "General.Null",
         "Null value was provided",
         ErrorType.Failure);
+    
+    /// <summary>
+    /// Represents an error indicating that a empty value was provided.
+    /// </summary>
+    public static readonly Error EmptyValue = new(
+        "General.Empty",
+        "Empty value was provided",
+        ErrorType.Failure);
 
     /// <summary>
     /// Creates an error categorized as a failure.

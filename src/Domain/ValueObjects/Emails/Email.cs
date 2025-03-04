@@ -1,6 +1,7 @@
 ﻿using System.Net.Mail;
+using Core;
 
-namespace Domain.ValueObjects;
+namespace Domain.ValueObjects.Emails;
 
 /// <summary>
 /// Represents an email address as a value object.
@@ -21,12 +22,28 @@ public sealed class Email : ValueObject
     /// Initializes a new instance of the <see cref="Email"/> class.
     /// </summary>
     /// <param name="value">The email address to validate and store.</param>
-    /// <exception cref="ArgumentException">Thrown when the provided email address is invalid.</exception>
-    public Email(string value)
+    private Email(string value) => Value = value.ToLowerInvariant();
+    
+    /// <summary>
+    /// Creates a new Email instance if the provided value is valid.
+    /// </summary>
+    /// <param name="value">The email address to validate and store.</param>
+    /// <returns>A Result containing the Email instance or a validation error.</returns>
+    public static Result<Email> Create(string value)
     {
-        if (!IsValid(value)) throw new ArgumentException($"'{value}' is not a valid email address.", nameof(value));
+        if (value is null)
+        {
+            return Result.Failure<Email>(Error.NullValue);
+        }
 
-        Value = value.ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Result.Failure<Email>(Error.EmptyValue);
+        }
+
+        return IsValid(value) 
+            ? Result.Success(new Email(value)) 
+            : Result.Failure<Email>(EmailErrors.InvalidEmail);
     }
 
     /// <summary>
@@ -42,15 +59,7 @@ public sealed class Email : ValueObject
             
             return mailAddress.Address == email;
         }
-        catch (ArgumentNullException)
-        {
-            return false;
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
-        catch (FormatException)
+        catch 
         {
             return false;
         }
@@ -62,13 +71,6 @@ public sealed class Email : ValueObject
     /// <param name="email">The email address to convert.</param>
     /// <returns>The email address as a string.</returns>
     public static implicit operator string(Email email) => email.Value;
-    
-    /// <summary>
-    /// Explicitly converts a <see cref="string"/> to an <see cref="Email"/>.
-    /// </summary>
-    /// <param name="email">The string to convert.</param>
-    /// <returns>The email address as an <see cref="Email"/> object.</returns>
-    public static explicit operator Email(string email) => new (email);
 
     /// <summary>
     /// Checks if two <see cref="Email"/> objects are equal.

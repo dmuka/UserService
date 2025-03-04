@@ -5,6 +5,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
@@ -108,8 +110,8 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                                     user.Username, 
                                     user.FirstName, 
                                     user.LastName, 
-                                    new PasswordHash(user.PasswordHash), 
-                                    new Email(user.Email), 
+                                    PasswordHash.Create(user.PasswordHash), 
+                                    Email.Create(user.Email), 
                                     new List<RoleId>(),
                                     new List<UserPermissionId>()).Value);
                             

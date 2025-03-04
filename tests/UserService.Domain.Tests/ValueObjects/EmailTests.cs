@@ -1,4 +1,5 @@
-﻿using Domain.ValueObjects;
+﻿using Core;
+using Domain.ValueObjects.Emails;
 
 namespace UserService.Domain.Tests.ValueObjects;
 
@@ -21,45 +22,71 @@ public class EmailTests
     {
         // Arrange
         // Act
-        var email = new Email(ValidEmail);
+        var email = Email.Create(ValidEmail).Value;
 
         // Assert
         Assert.That(email.Value, Is.EqualTo(ValidEmail));
     }
 
     [Test]
-    public void Constructor_InvalidEmail_ThrowsArgumentException()
+    public void Constructor_InvalidEmail_ReturnsResultWithProblem()
     {
-        // Arrange
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new Email(InvalidEmail));
+        // Arrange & Act
+        var result = Email.Create(InvalidEmail);
+        
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("InvalidEmail"));
+            Assert.That(result.Error.Description, Is.EqualTo("The provided email is invalid."));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Problem));
+        }
     }
 
     [Test]
-    public void Constructor_NullEmail_ThrowsArgumentException()
+    public void Constructor_EmptyEmail_ReturnResultWithFailure()
     {
-        // Arrange
-        string? nullEmail = null;
+        // Arrange & Act
+        var result = Email.Create("");
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new Email(nullEmail!));
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Empty"));
+            Assert.That(result.Error.Description, Is.EqualTo("Empty value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
-    public void Constructor_EmptyEmail_ThrowsArgumentException()
+    public void Constructor_NullEmail_ReturnResultWithFailure()
     {
-        // Arrange
-        const string emptyEmail = "";
+        // Arrange & Act
+        var result = Email.Create(null!);
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new Email(emptyEmail));
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Null"));
+            Assert.That(result.Error.Description, Is.EqualTo("Null value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
     public void ImplicitConversion_ToString_ReturnsCorrectValue()
     {
         // Arrange
-        var email = new Email(ValidEmail);
+        var email = Email.Create(ValidEmail).Value;
         var actual = ValidEmail;
 
         // Act
@@ -70,34 +97,11 @@ public class EmailTests
     }
 
     [Test]
-    public void ExplicitConversion_FromString_CreatesValidEmail()
-    {
-        // Arrange
-        var validEmail = new Email(ValidEmail);
-        
-        // Act
-        var email = (Email)ValidEmail;
-
-        // Assert
-        Assert.That(validEmail, Is.EqualTo(email));
-    }
-
-    [Test]
-    public void ExplicitConversion_FromInvalidString_ThrowsArgumentException()
-    {
-        // Arrange
-        var invalidEmail = "invalid-email";
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = (Email)invalidEmail);
-    }
-
-    [Test]
     public void Equals_EqualEmails_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmail).Value;
 
         // Act
         var result = email1.Equals(email2);
@@ -110,8 +114,8 @@ public class EmailTests
     public void Equals_DifferentEmails_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail2);
+        var email1 = Email.Create(ValidEmail);
+        var email2 = Email.Create(ValidEmail2);
 
         // Act
         var result = email1.Equals(email2);
@@ -124,8 +128,8 @@ public class EmailTests
     public void Equals_DifferentCaseEmails_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmailUpperCase);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmailUpperCase).Value;
 
         // Act
         var result = email1.Equals(email2);
@@ -138,7 +142,7 @@ public class EmailTests
     public void Equals_NullEmail_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail);
         Email? email2 = null;
 
         // Act
@@ -152,8 +156,8 @@ public class EmailTests
     public void GetHashCode_EqualEmails_ReturnSameHashCode()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmail).Value;
 
         // Act
         var hashCode1 = email1.GetHashCode();
@@ -167,8 +171,8 @@ public class EmailTests
     public void GetHashCode_DifferentEmails_ReturnDifferentHashCodes()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail2);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmail2).Value;
 
         // Act
         var hashCode1 = email1.GetHashCode();
@@ -182,8 +186,8 @@ public class EmailTests
     public void GetHashCode_DifferentCaseEmails_ReturnSameHashCode()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmailUpperCase);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmailUpperCase).Value;
 
         // Act
         var hashCode1 = email1.GetHashCode();
@@ -197,8 +201,8 @@ public class EmailTests
     public void OperatorEquality_EqualEmails_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmail).Value;
 
         // Act
         var result = email1 == email2;
@@ -211,8 +215,8 @@ public class EmailTests
     public void OperatorEquality_DifferentEmails_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail2);
+        var email1 = Email.Create(ValidEmail);
+        var email2 = Email.Create(ValidEmail2);
 
         // Act
         var result = email1 == email2;
@@ -225,8 +229,8 @@ public class EmailTests
     public void OperatorEquality_DifferentCaseEmails_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmailUpperCase);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmailUpperCase).Value;
 
         // Act
         var result = email1 == email2;
@@ -239,7 +243,7 @@ public class EmailTests
     public void OperatorEquality_OneNull_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
         Email? email2 = null;
 
         // Act
@@ -253,8 +257,8 @@ public class EmailTests
     public void OperatorInequality_EqualEmails_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmail).Value;
 
         // Act
         var result = email1 != email2;
@@ -267,8 +271,8 @@ public class EmailTests
     public void OperatorInequality_DifferentEmails_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmail2);
+        var email1 = Email.Create(ValidEmail);
+        var email2 = Email.Create(ValidEmail2);
 
         // Act
         var result = email1 != email2;
@@ -281,8 +285,8 @@ public class EmailTests
     public void OperatorInequality_DifferentCaseEmails_ReturnsFalse()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
-        var email2 = new Email(ValidEmailUpperCase);
+        var email1 = Email.Create(ValidEmail).Value;
+        var email2 = Email.Create(ValidEmailUpperCase).Value;
 
         // Act
         var result = email1 != email2;
@@ -295,7 +299,7 @@ public class EmailTests
     public void OperatorInequality_OneNull_ReturnsTrue()
     {
         // Arrange
-        var email1 = new Email(ValidEmail);
+        var email1 = Email.Create(ValidEmail).Value;
         Email? email2 = null;
 
         // Act

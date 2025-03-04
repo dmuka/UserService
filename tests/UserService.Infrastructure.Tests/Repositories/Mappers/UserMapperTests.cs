@@ -2,6 +2,8 @@
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Infrastructure.Repositories.Dtos;
 using Infrastructure.Repositories.Mappers;
 using Moq;
@@ -43,8 +45,8 @@ public class UserMapperTests
             Username,
             FirstName,
             LastName,
-            new PasswordHash(Hash),
-            new Email(Email),
+            PasswordHash.Create(Hash),
+            Domain.ValueObjects.Emails.Email.Create(Email),
             _roleIds,
             _userPermissionIds).Value;
         

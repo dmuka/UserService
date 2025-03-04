@@ -5,6 +5,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
 namespace Application.Users.SignUp;
@@ -35,10 +37,12 @@ internal sealed class SignUpUserCommandHandler(
             command.Username, 
             command.FirstName, 
             command.LastName, 
-            new PasswordHash(passwordHash),
-            new Email(command.Email),
+            PasswordHash.Create(passwordHash),
+            Email.Create(command.Email),
             new List<RoleId> { defaultUserRole.Id },
             new List<UserPermissionId>());
+
+        if (user.IsFailure) return Result.Failure<Guid>(user.Error);
 
         var userId = await userRepository.AddUserAsync(user.Value, cancellationToken);
 

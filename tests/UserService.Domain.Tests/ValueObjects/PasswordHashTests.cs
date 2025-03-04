@@ -1,4 +1,7 @@
-﻿using Domain.ValueObjects;
+﻿using Core;
+using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 
 namespace UserService.Domain.Tests.ValueObjects;
 
@@ -13,47 +16,53 @@ public class PasswordHashTests
     {
         // Arrange
         // Act
-        var passwordHash = _ = new PasswordHash(ValidHash);
+        var passwordHash = _ = PasswordHash.Create(ValidHash).Value;
 
         // Assert
         Assert.That(passwordHash.Value, Is.EqualTo(ValidHash));
     }
 
     [Test]
-    public void Constructor_EmptyString_ShouldThrowArgumentException()
+    public void Constructor_EmptyHash_ReturnResultWithFailure()
     {
-        // Arrange
-        const string hash = "";
+        // Arrange & Act
+        var result = PasswordHash.Create("");
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new PasswordHash(hash));
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Empty"));
+            Assert.That(result.Error.Description, Is.EqualTo("Empty value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
-    public void Constructor_WhiteSpaceString_ShouldThrowArgumentException()
+    public void Constructor_NullHash_ReturnResultWithFailure()
     {
-        // Arrange
-        const string hash = "   ";
+        // Arrange & Act
+        var result = PasswordHash.Create(null!);
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new PasswordHash(hash));
-    }
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
 
-    [Test]
-    public void Constructor_NullString_ShouldThrowArgumentException()
-    {
-        // Arrange
-        string? hash = null;
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _ = new PasswordHash(hash!));
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("General.Null"));
+            Assert.That(result.Error.Description, Is.EqualTo("Null value was provided"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+        }
     }
 
     [Test]
     public void ImplicitConversion_PasswordHashToString_ShouldReturnCorrectValue()
     {
         // Arrange
-        var passwordHash = _ = new PasswordHash(ValidHash);
+        var passwordHash = _ = PasswordHash.Create(ValidHash).Value;
 
         // Act
         string result = passwordHash;
@@ -78,8 +87,8 @@ public class PasswordHashTests
     public void Equals_SameHash_ShouldReturnTrue()
     {
         // Arrange
-        var hash1 = _ = new PasswordHash(ValidHash);
-        var hash2 = _ = new PasswordHash(ValidHash);
+        var hash1 = _ = PasswordHash.Create(ValidHash).Value;
+        var hash2 = _ = PasswordHash.Create(ValidHash).Value;
 
         // Act
         var result = hash1.Equals(hash2);
@@ -92,8 +101,8 @@ public class PasswordHashTests
     public void Equals_DifferentHash_ShouldReturnFalse()
     {
         // Arrange
-        var hash1 = _ = new PasswordHash(ValidHash);
-        var hash2 = _ = new PasswordHash(ValidHash2);
+        var hash1 = _ = PasswordHash.Create(ValidHash).Value;
+        var hash2 = _ = PasswordHash.Create(ValidHash2).Value;
 
         // Act
         var result = hash1.Equals(hash2);
@@ -106,8 +115,8 @@ public class PasswordHashTests
     public void GetHashCode_SameHash_ShouldReturnSameValue()
     {
         // Arrange
-        var hash1 = _ = new PasswordHash(ValidHash);
-        var hash2 = _ = new PasswordHash(ValidHash);
+        var hash1 = _ = PasswordHash.Create(ValidHash).Value;
+        var hash2 = _ = PasswordHash.Create(ValidHash).Value;
 
         // Act
         var hashCode1 = hash1.GetHashCode();
@@ -121,8 +130,8 @@ public class PasswordHashTests
     public void GetHashCode_DifferentHash_ShouldReturnDifferentValues()
     {
         // Arrange
-        var hash1 = _ = new PasswordHash(ValidHash);
-        var hash2 = _ = new PasswordHash(ValidHash2);
+        var hash1 = _ = PasswordHash.Create(ValidHash).Value;
+        var hash2 = _ = PasswordHash.Create(ValidHash2).Value;
 
         // Act
         var hashCode1 = hash1.GetHashCode();
@@ -136,7 +145,7 @@ public class PasswordHashTests
     public void ToString_ShouldReturnHashValue()
     {
         // Arrange
-        var passwordHash = _ = new PasswordHash(ValidHash);
+        var passwordHash = _ = PasswordHash.Create(ValidHash).Value;
 
         // Act
         var result = passwordHash.ToString();

@@ -4,6 +4,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 using Moq;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
@@ -40,8 +42,8 @@ public class SignUpUserCommandHandlerTests
             Username,
             "firstName",
             "lastName",
-            new PasswordHash("hash"),
-            new Email(Email),
+            PasswordHash.Create("hash"),
+            Domain.ValueObjects.Emails.Email.Create(Email),
             _roles.Select(role => role.Id).ToList(),
             new List<UserPermissionId>()).Value;
         

@@ -3,6 +3,8 @@ using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
+using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.PasswordHashes;
 
 namespace UserService.Domain.Tests.Aggregates;
 
@@ -20,8 +22,8 @@ public class UserTests
     private const string ValidFirstName = "John";
     private const string ValidLastName = "Doe";
     
-    private static readonly PasswordHash ValidPasswordHash = new ("hashedpassword");
-    private static readonly Email ValidEmail = new("test@example.com");
+    private static readonly PasswordHash ValidPasswordHash = PasswordHash.Create("hashedpassword").Value;
+    private static readonly Email ValidEmail = Email.Create("test@example.com").Value;
 
     [Test]
     public void Constructor_Should_Initialize_User_Correctly()
@@ -129,8 +131,8 @@ public class UserTests
         }
     }
 
-    [TestCase(null!)]
-    public void Constructor_ShouldReturnResultWithFailure_ForNullPasswordHash(PasswordHash passwordHash)
+    [Test]
+    public void Constructor_ShouldReturnResultWithFailure_ForNullPasswordHash()
     {
         // Act & Arrange
         var user = User.CreateUser(
@@ -138,7 +140,7 @@ public class UserTests
             ValidUsername, 
             ValidFirstName, 
             ValidLastName, 
-            passwordHash, 
+            null!, 
             ValidEmail, 
             _validRolesIds,
             _userPermissionIds);
@@ -217,13 +219,13 @@ public class UserTests
             ValidEmail, 
             _validRolesIds,
             _userPermissionIds).Value;
-        var newEmail = new Email("newemail@example.com");
+        var newEmail = Email.Create("newemail@example.com");
 
         // Act
-        user.ChangeEmail(newEmail);
+        user.ChangeEmail(newEmail.Value);
 
         // Assert
-        Assert.That(user.Email, Is.EqualTo(newEmail));
+        Assert.That(user.Email, Is.EqualTo(newEmail.Value));
     }
 
     [Test]
@@ -266,13 +268,13 @@ public class UserTests
             ValidEmail, 
             _validRolesIds,
             _userPermissionIds).Value;
-        var newPasswordHash = new PasswordHash("newhashedpassword");
+        var newPasswordHash = PasswordHash.Create("newhashedpassword");
 
         // Act
-        user.ChangePassword(newPasswordHash);
+        user.ChangePassword(newPasswordHash.Value);
 
         // Assert
-        Assert.That(user.PasswordHash, Is.EqualTo(newPasswordHash));
+        Assert.That(user.PasswordHash, Is.EqualTo(newPasswordHash.Value));
     }
 
     [Test]
