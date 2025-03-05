@@ -59,8 +59,8 @@ public class TokenProviderTests
             "testuser",
             "firstName",
             "lastName",
-            PasswordHash.Create("hashedPassword"),
-            Email.Create("testuser@example.com"),
+            "hashedPassword",
+            "testuser@example.com",
             new List<RoleId> { new (Guid.CreateVersion7()) },
             new List<UserPermissionId>()).Value;
 

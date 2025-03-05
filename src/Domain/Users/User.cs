@@ -2,7 +2,6 @@
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users.Specifications;
-using Domain.ValueObjects;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
 
@@ -45,8 +44,8 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        Result<PasswordHash> passwordHash, 
-        Result<Email> email, 
+        string passwordHash, 
+        string email, 
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -70,8 +69,8 @@ public class User : Entity, IAggregationRoot
             userName, 
             firstName, 
             lastName, 
-            passwordHash, 
-            email, 
+            PasswordHash.Create(passwordHash), 
+            Email.Create(email), 
             roleIds,
             userPermissionIds);
     }    
@@ -81,8 +80,8 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        Result<PasswordHash> passwordHash, 
-        Result<Email> email, 
+        PasswordHash passwordHash, 
+        Email email, 
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -90,8 +89,8 @@ public class User : Entity, IAggregationRoot
         Username = userName;
         FirstName = firstName;
         LastName = lastName;
-        PasswordHash = passwordHash.Value;
-        Email = email.Value;
+        PasswordHash = passwordHash;
+        Email = email;
         RoleIds = roleIds;
         UserPermissionIds = userPermissionIds;
     }
@@ -177,8 +176,8 @@ public class User : Entity, IAggregationRoot
         string userName,
         string firstName,
         string lastName,
-        Result<PasswordHash> passwordHash,
-        Result<Email> email,
+        string passwordHash,
+        string email,
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -188,12 +187,14 @@ public class User : Entity, IAggregationRoot
             new UserNameMustBeValid(userName).IsSatisfied(),
             new FirstNameMustBeValid(firstName).IsSatisfied(),
             new LastNameMustBeValid(lastName).IsSatisfied(),
-            new MustBeNonNull<Result<PasswordHash>>(passwordHash).IsSatisfied(),
-            new MustBeNonNull<Result<Email>>(email).IsSatisfied(),
+            new MustBeNonNullValue<string>(passwordHash).IsSatisfied(),
+            new EmailMustBeValid(email).IsSatisfied(),
             new UserMustHaveAtLeastOneRole(roleIds).IsSatisfied(),
             new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
-        }.Where(result => result.IsFailure);
+        };
+            
+        var res = validationResults.Where(result => result.IsFailure);
 
-        return validationResults.ToArray();
+        return res.ToArray();
     }
 }

@@ -45,8 +45,8 @@ public class UserMapperTests
             Username,
             FirstName,
             LastName,
-            PasswordHash.Create(Hash),
-            Domain.ValueObjects.Emails.Email.Create(Email),
+            Hash,
+            Email,
             _roleIds,
             _userPermissionIds).Value;
         

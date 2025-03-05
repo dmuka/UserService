@@ -42,8 +42,8 @@ public class SignUpUserCommandHandlerTests
             Username,
             "firstName",
             "lastName",
-            PasswordHash.Create("hash"),
-            Domain.ValueObjects.Emails.Email.Create(Email),
+            "hash",
+            Email,
             _roles.Select(role => role.Id).ToList(),
             new List<UserPermissionId>()).Value;
         

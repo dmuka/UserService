@@ -92,8 +92,8 @@ public class GetUserByIdQueryHandlerTests
             "userName", 
             "John",
             "Doe", 
-            PasswordHash.Create("hash"), 
-            Email.Create("email@email.com"), 
+            "hash", 
+            "email@email.com", 
             new List<RoleId> { new (RoleId) },
             new List<UserPermissionId>()).Value;
 

@@ -1,5 +1,4 @@
 ﻿using Core;
-using Domain.ValueObjects.Emails;
 
 namespace Domain.ValueObjects.PasswordHashes;
 
@@ -28,15 +27,9 @@ public sealed class PasswordHash : ValueObject
     /// <returns>A Result containing the PasswordHash instance or a validation error.</returns>
     public static Result<PasswordHash> Create(string value)
     {
-        if (value is null)
-        {
-            return Result.Failure<PasswordHash>(Error.NullValue);
-        }
+        if (value is null) return Result.Failure<PasswordHash>(Error.NullValue);
 
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Result.Failure<PasswordHash>(Error.EmptyValue);
-        }
+        if (string.IsNullOrWhiteSpace(value)) return Result.Failure<PasswordHash>(Error.EmptyValue);
 
         return Result.Success(new PasswordHash(value));
     }
@@ -46,6 +39,12 @@ public sealed class PasswordHash : ValueObject
     /// </summary>
     /// <param name="passwordHash">The password hash to convert.</param>
     public static implicit operator string(PasswordHash passwordHash) => passwordHash.Value;
+
+    /// <summary>
+    /// Implicitly converts a <see cref="Result{PasswordHash}" /> to a <see cref="PasswordHash" />.
+    /// </summary>
+    /// <param name="passwordHashResult">The result with password hash to convert.</param>
+    public static implicit operator PasswordHash(Result<PasswordHash> passwordHashResult) => passwordHashResult.Value;
 
     /// <summary>
     /// Explicitly converts a string to a <see cref="PasswordHash"/>.

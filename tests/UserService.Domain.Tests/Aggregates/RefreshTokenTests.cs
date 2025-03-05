@@ -19,8 +19,8 @@ public class RefreshTokenTests
         "username", 
         "firstName", 
         "lastName", 
-        PasswordHash.Create("hash"), 
-        Email.Create("email@email.com"),
+        "hash", 
+        "email@email.com",
         new List<RoleId> { new (Guid.CreateVersion7()) },
         new List<UserPermissionId>()).Value;
     

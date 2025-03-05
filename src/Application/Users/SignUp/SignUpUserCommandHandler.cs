@@ -37,8 +37,8 @@ internal sealed class SignUpUserCommandHandler(
             command.Username, 
             command.FirstName, 
             command.LastName, 
-            PasswordHash.Create(passwordHash),
-            Email.Create(command.Email),
+            passwordHash,
+            command.Email,
             new List<RoleId> { defaultUserRole.Id },
             new List<UserPermissionId>());
 

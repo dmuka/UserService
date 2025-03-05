@@ -8,6 +8,6 @@ public class MustBeNonNull<T>(Result<T> result)
      {
          if (result.IsFailure) return result;
          
-         return result.Value is null ? Result.Failure<T>(Error.NullValue) : Result.Success();
+         return result is null ? Result.Failure<T>(Error.NullValue) : Result.Success();
      }
  }

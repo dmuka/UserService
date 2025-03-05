@@ -36,8 +36,8 @@ public class SignInUserByTokenCommandHandlerTests
             "username",
             "firstName",
             "lastName",
-            PasswordHash.Create("hash"),
-            Email.Create("email@email.com"),
+            "hash",
+            "email@email.com",
             _roles.Select(role => role.Id).ToList(),
             new List<UserPermissionId>()).Value;
         

@@ -32,8 +32,8 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserDto>
             dto.Username, 
             dto.FirstName, 
             dto.LastName, 
-            PasswordHash.Create(dto.PasswordHash), 
-            Email.Create(dto.Email), 
+            dto.PasswordHash, 
+            dto.Email, 
             new List<RoleId> { role.Id },
             new List<UserPermissionId>()).Value;
         

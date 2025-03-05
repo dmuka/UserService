@@ -73,6 +73,12 @@ public sealed class Email : ValueObject
     public static implicit operator string(Email email) => email.Value;
 
     /// <summary>
+    /// Implicitly converts a <see cref="Result{Email}" /> to a <see cref="Email" />.
+    /// </summary>
+    /// <param name="emailResult">The result with email to convert.</param>
+    public static implicit operator Email(Result<Email> emailResult) => emailResult.Value;
+
+    /// <summary>
     /// Checks if two <see cref="Email"/> objects are equal.
     /// </summary>
     /// <param name="left">The first email address to compare.</param>

@@ -110,8 +110,8 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                                     user.Username, 
                                     user.FirstName, 
                                     user.LastName, 
-                                    PasswordHash.Create(user.PasswordHash), 
-                                    Email.Create(user.Email), 
+                                    user.PasswordHash, 
+                                    user.Email, 
                                     new List<RoleId>(),
                                     new List<UserPermissionId>()).Value);
                             

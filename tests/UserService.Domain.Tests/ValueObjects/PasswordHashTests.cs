@@ -1,6 +1,4 @@
 ﻿using Core;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
 
 namespace UserService.Domain.Tests.ValueObjects;

@@ -322,8 +322,8 @@ public class UserRepository : BaseRepository, IUserRepository
                         user.Username,
                         user.FirstName,
                         user.LastName,
-                        PasswordHash.Create(user.PasswordHash),
-                        Email.Create(user.Email),
+                        user.PasswordHash,
+                        user.Email,
                         new List<RoleId> { new (role.Id) },
                         new List<UserPermissionId>()).Value;
                     userDictionary.Add(user.Id, userEntry);
