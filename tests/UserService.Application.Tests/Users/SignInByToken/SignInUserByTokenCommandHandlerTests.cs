@@ -24,7 +24,9 @@ public class SignInUserByTokenCommandHandlerTests
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
     
     private Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private Mock<IUserRepository> _userRepositoryMock;
     private Mock<ITokenProvider> _tokenProviderMock;
+    
     private SignInUserByTokenCommandHandler _handler;
 
     [SetUp]
@@ -48,19 +50,25 @@ public class SignInUserByTokenCommandHandlerTests
             _refreshTokenGuid,
             ValidToken,
             validExpireDate,
-            _user);
+            _user.Id).Value;
         
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-
-        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_validRefreshToken.User, _cancellationToken))
+        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, _cancellationToken))
             .Returns(Task.FromResult("newAccessToken"));
+        
+        _userRepositoryMock = new Mock<IUserRepository>();
+        _userRepositoryMock.Setup(repository => repository.GetUserByIdAsync(_user.Id.Value, _cancellationToken))
+            .ReturnsAsync(_user);
 
         _tokenProviderMock.Setup(provider => provider.CreateRefreshToken())
             .Returns("newRefreshToken");
         
-        _handler = new SignInUserByTokenCommandHandler(_refreshTokenRepositoryMock.Object, _tokenProviderMock.Object);
+        _handler = new SignInUserByTokenCommandHandler(
+            _refreshTokenRepositoryMock.Object, 
+            _userRepositoryMock.Object, 
+            _tokenProviderMock.Object);
     }
 
     [Test]

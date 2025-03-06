@@ -31,11 +31,15 @@ internal sealed class SignInUserCommandHandler(
 
         var accessToken = await tokenProvider.CreateAccessTokenAsync(user, cancellationToken);
 
-        var refreshToken = RefreshToken.Create(
+        var result = RefreshToken.Create(
             Guid.CreateVersion7(),
             tokenProvider.CreateRefreshToken(),
             DateTime.UtcNow.AddHours(1),
-            user);
+            user.Id);
+
+        if (result.IsFailure) return Result.Failure<SignInResponse>(result.Error);
+        
+        var refreshToken = result.Value;
         
         await refreshTokenRepository.AddTokenAsync(refreshToken, cancellationToken);
 

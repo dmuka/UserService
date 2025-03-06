@@ -1,10 +1,8 @@
-﻿using Domain.RefreshTokens;
+﻿using Core;
+using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
 
 namespace UserService.Domain.Tests.Aggregates;
 
@@ -31,15 +29,15 @@ public class RefreshTokenTests
         var expiresUtc = DateTime.UtcNow.AddDays(1);
 
         // Act
-        var refreshToken = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user);
+        var result = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user.Id);
 
         using (Assert.EnterMultipleScope())
         {
             // Assert
-            Assert.That(refreshToken.Id, Is.EqualTo(new RefreshTokenId(Id)));
-            Assert.That(refreshToken.Value, Is.EqualTo(SampleTokenValue));
-            Assert.That(refreshToken.ExpiresUtc, Is.EqualTo(expiresUtc));
-            Assert.That(refreshToken.User, Is.EqualTo(_user));
+            Assert.That(result.Value.Id, Is.EqualTo(new RefreshTokenId(Id)));
+            Assert.That(result.Value.Value, Is.EqualTo(SampleTokenValue));
+            Assert.That(result.Value.ExpiresUtc, Is.EqualTo(expiresUtc));
+            Assert.That(result.Value.UserId, Is.EqualTo(_user.Id));
         }
     }
 
@@ -71,40 +69,73 @@ public class RefreshTokenTests
         Assert.That(refreshToken.ExpiresUtc, Is.EqualTo(newExpireDate));
     }
 
-    [Test]
-    public void Create_ShouldThrowException_WhenValueIsNullOrEmpty()
+    [TestCase(null)]
+    [TestCase("")]
+    public void Create_ShouldReturnResultWithFailure_WhenValueIsNullOrEmpty(string? newValue)
     {
         // Arrange
         var expiresUtc = DateTime.UtcNow.AddDays(1);
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => RefreshToken.Create(Id, null, expiresUtc, _user));
-        Assert.Throws<ArgumentException>(() => RefreshToken.Create(Id, "", expiresUtc, _user));
+        // Act
+        var result = RefreshToken.Create(Id, newValue, expiresUtc, _user.Id);
+        
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(result.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
     [Test]
-    public void Create_ShouldThrowException_WhenExpireDateIsPast()
+    public void Create_ShouldReturnResultWithFailure_WhenExpireDateIsPast()
     {
         // Arrange
         var expiresUtc = DateTime.UtcNow.AddDays(-1);
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user));
+        // Act
+        var result = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user.Id);
+        
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(result.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
     [Test]
-    public void Create_ShouldThrowException_WhenUserIsNull()
+    public void Create_ShouldReturnResultWithFailure_WhenUserIdIsNull()
     {
         // Arrange
         var expiresUtc = DateTime.UtcNow.AddDays(1);
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => RefreshToken.Create(Id, SampleTokenValue, expiresUtc, null));
+        // Act
+        var result = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, null);
+        
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo("Validation.General"));
+            Assert.That(result.Error.Description, Is.EqualTo("One or more validation errors occurred"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Validation));
+        }
     }
 
     private RefreshToken CreateSampleRefreshToken()
     {
         var expiresUtc = DateTime.UtcNow.AddDays(1);
-        return RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user);
+        return RefreshToken.Create(Id, SampleTokenValue, expiresUtc, _user.Id).Value;
     }
 }

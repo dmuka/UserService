@@ -1,5 +1,8 @@
 ﻿using Core;
+using Domain.RefreshTokens.Specifications;
+using Domain.Specifications;
 using Domain.Users;
+using Domain.Users.Specifications;
 
 namespace Domain.RefreshTokens;
 
@@ -8,7 +11,7 @@ public class RefreshToken : Entity
     public RefreshTokenId Id { get; private set; }
     public string Value { get; private set; }
     public DateTime ExpiresUtc { get; private set; }
-    public User User { get; private set; }
+    public UserId UserId { get; private set; }
 
     /// <summary>
     /// Default constructor for ORM compatibility.
@@ -21,34 +24,39 @@ public class RefreshToken : Entity
     /// <param name="refreshTokenId">The unique identifier for the refresh token.</param>
     /// <param name="value">The refresh token value.</param>
     /// <param name="expiresUtc">The refresh token expire date.</param>
-    /// <param name="user">The owner of the refresh token.</param>
+    /// <param name="userId">The id of the owner of the refresh token.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
-    public static RefreshToken Create(
+    public static Result<RefreshToken> Create(
         Guid refreshTokenId,
         string value,
         DateTime expiresUtc,
-        User user)
+        UserId userId)
     {
+        var resultsWithFailures = ValidateRefreshTokenDetails(value, expiresUtc, userId);
+
+        if (resultsWithFailures.Length != 0)
+        {
+            return Result<RefreshToken>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
+        }
+
         return new RefreshToken(
-            new RefreshTokenId(refreshTokenId),
+            refreshTokenId,
             value,
             expiresUtc, 
-            user);
+            userId);
     }    
     
     private RefreshToken(
-        RefreshTokenId refreshTokenId,
+        Guid refreshTokenId,
         string value,
         DateTime expiresUtc,
-        User user)
+        UserId userId)
     {
-        ValidateRefreshTokenDetails(value, expiresUtc, user);
-
-        Id = refreshTokenId;
+        Id = new RefreshTokenId(refreshTokenId);
         Value = value;
         ExpiresUtc = expiresUtc;
-        User = user;
+        UserId = userId;
     }
 
     public void ChangeValue(string value)
@@ -70,15 +78,20 @@ public class RefreshToken : Entity
     /// <summary>
     /// Validates refresh token details.
     /// </summary>
-    private static void ValidateRefreshTokenDetails(
+    private static Result[] ValidateRefreshTokenDetails(
         string value,
         DateTime expiresUtc,
-        User user)
+        UserId userId)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Refresh token value can't be null or empty.", nameof(value));
-        if (expiresUtc <= DateTime.UtcNow)
-            throw new ArgumentException("Expire date can't be less than current date.", nameof(expiresUtc));
-        ArgumentNullException.ThrowIfNull(user, nameof(user));
+        var validationResults = new []
+        {
+            new MustBeNonNullNonEmpty(value).IsSatisfied(),
+            new ExpirationDateMustBeInFuture(expiresUtc).IsSatisfied(),
+            new MustBeNonNullValue<UserId>(userId).IsSatisfied()
+        };
+            
+        var results = validationResults.Where(result => result.IsFailure);
+
+        return results.ToArray();
     }
 }

@@ -50,7 +50,6 @@ public class User : Entity, IAggregationRoot
         ICollection<UserPermissionId> userPermissionIds)
     {
         var resultsWithFailures = ValidateUserDetails(
-            userId,
             userName, 
             firstName, 
             lastName,
@@ -172,7 +171,6 @@ public class User : Entity, IAggregationRoot
     /// Validates user details.
     /// </summary>
     private static Result[] ValidateUserDetails(
-        Guid userId,
         string userName,
         string firstName,
         string lastName,
@@ -183,7 +181,6 @@ public class User : Entity, IAggregationRoot
     {
         var validationResults = new []
         {
-            new MustBeNonNullValue<Guid>(userId).IsSatisfied(),
             new UserNameMustBeValid(userName).IsSatisfied(),
             new FirstNameMustBeValid(firstName).IsSatisfied(),
             new LastNameMustBeValid(lastName).IsSatisfied(),
@@ -193,8 +190,8 @@ public class User : Entity, IAggregationRoot
             new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
         };
             
-        var res = validationResults.Where(result => result.IsFailure);
+        var results = validationResults.Where(result => result.IsFailure);
 
-        return res.ToArray();
+        return results.ToArray();
     }
 }
