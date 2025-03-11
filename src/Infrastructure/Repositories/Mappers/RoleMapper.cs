@@ -9,7 +9,7 @@ public class RoleMapper : IMapper<Role, RoleDto>
 
     public Role ToEntity(RoleDto dto)
     {
-        var role = Role.CreateRole(dto.Id, dto.Name);
+        var role = Role.Create(dto.Id, dto.Name);
         
         return role;
     }

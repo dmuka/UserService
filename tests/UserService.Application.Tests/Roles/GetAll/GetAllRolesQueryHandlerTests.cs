@@ -46,8 +46,8 @@ public class GetAllRolesQueryHandlerTests
         _userContextMock.Setup(x => x.UserRole).Returns("Admin");
         var roles = new List<Role>
         {
-            Role.CreateRole(Guid.CreateVersion7(), "Admin"), 
-            Role.CreateRole(Guid.CreateVersion7(), "User")
+            Role.Create(Guid.CreateVersion7(), "Admin"), 
+            Role.Create(Guid.CreateVersion7(), "User")
         };
         _roleRepositoryMock.Setup(x => x.GetAllRolesAsync(_cancellationToken))
             .ReturnsAsync(roles);

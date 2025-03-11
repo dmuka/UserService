@@ -17,7 +17,7 @@ public class RoleTests
         const string roleName = "Administrator";
 
         // Act
-        var role = Role.CreateRole(_id, roleName);
+        var role = Role.Create(_id, roleName);
 
         using (Assert.EnterMultipleScope())
         {
@@ -32,7 +32,7 @@ public class RoleTests
     public void AddUser_ShouldAddUserToRole()
     {
         // Arrange
-        var role = Role.CreateRole(_id, "User");
+        var role = Role.Create(_id, "User");
         var userId = new UserId(_id);
 
         // Act

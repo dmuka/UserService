@@ -8,7 +8,6 @@ namespace WebApi.Endpoints.Users;
 internal sealed class SignIn : IEndpoint
 {
     public sealed record Request(string Username, string Password, string? Email = null);
-    public sealed record Response(string AccessToken, string RefreshToken);
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {

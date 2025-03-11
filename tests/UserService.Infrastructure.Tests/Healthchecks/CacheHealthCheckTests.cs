@@ -23,7 +23,8 @@ public class CacheHealthCheckTests
     public async Task CheckHealthAsync_ShouldReturnHealthy_WhenCacheOperationsSucceed()
     {
         // Arrange
-        _mockCacheService.Setup(x => x.GetEntity<Role>(It.IsAny<string>())).Returns(Role.CreateRole(Guid.CreateVersion7(), "name"));
+        _mockCacheService.Setup(x => x.GetEntity<Role>(It.IsAny<string>()))
+            .Returns(Role.Create(Guid.CreateVersion7(), "name"));
         _mockCacheService.Setup(x => x.Remove(It.IsAny<string>()));
         _mockCacheService.Setup(x => 
             x.Create(

@@ -66,7 +66,7 @@ public class GetAllUsersQueryHandlerTests
         _userRepositoryMock.Setup(x => x.GetAllUsersAsync(_cancellationToken))
             .ReturnsAsync(users);
         _roleRepositoryMock.Setup(x => x.GetRolesByUserIdAsync(_user.Id.Value, _cancellationToken))
-            .ReturnsAsync(new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Admin") });
+            .ReturnsAsync(new List<Role> { Role.Create(Guid.CreateVersion7(), "Admin") });
 
         // Act
         var result = await _handler.Handle(new GetAllUsersQuery(), _cancellationToken);

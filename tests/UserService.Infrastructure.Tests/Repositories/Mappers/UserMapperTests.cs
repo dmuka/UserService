@@ -38,7 +38,8 @@ public class UserMapperTests
         _userPermissionIds = [new UserPermissionId(Id)];
         
         _roleRepositoryMock = new Mock<IRoleRepository>();
-        _roleRepositoryMock.Setup(repository => repository.GetRoleByNameAsync("User", CancellationToken.None)).ReturnsAsync(Role.CreateRole(Id, "User"));
+        _roleRepositoryMock.Setup(repository => repository.GetRoleByNameAsync("User", CancellationToken.None))
+            .ReturnsAsync(Role.Create(Id, "User"));
         
         _user = User.CreateUser(
             Id,

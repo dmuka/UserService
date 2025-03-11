@@ -23,6 +23,36 @@ public class RoleRepository : BaseRepository, IRoleRepository
         _connectionString = postgresOptions.Value.GetConnectionString();
         _logger = logger;
     }
+
+    public async Task<bool> IsRoleNameExistsAsync(string roleName, CancellationToken cancellationToken = default)
+    {
+        var roles = GetFromCache<Role>();
+        
+        if (roles is not null) return roles.Count(role => role.Name == roleName) > 1;
+        
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        SELECT COUNT(roles.name)
+                        FROM roles
+                        WHERE roles.name = @RoleName
+                    """;
+        
+        var parameters = new { RoleName = roleName };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var result = await connection.ExecuteScalarAsync<int>(command);
+            
+            return result > 0;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
     
     public async Task<Role?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
@@ -48,7 +78,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
 
             RemoveFromCache<Role>();
             
-            return Role.CreateRole(roleDto.Id, roleDto.Name);
+            return Role.Create(roleDto.Id, roleDto.Name);
         }
         catch (Exception e)
         {
@@ -76,7 +106,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
         {
             var roleDtos = await connection.QueryAsync<RoleDto>(command);
             
-            return roleDtos.Select(dto => Role.CreateRole(dto.Id, dto.Name)).ToList();
+            return roleDtos.Select(dto => Role.Create(dto.Id, dto.Name)).ToList();
         }
         catch (Exception e)
         {
@@ -106,7 +136,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
             RemoveFromCache<Role>();
 
-            return roleDto is not null ? Role.CreateRole(roleDto.Id, roleDto.Name) : null;
+            return roleDto is not null ? Role.Create(roleDto.Id, roleDto.Name) : null;
         }
         catch (Exception e)
         {

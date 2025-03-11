@@ -22,7 +22,7 @@ public class RoleMapperTests
     public void ToDto_ShouldMapRoleToRoleDtoCorrectly()
     {
         // Arrange
-        var role = Role.CreateRole(Id, "Admin");
+        var role = Role.Create(Id, "Admin");
 
         // Act
         var roleDto = _roleMapper.ToDto(role);

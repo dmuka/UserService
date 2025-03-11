@@ -31,7 +31,7 @@ public class GetUserByIdQueryHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _roles = new List<Role> { Role.CreateRole(Guid.CreateVersion7(), "Role") };
+        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
         
         _mockRepository = new Mock<IUserRepository>();
         _mockRoleRepository = new Mock<IRoleRepository>();
