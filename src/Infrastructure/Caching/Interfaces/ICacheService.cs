@@ -11,8 +11,8 @@ public interface ICacheService
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null) where T : Entity;
 
-    IList<T>? Get<T>(string cacheKey) where T : Entity;
-    T? GetEntity<T>(string cacheKey) where T : Entity;
+    IList<T>? Get<T>(string cacheKey);
+    T? GetEntity<T>(string cacheKey);
 
     public void Create<T>(
         string cacheKey,

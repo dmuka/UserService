@@ -87,6 +87,34 @@ public class RoleRepository : BaseRepository, IRoleRepository
         }
     }
     
+    public async Task<int> RemoveRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+            
+        var query = """
+                        DELETE FROM roles
+                        WHERE roles.Id = @RoleId
+                    """;
+        
+        var parameters = new { RoleId = roleId };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var rowsCount = await connection.ExecuteAsync(command);
+
+            RemoveFromCache<Role>();
+            
+            return rowsCount;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while deleting the role by id: {RoleId}.", e, e.Message, roleId);
+            throw;
+        }
+    }
+    
     public async Task<IList<Role>> GetRolesByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);

@@ -13,7 +13,11 @@ public class CacheService(IMemoryCache cache) : ICacheService
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null) where T : Entity
     {
-        if (cache.TryGetValue(cacheKey, out IList<T>? cachedData) && cachedData is not null) return cachedData;
+        if (cache.TryGetValue(cacheKey, out IList<T>? cachedData) 
+            && cachedData is not null)
+        {
+            return cachedData;
+        }
         
         cachedData = await getFromRepositoryAsync();
             
@@ -33,14 +37,14 @@ public class CacheService(IMemoryCache cache) : ICacheService
         return entity;
     }
     
-    public IList<T>? Get<T>(string cacheKey) where T : Entity
+    public IList<T>? Get<T>(string cacheKey)
     {
         var entities = cache.Get<IList<T>>(cacheKey);
 
         return entities;
     }
     
-    public T? GetEntity<T>(string cacheKey) where T : Entity
+    public T? GetEntity<T>(string cacheKey)
     {
         var entity = cache.Get<T>(cacheKey);
 

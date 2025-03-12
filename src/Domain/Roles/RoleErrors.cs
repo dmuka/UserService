@@ -20,4 +20,8 @@ public static class RoleErrors
     public static readonly Error RoleNameAlreadyExists = Error.Conflict(
         Codes.RoleNameExists,
         "The provided role name already exists.");
+
+    public static readonly Error UsersWithAssignedRole = Error.Problem(
+        Codes.UsersWithAssignedRole,
+        "Can't remove role with users assigned to it.");
 }
