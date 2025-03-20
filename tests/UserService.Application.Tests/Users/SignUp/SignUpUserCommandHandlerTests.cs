@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignUp;
+using Domain;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
@@ -31,6 +32,8 @@ public class SignUpUserCommandHandlerTests
     private Mock<IUserRepository> _userRepositoryMock;
     private Mock<IRoleRepository> _roleRepositoryMock;
     private Mock<IPasswordHasher> _passwordHasherMock;
+    private Mock<IEventDispatcher> _eventDispatcherMock;
+    
     private SignUpUserCommandHandler _handler;
 
     [SetUp]
@@ -66,11 +69,14 @@ public class SignUpUserCommandHandlerTests
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _passwordHasherMock.Setup(hasher => hasher.GetHash(Password))
             .Returns("hash");
+
+        _eventDispatcherMock = new Mock<IEventDispatcher>();
         
         _handler = new SignUpUserCommandHandler(
             _userRepositoryMock.Object,
             _roleRepositoryMock.Object,
-            _passwordHasherMock.Object);
+            _passwordHasherMock.Object,
+            _eventDispatcherMock.Object);
     }
 
     [Test]

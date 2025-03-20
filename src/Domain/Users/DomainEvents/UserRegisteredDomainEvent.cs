@@ -1,5 +1,5 @@
 ﻿using Core;
 
-namespace Domain.Users;
+namespace Domain.Users.DomainEvents;
 
-public sealed record UserRegisteredDomainEvent(int UserId) : IDomainEvent;
+public sealed record UserRegisteredDomainEvent(Guid UserId) : IDomainEvent;

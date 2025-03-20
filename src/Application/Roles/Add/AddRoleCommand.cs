@@ -1,6 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
-using Core;
 
-namespace Application.Roles.AddRole;
+namespace Application.Roles.Add;
 
 public sealed record AddRoleCommand(string Name) : ICommand<Guid>;

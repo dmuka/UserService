@@ -1,12 +1,10 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
 using Core;
+using Domain;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
 namespace Application.Users.SignUp;
@@ -14,7 +12,8 @@ namespace Application.Users.SignUp;
 internal sealed class SignUpUserCommandHandler(
     IUserRepository userRepository,
     IRoleRepository roleRepository,
-    IPasswordHasher passwordHasher) : ICommandHandler<SignUpUserCommand, Guid>
+    IPasswordHasher passwordHasher,
+    IEventDispatcher eventDispatcher) : ICommandHandler<SignUpUserCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(SignUpUserCommand command, CancellationToken cancellationToken)
     {
@@ -45,6 +44,12 @@ internal sealed class SignUpUserCommandHandler(
         if (user.IsFailure) return Result.Failure<Guid>(user.Error);
 
         var userId = await userRepository.AddUserAsync(user.Value, cancellationToken);
+
+        foreach (var domainEvent in user.Value.DomainEvents)
+        {
+            await eventDispatcher.DispatchAsync(domainEvent, cancellationToken);
+        }
+        user.Value.ClearDomainEvents();
 
         return userId;
     }

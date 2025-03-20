@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
+using Application.Roles.Add;
 using Core;
 using Domain.Roles;
 

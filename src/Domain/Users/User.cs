@@ -64,7 +64,7 @@ public class User : Entity, IAggregationRoot
             return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
         }
 
-        return new User(
+        var user = new User(
             new UserId(userId), 
             userName, 
             firstName, 
@@ -73,6 +73,11 @@ public class User : Entity, IAggregationRoot
             Email.Create(email), 
             roleIds,
             userPermissionIds);
+    
+        var userRegisteredEvent = new UserRegisteredDomainEvent(userId);
+        user.AddDomainEvent(userRegisteredEvent);
+
+        return user;
     }    
     
     private User(
