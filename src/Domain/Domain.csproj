@@ -9,6 +9,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Roles\Specifications\" />
-    <Folder Include="Users\DomainEvents\" />
   </ItemGroup>
 </Project>

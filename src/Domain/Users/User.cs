@@ -1,6 +1,7 @@
 ﻿using Core;
 using Domain.Roles;
 using Domain.UserPermissions;
+using Domain.Users.DomainEvents;
 using Domain.Users.Specifications;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
@@ -103,7 +104,10 @@ public class User : Entity, IAggregationRoot
         if (newEmail is null) return Result.Failure<Email>(Error.NullValue);
         
         Email = newEmail;
-        
+    
+        var emailChangedEvent = new UserEmailChangedEvent(Id.Value, newEmail.Value);
+        AddDomainEvent(emailChangedEvent);
+    
         return Result.Success();
     }
 
