@@ -1,11 +1,13 @@
 ﻿ using System.Text;
  using Application.Abstractions.Authentication;
+ using Domain;
  using Domain.Roles;
  using Domain.Users;
  using Infrastructure.Authentication;
  using Infrastructure.Authorization;
  using Infrastructure.Caching;
  using Infrastructure.Caching.Interfaces;
+ using Infrastructure.Events;
  using Infrastructure.HealthChecks;
  using Infrastructure.Options.Authentication;
  using Infrastructure.Options.Db;
@@ -29,7 +31,8 @@
              .AddDbConnectionOptions()
              .AddHealthCheck()
              .AddRepositories()
-             .AddCache();
+             .AddCache()
+             .AddEventDispatcher();
 
      private static IServiceCollection AddCache(this IServiceCollection services)
      {
@@ -40,11 +43,19 @@
          
          return services;
      }
+
+     private static IServiceCollection AddEventDispatcher(this IServiceCollection services)
+     {
+         services.AddScoped<IEventDispatcher, EventDispatcher>();
+         
+         return services;
+     }
      
      private static IServiceCollection AddRepositories(this IServiceCollection services)
      {
          services.AddScoped<IUserRepository, UserRepository>();
          services.AddScoped<IRoleRepository, RoleRepository>();
+         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
          services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
          
          return services;

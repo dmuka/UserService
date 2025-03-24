@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Behaviors;
+using Domain;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 

@@ -21,6 +21,8 @@ builder.Services
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
 app.MapEndpoints();
@@ -56,10 +58,14 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapGrpcService<UserGrpcService>();
+
+app.MapRazorPages();
 
 await app.RunAsync();
