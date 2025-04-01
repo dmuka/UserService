@@ -9,10 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace WebApi.Pages;
 
 [AllowAnonymous]
-public class SignUpModel(
-    ISender sender,
-    ILogger<SignUpModel> logger)
-    : PageModel
+public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new ();
@@ -62,23 +59,27 @@ public class SignUpModel(
     {
         returnUrl ??= Url.Content("~/");
 
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid) return Page();
+        
+        var signUpCommand = new SignUpUserCommand(
+            Input.UserName, 
+            Input.Email, 
+            Input.FirstName, 
+            Input.LastName, 
+            Input.Password);
+            
+        var result = await sender.Send(signUpCommand);
+        if (result.IsSuccess)
         {
-            var signUpCommand = new SignUpUserCommand(Input.UserName, Input.Email, Input.FirstName, Input.LastName, Input.Password);
-            
-            var result = await sender.Send(signUpCommand);
-            if (result.IsSuccess)
-            {
-                logger.LogInformation("User created a new account with password.");
+            logger.LogInformation("User created a new account with password.");
                 
-                var signInCommand = new SignInUserCommand(Input.UserName, Input.Password);
-                await sender.Send(signInCommand);
+            var signInCommand = new SignInUserCommand(Input.UserName, Input.Password);
+            await sender.Send(signInCommand);
                 
-                return LocalRedirect(returnUrl);
-            }
-            
-            ModelState.AddModelError(string.Empty, result.Error.Description);
+            return LocalRedirect(returnUrl);
         }
+            
+        ModelState.AddModelError(string.Empty, result.Error.Description);
 
         return Page();
     }

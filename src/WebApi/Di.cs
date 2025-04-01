@@ -16,6 +16,12 @@ public static class Di
             options.Interceptors.Add<LoggingInterceptor>();
         });
         services.AddEndpointsApiExplorer();
+        
+        services.AddScoped<TokenHandler>();
+        services.AddMvc(options =>
+        {
+            options.Filters.Add<TokenAuthFilter>();
+        });
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();

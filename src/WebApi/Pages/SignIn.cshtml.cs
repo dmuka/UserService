@@ -3,10 +3,14 @@ using Application.Users.SignIn;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApi.Infrastructure;
 
 namespace WebApi.Pages;
 
-public class SignInModel(ISender sender, ILogger<SignInModel> logger) : PageModel
+public class SignInModel(
+    ISender sender, 
+    TokenHandler tokenHandler, 
+    ILogger<SignInModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new ();
@@ -19,7 +23,7 @@ public class SignInModel(ISender sender, ILogger<SignInModel> logger) : PageMode
     public class InputModel
     {
         [Required]
-        [MinLength(5)]
+        [MinLength(4)]
         public string UserName { get; set; }
 
         [EmailAddress]
@@ -60,8 +64,13 @@ public class SignInModel(ISender sender, ILogger<SignInModel> logger) : PageMode
         if (result.IsSuccess)
         {
             logger.LogInformation("User logged in.");
+            tokenHandler.StoreTokens(result.Value.AccessToken, result.Value.RefreshToken);
+
             return LocalRedirect(returnUrl);
         }
+        
+        ModelState.AddModelError(string.Empty, "Invalid login attempt");
+        return Page();
         // if (result.RequiresTwoFactor)
         // {
         //     return RedirectToPage("./SignInWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
@@ -71,8 +80,5 @@ public class SignInModel(ISender sender, ILogger<SignInModel> logger) : PageMode
         //     _logger.LogWarning("User account locked out.");
         //     return RedirectToPage("./Lockout");
         // }
-        
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-        return Page();
     }
 }

@@ -22,6 +22,11 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddRazorPages();
+builder.Services.AddAntiforgery(options => 
+{
+    options.Cookie.Name = ".AspNetCore.Antiforgery";
+    options.HeaderName = "X-CSRF-TOKEN";
+});
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Abstractions.Authentication;
@@ -48,6 +49,33 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
         var token = handler.CreateToken(tokenDescriptor);
 
         return token;
+    }
+    
+    public bool ValidateAccessToken(string accessToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(authOptions.Value.Secret);
+
+        try
+        {
+            tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = authOptions.Value.Issuer,
+                ValidateAudience = true,
+                ValidAudience = authOptions.Value.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out _);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public string CreateRefreshToken()
