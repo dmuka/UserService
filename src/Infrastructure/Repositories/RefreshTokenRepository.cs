@@ -131,7 +131,7 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                         WHERE refresh_tokens.id = @Id
                     """;
         
-        var parameters = new { token.Id, token.Value, token.ExpiresUtc };
+        var parameters = new { Id = token.Id.Value, token.Value, token.ExpiresUtc };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         

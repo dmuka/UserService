@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApi.Infrastructure;
 
 namespace WebApi.Pages;
 
-public class IndexModel(IHttpContextAccessor httpContextAccessor, TokenHandler tokenHandler, IConfiguration _configuration) : PageModel
+[Authorize(Policy = "UserManagementPolicy")]
+public class IndexModel(IHttpContextAccessor httpContextAccessor) : PageModel
 {
-    public async Task<IActionResult> OnGet()
+    public IActionResult OnGet()
     {
         var principal = httpContextAccessor.HttpContext.User;
         

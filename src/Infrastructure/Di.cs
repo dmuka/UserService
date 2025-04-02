@@ -13,6 +13,7 @@
  using Infrastructure.Options.Db;
  using Infrastructure.Repositories;
  using Microsoft.AspNetCore.Authentication.JwtBearer;
+ using Microsoft.AspNetCore.Authorization;
  using Microsoft.Extensions.Configuration;
  using Microsoft.Extensions.DependencyInjection;
  using Microsoft.IdentityModel.Tokens;
@@ -132,7 +133,15 @@
 
      private static IServiceCollection AddAuthorizationLogic(this IServiceCollection services)
      {
-         services.AddAuthorization();
+         services.AddAuthorizationBuilder()
+             .AddPolicy(
+                 "UserManagementPolicy", 
+                 configurePolicy => configurePolicy.RequireRole("Admin", "Manager"));
+         services.AddSingleton<IAuthorizationHandler, RoleAuthorizationHandler>();
+         services.ConfigureApplicationCookie(options =>
+         {
+             options.AccessDeniedPath = "/AccessDenied";
+         });
          
          services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
