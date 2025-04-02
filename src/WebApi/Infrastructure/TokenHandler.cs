@@ -33,9 +33,13 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
     {
         var refreshToken = GetRefreshToken();
         if (string.IsNullOrEmpty(refreshToken)) return false;
-
+        
+        var currentRequest = httpContextAccessor.HttpContext.Request;
+        var baseUri = $"{currentRequest.Scheme}://{currentRequest.Host}";
+        var requestUri = new Uri(new Uri(baseUri), "users/signinbytoken");
+        
         var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "users/signinbytoken");
+        var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
         request.Content = new StringContent(JsonSerializer.Serialize(new { refreshToken }), 
                          Encoding.UTF8, "application/json");
 

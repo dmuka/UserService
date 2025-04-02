@@ -83,13 +83,12 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
         {
             var dtos = (await connection.QueryAsync<RefreshTokenDto>(command)).ToList();
 
-            var token = dtos.Select(dto => 
-                RefreshToken.Create(dto.Id, dto.Value, dto.ExpiresUtc, new UserId(dto.UserId)).Value).FirstOrDefault();
-            
-            if (token is not null && token.ExpiresUtc <= DateTime.UtcNow)
+            var token = dtos.Select(dto =>
             {
-                token = null;
-            }
+                var result = RefreshToken.Create(dto.Id, dto.Value, dto.ExpiresUtc, new UserId(dto.UserId));
+                
+                return result.IsSuccess ? result.Value : null;
+            }).FirstOrDefault();
             
             return token;
         }
