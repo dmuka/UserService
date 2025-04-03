@@ -2,7 +2,6 @@
 @model WebApi.Pages.SignInModel
 @{
     ViewData["Title"] = "Sign in";
-    const bool useEmail = true;
 }
 
 <link rel="stylesheet" href="~/css/site.css" />
@@ -10,7 +9,7 @@
 <div class="center-container">
     <div class="form-container">
         <section>
-            <form id="account" method="post">
+            <form id="signInForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                 @Html.AntiForgeryToken()
                 <h2>Sign in</h2>
                 <hr/>
@@ -19,25 +18,25 @@
                 <div class="mb-3">
                     <label class="form-label">Sign in using:</label>
                     <select id="signInOption" class="form-select" onchange="toggleInputField()">
-                        <option value="email" selected>Email</option>
-                        <option value="username">Username</option>
+                        <option value="email">Email</option>
+                        <option value="username" selected>Username</option>
                     </select>
                 </div>
 
-                <div id="emailInput" class="form-floating mb-3" style="display: @(useEmail ? "block" : "none")">
-                    <input id="Input.Email" name="Input.Email" type="email" class="form-control" autocomplete="email" aria-required="true"/>
+                <div id="emailInput" class="form-floating mb-3" style="display: none">
+                    <input asp-for="Input.Email" name="Input.Email" type="email" class="form-control" autocomplete="email" aria-required="true"/>
                     <label asp-for="Input.Email" class="form-label">Email address</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
 
-                <div id="usernameInput" class="form-floating mb-3" style="display: @(!useEmail ? "block" : "none")">
-                    <input id="Input.UserName" name="Input.UserName" class="form-control" autocomplete="username" aria-required="true"/>
+                <div id="usernameInput" class="form-floating mb-3" style="display: block">
+                    <input asp-for="Input.UserName" name="Input.UserName" class="form-control" autocomplete="username" aria-required="true"/>
                     <label asp-for="Input.UserName" class="form-label">User name</label>
                     <span asp-validation-for="Input.UserName" class="text-danger"></span>
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input id="Input.Password" name="Input.Password" type="password" class="form-control" autocomplete="current-password" aria-required="true"/>
+                    <input asp-for="Input.Password" name="Input.Password" type="password" class="form-control" autocomplete="current-password" aria-required="true"/>
                     <label asp-for="Input.Password" class="form-label">Password</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>

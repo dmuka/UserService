@@ -19,6 +19,12 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
         httpContextAccessor.HttpContext.Response.Cookies.Append("RefreshToken", refreshToken, cookieOptions);
     }
 
+    public void ClearTokens()
+    {
+        httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
+        httpContextAccessor.HttpContext.Response.Cookies.Delete("RefreshToken");
+    }
+
     public string GetAccessToken()
     {
         return httpContextAccessor.HttpContext.Request.Cookies["AccessToken"];
