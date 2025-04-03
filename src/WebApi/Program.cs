@@ -1,3 +1,4 @@
+using System.Net;
 using Application;
 using Grpc.Services;
 using HealthChecks.UI.Client;
@@ -39,6 +40,23 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseStatusCodePages(context =>
+{
+    var response = context.HttpContext.Response;
+
+    switch(response.StatusCode)
+    {
+        case (int)HttpStatusCode.Forbidden:
+            response.Redirect("/AccessDenied");
+            break;
+        case (int)HttpStatusCode.Unauthorized:
+            response.Redirect("/SignIn");
+            break;
+    }
+
+    return Task.CompletedTask;
+});
 
 app.MapHealthChecks("healthch", new HealthCheckOptions
 {
