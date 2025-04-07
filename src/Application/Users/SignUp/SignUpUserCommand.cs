@@ -7,5 +7,6 @@ public sealed record SignUpUserCommand(
     string Email, 
     string FirstName, 
     string LastName, 
-    string Password)
+    string Password,
+    IEnumerable<Guid>? RolesIds = null)
     : ICommand<Guid>;

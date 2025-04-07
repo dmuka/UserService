@@ -29,6 +29,10 @@ internal sealed class SignUpUserCommandHandler(
 
         var defaultUserRole = await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken);
 
+        var roleIds = new List<RoleId>();
+        
+        if (command.RolesIds is not null) roleIds = command.RolesIds.Select(roleId => new RoleId(roleId)).ToList();
+        
         var passwordHash = passwordHasher.GetHash(command.Password);
         
         var user = User.CreateUser(
@@ -38,7 +42,7 @@ internal sealed class SignUpUserCommandHandler(
             command.LastName, 
             passwordHash,
             command.Email,
-            new List<RoleId> { defaultUserRole.Id },
+            command.RolesIds is null ? [defaultUserRole.Id] : roleIds,
             new List<UserPermissionId>());
 
         if (user.IsFailure) return Result.Failure<Guid>(user.Error);
