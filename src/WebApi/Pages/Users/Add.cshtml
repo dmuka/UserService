@@ -7,20 +7,19 @@
 
 <h1>Add a new user</h1>
 
-<form method="post">
-    @Html.AntiForgeryToken()
+<form method="post" asp-antiforgery="true">
     <div class="form-floating mb-3">
-        <input asp-for="Input.UserName" class="form-control" autocomplete="email" aria-required="true"/>
+        <input asp-for="Input.UserName" class="form-control" autocomplete="username" aria-required="true"/>
         <label asp-for="Input.UserName" class="control-label"></label>
         <span asp-validation-for="Input.UserName" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <input asp-for="Input.FirstName" class="form-control" autocomplete="email" aria-required="true"/>
+        <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true"/>
         <label asp-for="Input.FirstName" class="control-label"></label>
         <span asp-validation-for="Input.FirstName" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <input asp-for="Input.LastName" class="form-control" autocomplete="email" aria-required="true"/>
+        <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true"/>
         <label asp-for="Input.LastName" class="control-label"></label>
         <span asp-validation-for="Input.LastName" class="text-danger"></span>
     </div>
@@ -28,6 +27,11 @@
         <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true"/>
         <label asp-for="Input.Email" class="control-label"></label>
         <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.SelectedRoles">Select roles</label>
+        <select asp-for="Input.SelectedRoles" asp-items="Model.AllRoles" class="form-control"></select>
+        <span asp-validation-for="Input.SelectedRoles" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
         <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true"/>
@@ -47,4 +51,21 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function adjustSelectSize() {
+            let select = document.getElementById('Input_SelectedRoles');
+            if (!select) {
+                console.error('Select element not found');
+                return;
+            }
+
+            let optionsCount = select.options.length;
+            let maxVisibleOptions = 5;
+
+            select.size = Math.min(optionsCount, maxVisibleOptions);
+        }
+
+        window.onload = adjustSelectSize;
+    </script>
 }
