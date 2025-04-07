@@ -35,7 +35,7 @@ public class BaseRepository(ICacheService cache)
 
     protected IList<T>? GetFromCache<T>() where T : Entity
     {
-        return cache.Get<T>(nameof(T));
+        return cache.Get<T>(typeof(T).Name);
     }
 
     protected IList<T>? GetFromCache<T>(string key) => cache.Get<T>(key);

@@ -1,5 +1,4 @@
-﻿using Core;
-using Dapper;
+﻿using Dapper;
 using Domain.Roles;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
@@ -187,7 +186,8 @@ public class RoleRepository : BaseRepository, IRoleRepository
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
-        roles = (await connection.QueryAsync<Role>(command)).ToList();
+        roles = (await connection.QueryAsync<RoleDto>(command))
+            .Select(dto => Role.Create(dto.Id, dto.Name)).ToList();
         CreateInCache(roles);
         
         return roles;
