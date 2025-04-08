@@ -6,7 +6,7 @@ namespace Domain.UserPermissions;
 
 public class UserPermission : Entity
 {
-    public UserPermissionId Id { get; private set; }
+    public new UserPermissionId Id { get; private set; }
     public UserId UserId { get; private set; }
     public PermissionId PermissionId { get; private set; }
 

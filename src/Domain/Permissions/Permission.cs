@@ -4,13 +4,17 @@ namespace Domain.Permissions;
 
 public class Permission : Entity
 {
-    public PermissionId Id { get; private set; }
+    public new PermissionId Id { get; private set; }
     public string Name { get; private set; }
 
     /// <summary>
     /// Default constructor for ORM compatibility.
     /// </summary>
-    protected Permission() { }
+    protected Permission() 
+    { 
+        Id = new PermissionId(Guid.Empty);
+        Name = string.Empty; 
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Permission"/> class.

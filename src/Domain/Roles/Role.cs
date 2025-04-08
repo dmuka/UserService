@@ -5,7 +5,7 @@ namespace Domain.Roles;
 
 public class Role : Entity, IAggregationRoot
 {
-    public RoleId Id { get; private set; }
+    public new RoleId Id { get; private set; }
     public string Name { get; private set; }
     public ICollection<UserId> UserIds { get; private set; }
 

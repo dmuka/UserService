@@ -13,7 +13,7 @@ namespace Domain.Users;
 /// </summary>
 public class User : Entity, IAggregationRoot
 {
-    public UserId Id { get; private set; }
+    public new UserId Id { get; private set; }
     public string Username { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }

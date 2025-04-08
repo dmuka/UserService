@@ -8,6 +8,21 @@ namespace Domain.ValueObjects.Emails;
 /// </summary>
 public sealed class Email : ValueObject
 {
+    private bool Equals(Email other)
+    {
+        return base.Equals(other) && Value == other.Value;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return ReferenceEquals(this, obj) || obj is Email other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), Value);
+    }
+
     /// <summary>
     /// Gets the email address value.
     /// </summary>

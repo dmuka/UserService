@@ -8,7 +8,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
 {
     public async Task<IList<T>> GetOrCreateAsync<T>(
         string cacheKey,
-        Func<Task<IList<T>>> getFromRepositoryAsync,
+        Func<CancellationToken, Task<IList<T>>> getFromRepositoryAsync,
         CancellationToken cancellationToken,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null) where T : Entity
@@ -19,7 +19,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
             return cachedData;
         }
         
-        cachedData = await getFromRepositoryAsync();
+        cachedData = await getFromRepositoryAsync(cancellationToken);
             
         var cacheEntryOptions = GetOptions(absoluteExpiration, slidingExpiration);
             

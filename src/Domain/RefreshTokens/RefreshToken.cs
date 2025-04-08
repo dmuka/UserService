@@ -8,7 +8,7 @@ namespace Domain.RefreshTokens;
 
 public class RefreshToken : Entity
 {
-    public RefreshTokenId Id { get; private set; }
+    public new RefreshTokenId Id { get; private set; }
     public string Value { get; private set; }
     public DateTime ExpiresUtc { get; private set; }
     public UserId UserId { get; private set; }
