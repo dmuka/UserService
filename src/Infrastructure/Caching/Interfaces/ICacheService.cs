@@ -6,7 +6,7 @@ public interface ICacheService
 {
     Task<IList<T>> GetOrCreateAsync<T>(
         string cacheKey,
-        Func<Task<IList<T>>> getFromRepositoryAsync,
+        Func<CancellationToken, Task<IList<T>>> getFromRepositoryAsync,
         CancellationToken cancellationToken,
         TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null) where T : Entity;

@@ -28,5 +28,5 @@ public interface ITokenProvider
     /// <remarks>
     /// This method checks the token's signature and expiration to ensure it is valid and trustworthy.
     /// </remarks>
-    bool ValidateAccessToken(string accessToken);
+    bool ValidateAccessToken(string? accessToken);
 }
