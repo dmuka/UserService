@@ -8,16 +8,14 @@ namespace WebApi.Pages;
 [AllowAnonymous]
 public class LogoutModel(TokenHandler tokenHandler, ILogger<LogoutModel> logger) : PageModel
 {
-    public void OnGet()
-    {
-    }
+    public IActionResult OnGet() => Page();
 
-    public async Task<IActionResult> OnPost(string returnUrl = null)
+    public async Task<IActionResult> OnPost(string? returnUrl = null)
     {
         tokenHandler.ClearTokens();
         logger.LogInformation("User logged out.");
         
-        if (returnUrl != null)
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return LocalRedirect(returnUrl);
         }
