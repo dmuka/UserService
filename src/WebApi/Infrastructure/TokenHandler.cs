@@ -7,6 +7,8 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
 {
     public void StoreTokens(string accessToken, string refreshToken)
     {
+        if (httpContextAccessor.HttpContext is null) return;
+        
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
@@ -21,22 +23,26 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
 
     public void ClearTokens()
     {
+        if (httpContextAccessor.HttpContext is null) return;
+        
         httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
         httpContextAccessor.HttpContext.Response.Cookies.Delete("RefreshToken");
     }
 
-    public string GetAccessToken()
+    public string? GetAccessToken()
     {
-        return httpContextAccessor.HttpContext.Request.Cookies["AccessToken"];
+        return httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
     }
 
-    public string GetRefreshToken()
+    public string? GetRefreshToken()
     {
-        return httpContextAccessor.HttpContext.Request.Cookies["RefreshToken"];
+        return httpContextAccessor.HttpContext?.Request.Cookies["RefreshToken"];
     }
 
     public async Task<bool> RefreshTokens()
     {
+        if (httpContextAccessor.HttpContext is null) return  false;
+        
         var refreshToken = GetRefreshToken();
         if (string.IsNullOrEmpty(refreshToken)) return false;
         
@@ -54,6 +60,8 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
         
         var content = await response.Content.ReadAsStringAsync();
         var tokens = JsonSerializer.Deserialize<TokenResponse>(content);
+        
+        if (tokens is null) return false;
             
         StoreTokens(tokens.AccessToken, tokens.RefreshToken);
         
@@ -63,6 +71,6 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
 
 public class TokenResponse
 {
-    public string AccessToken { get; set; }
-    public string RefreshToken { get; set; }
+    public string AccessToken { get; set; } = string.Empty;
+    public string RefreshToken { get; set; } = string.Empty;
 }

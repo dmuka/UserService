@@ -83,7 +83,13 @@
          
          //var authOptions = configuration.Get<AuthOptions>();
          
-         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+         services
+             .AddAuthentication(options =>
+             {
+                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+             })
+             .AddCookie(options => options.LoginPath = "/SignIn")
              .AddJwtBearer(jwtBearerOptions =>
              {
                  jwtBearerOptions.RequireHttpsMetadata = false;
@@ -95,7 +101,6 @@
                      ValidAudience = configuration["Jwt:Audience"],
                      ClockSkew = TimeSpan.Zero
                  };
-
                  jwtBearerOptions.Events = new JwtBearerEvents
                  {
                      OnTokenValidated = context =>

@@ -39,7 +39,7 @@ public class TokenAuthFilter(
         await next();
     }
 
-    private bool IsTokenValid(string token)
+    private bool IsTokenValid(string? token)
     {
         return tokenProvider.ValidateAccessToken(token);
     }

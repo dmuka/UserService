@@ -57,6 +57,31 @@ app.UseStatusCodePages(context =>
 
     return Task.CompletedTask;
 });
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Cookies["AccessToken"];
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers.Add("Authorization", $"Bearer {token}");
+    }
+    await next();
+});
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity.IsAuthenticated)
+    {
+        var claims = context.User.Claims.Select(c => new { c.Type, c.Value });
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("User Claims: {@Claims}", claims);
+    }
+    else
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("User is not authenticated.");
+    }
+
+    await next();
+});
 
 app.MapHealthChecks("healthch", new HealthCheckOptions
 {
