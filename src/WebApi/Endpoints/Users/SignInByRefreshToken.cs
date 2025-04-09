@@ -13,7 +13,7 @@ internal sealed class SignInByRefreshToken : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("users/signinbytoken", async (Request request, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapPost("/api/users/signinbytoken", async (Request request, ISender sender, CancellationToken cancellationToken) =>
         {
             var command = new SignInUserByTokenCommand(request.RefreshToken);
 

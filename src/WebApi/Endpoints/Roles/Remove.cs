@@ -9,7 +9,7 @@ internal sealed class Remove : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("roles/remove", async (Guid roleId, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapPost("/api/roles/remove", async (Guid roleId, ISender sender, CancellationToken cancellationToken) =>
         {
             var command = new RemoveRoleCommand(roleId);
 

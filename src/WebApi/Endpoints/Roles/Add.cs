@@ -10,7 +10,7 @@ internal sealed class Add : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("roles/add", async (string name, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapPost("/api/roles/add", async (string name, ISender sender, CancellationToken cancellationToken) =>
         {
             var command = new AddRoleCommand(name);
 

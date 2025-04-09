@@ -9,7 +9,7 @@ internal sealed class GetByName : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("roles/{roleName}", async (string roleName, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapGet("/api/roles/{roleName}", async (string roleName, ISender sender, CancellationToken cancellationToken) =>
         {
             var query = new GetRoleByNameQuery(roleName);
 

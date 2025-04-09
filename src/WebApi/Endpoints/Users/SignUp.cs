@@ -11,7 +11,7 @@ internal sealed class SignUp : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("users/signup", async (Request request, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapPost("/api/users/signup", async (Request request, ISender sender, CancellationToken cancellationToken) =>
         {
             var command = new SignUpUserCommand(
                 request.Username,

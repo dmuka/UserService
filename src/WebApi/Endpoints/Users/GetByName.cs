@@ -9,7 +9,7 @@ internal sealed class GetByName : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("users/{userName}", async (string userName, ISender sender, CancellationToken cancellationToken) =>
+        builder.MapGet("/api/users/{userName}", async (string userName, ISender sender, CancellationToken cancellationToken) =>
         {
             var query = new GetUserByNameQuery(userName);
 
