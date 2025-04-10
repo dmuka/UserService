@@ -20,6 +20,6 @@ public class LogoutModel(TokenHandler tokenHandler, ILogger<LogoutModel> logger)
             return LocalRedirect(returnUrl);
         }
 
-        return RedirectToPage();
+        return LocalRedirect(Routes.SignIn);
     }
 }

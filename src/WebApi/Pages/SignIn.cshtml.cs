@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Application.Users.SignIn;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -26,17 +24,18 @@ public class SignInModel(
     public class InputModel
     {
         [Required]
-        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 4)]
-        public string UserName { get; set; }
+        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.",
+            MinimumLength = 4)]
+        public string UserName { get; set; } = string.Empty;
 
         [EmailAddress]
         [Display(Name = "Email")]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
@@ -69,22 +68,7 @@ public class SignInModel(
         if (result.IsSuccess)
         {
             logger.LogInformation("User logged in.");
-            tokenHandler.StoreTokens(result.Value.AccessToken, result.Value.RefreshToken);        
-            
-            // var handler = new JwtSecurityTokenHandler();
-            // var jwtToken = handler.ReadJwtToken(result.Value.AccessToken);
-            //
-            // if (jwtToken == null || jwtToken.ValidTo <= DateTime.UtcNow) 
-            //     return LocalRedirect("/SignIn");
-            //
-            // var claims = jwtToken.Claims;
-            // var identity = new ClaimsIdentity(claims, "Bearer");
-            // var principal = new ClaimsPrincipal(identity);
-            //
-            // if (contextAccessor.HttpContext is not null)
-            // {
-            //     contextAccessor.HttpContext.User = principal;
-            // }
+            tokenHandler.StoreTokens(result.Value.AccessToken, result.Value.RefreshToken); 
 
             return LocalRedirect(returnUrl);
         }

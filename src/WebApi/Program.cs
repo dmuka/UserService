@@ -8,6 +8,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
+using WebApi.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,10 +48,10 @@ app.UseStatusCodePages(context =>
     switch(response.StatusCode)
     {
         case (int)HttpStatusCode.Forbidden:
-            response.Redirect("/AccessDenied");
+            response.Redirect(Routes.Denied403);
             break;
         case (int)HttpStatusCode.Unauthorized:
-            response.Redirect("/SignIn");
+            response.Redirect(Routes.SignIn);
             break;
     }
 

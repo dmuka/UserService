@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebApi.Pages;
 
 namespace WebApi.Infrastructure;
 
@@ -12,8 +13,8 @@ public class TokenAuthFilter(
         PageHandlerExecutingContext context, 
         PageHandlerExecutionDelegate next)
     {
-        if (context.HttpContext.Request.Path.StartsWithSegments("/SignIn")
-            || context.HttpContext.Request.Path.StartsWithSegments("/SignUp"))
+        if (context.HttpContext.Request.Path.StartsWithSegments(Routes.SignIn)
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.SignUp))
         {
             await next();
             return;
@@ -23,7 +24,7 @@ public class TokenAuthFilter(
         
         if (string.IsNullOrEmpty(accessToken))
         {
-            context.Result = new RedirectToPageResult("/SignIn");
+            context.Result = new RedirectToPageResult(Routes.SignIn);
             return;
         }
 
@@ -31,7 +32,7 @@ public class TokenAuthFilter(
         {
             if (!await tokenHandler.RefreshTokens())
             {
-                context.Result = new RedirectToPageResult("/SignIn");
+                context.Result = new RedirectToPageResult(Routes.SignIn);
                 return;
             }
         }

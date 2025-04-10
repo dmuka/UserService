@@ -9,12 +9,12 @@ public class IndexModel(IHttpContextAccessor httpContextAccessor) : PageModel
 {
     public IActionResult OnGet()
     {
-        if (httpContextAccessor.HttpContext is null) return RedirectToPage("/SignIn"); 
+        if (httpContextAccessor.HttpContext is null) return RedirectToPage(Routes.SignIn); 
         
         var principal = httpContextAccessor.HttpContext.User;
         
         if (principal.Identity is null || !principal.Identity.IsAuthenticated) 
-            return RedirectToPage("/SignIn"); 
+            return RedirectToPage(Routes.SignIn); 
         
         return Page();
     }
