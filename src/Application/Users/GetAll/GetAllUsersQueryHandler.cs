@@ -16,7 +16,7 @@ public class GetAllUsersQueryHandler(
         GetAllUsersQuery query, 
         CancellationToken cancellationToken)
     {
-        if (userContext.UserRole != "User")
+        if (userContext.UserRole != "Admin")
         {
             return Result.Failure<IEnumerable<UserResponse>>(UserErrors.Unauthorized());
         }

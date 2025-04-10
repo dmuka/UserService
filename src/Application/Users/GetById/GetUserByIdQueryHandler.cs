@@ -16,7 +16,7 @@ public class GetUserByIdQueryHandler(
         GetUserByIdQuery query, 
         CancellationToken cancellationToken)
     {
-        if (query.UserId != userContext.UserId)
+        if (userContext.UserRole != "Admin")
         {
             return Result.Failure<UserResponse>(UserErrors.Unauthorized());
         }
