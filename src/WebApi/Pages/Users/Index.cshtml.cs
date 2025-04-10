@@ -1,10 +1,12 @@
 ﻿using Application.Users.GetAll;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApi.Pages.Users;
 
+[Authorize(Policy = "UserManagementPolicy")]
 public class IndexModel(ISender sender) : PageModel
 {
     public IList<UserResponse> Users { get; set; } = [];

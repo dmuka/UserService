@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Application.Users.SignIn;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +11,8 @@ namespace WebApi.Pages;
 
 public class SignInModel(
     ISender sender, 
-    TokenHandler tokenHandler, 
+    TokenHandler tokenHandler,
+    IHttpContextAccessor contextAccessor, 
     ILogger<SignInModel> logger) : PageModel
 {
     [BindProperty]
@@ -66,21 +69,27 @@ public class SignInModel(
         if (result.IsSuccess)
         {
             logger.LogInformation("User logged in.");
-            tokenHandler.StoreTokens(result.Value.AccessToken, result.Value.RefreshToken);
+            tokenHandler.StoreTokens(result.Value.AccessToken, result.Value.RefreshToken);        
+            
+            // var handler = new JwtSecurityTokenHandler();
+            // var jwtToken = handler.ReadJwtToken(result.Value.AccessToken);
+            //
+            // if (jwtToken == null || jwtToken.ValidTo <= DateTime.UtcNow) 
+            //     return LocalRedirect("/SignIn");
+            //
+            // var claims = jwtToken.Claims;
+            // var identity = new ClaimsIdentity(claims, "Bearer");
+            // var principal = new ClaimsPrincipal(identity);
+            //
+            // if (contextAccessor.HttpContext is not null)
+            // {
+            //     contextAccessor.HttpContext.User = principal;
+            // }
 
             return LocalRedirect(returnUrl);
         }
         
         ModelState.AddModelError(string.Empty, "Invalid login attempt");
         return Page();
-        // if (result.RequiresTwoFactor)
-        // {
-        //     return RedirectToPage("./SignInWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-        // }
-        // if (result.IsLockedOut)
-        // {
-        //     _logger.LogWarning("User account locked out.");
-        //     return RedirectToPage("./Lockout");
-        // }
     }
 }
