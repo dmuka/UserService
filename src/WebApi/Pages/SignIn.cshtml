@@ -1,4 +1,6 @@
 ﻿@page
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using WebApi.Pages
 @model WebApi.Pages.SignInModel
 @{
     ViewData["Title"] = "Sign in";
@@ -65,7 +67,7 @@
         }
 
         function redirectToSignUp() {
-            window.location.href = '@Url.Page("./SignUp", new { returnUrl = Model.ReturnUrl })';
+            window.location.href = '@Url.Page(Routes.SignUp, new { returnUrl = Model.ReturnUrl })';
         }
     </script>
 }
