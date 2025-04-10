@@ -44,7 +44,7 @@ public class GetAllUsersQueryHandlerTests
     public async Task Handle_UserIsNotAuthorized_ReturnsUnauthorizedResult()
     {
         // Arrange
-        _userContextMock.Setup(x => x.UserRole).Returns("Admin");
+        _userContextMock.Setup(x => x.UserRole).Returns("User");
 
         // Act
         var result = await _handler.Handle(new GetAllUsersQuery(), _cancellationToken);
@@ -61,7 +61,7 @@ public class GetAllUsersQueryHandlerTests
     public async Task Handle_UserIsAuthorized_ReturnsUsers()
     {
         // Arrange
-        _userContextMock.Setup(x => x.UserRole).Returns("User");
+        _userContextMock.Setup(x => x.UserRole).Returns("Admin");
         var users = new List<User> { _user, _user };
         _userRepositoryMock.Setup(x => x.GetAllUsersAsync(_cancellationToken))
             .ReturnsAsync(users);

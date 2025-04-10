@@ -65,7 +65,8 @@ public class GetUserByIdQueryHandlerTests
     {
         // Arrange
         var query = new GetUserByIdQuery(AuthorizedUserId);
-        _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);
+        _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);    
+        _mockUserContext.Setup(x => x.UserRole).Returns("Admin");
         _mockRepository.Setup(x => x.GetUserByIdAsync(AuthorizedUserId, _cancellationToken))
             .ReturnsAsync((User?)null);
 
@@ -86,7 +87,8 @@ public class GetUserByIdQueryHandlerTests
     {
         // Arrange
         var query = new GetUserByIdQuery(AuthorizedUserId);
-        _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);
+        _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);   
+        _mockUserContext.Setup(x => x.UserRole).Returns("Admin");
         var user = User.CreateUser(
             _userId.Value,
             "userName", 
