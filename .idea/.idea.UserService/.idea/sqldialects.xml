@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/Infrastructure/Repositories/RefreshTokenRepository.cs" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/Infrastructure/Repositories/RoleRepository.cs" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/Infrastructure/Repositories/UserPermissionsRepository.cs" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/Infrastructure/Repositories/UserRepository.cs" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/Infrastructure/Repositories/UserRoleRepository.cs" dialect="PostgreSQL" />
+  </component>
+</project>
