@@ -92,4 +92,84 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
             throw;
         }
     }
+
+    public async Task<int> UpdateUserRolesAsync(
+        Guid userId, 
+        IEnumerable<Guid> rolesIds,  
+        CancellationToken cancellationToken)
+    {
+        var oldRolesIds = await GetRolesIdsByUserIdAsync(userId, cancellationToken);
+        var newRolesIds = rolesIds.ToList();
+        
+        var toAdd = newRolesIds.Except(oldRolesIds).ToList();
+        var toRemove = oldRolesIds.Except(newRolesIds).ToList();
+        
+        var updatedRoles = 0;
+        if (toRemove.Count != 0) updatedRoles += await AddUserRolesAsync(userId, toAdd, cancellationToken);
+        if (toAdd.Count != 0) updatedRoles += await RemoveUserRolesAsync(userId, toRemove, cancellationToken);
+        
+        RemoveFromCache($"{UsersIdsKey}_{userId}");
+        
+        return updatedRoles; 
+    }
+
+    public async Task<int> AddUserRolesAsync(
+        Guid userId, 
+        IEnumerable<Guid> rolesIds,  
+        CancellationToken cancellationToken)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        
+        const string query = """
+                                 INSERT INTO user_roles (user_id, role_id)
+                                 VALUES (@UserId, @RoleId)
+                             """;
+
+        try
+        {
+            var result = await connection.ExecuteAsync(
+                query, 
+                rolesIds.Select(roleId => new { UserId = userId, RoleId = roleId }).ToArray(), 
+                transaction: transaction);
+            
+            RemoveFromCache($"{RolesIdsKey}_{userId}");
+            
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while adding the roles ids for user id: {UserId}.", e, e.Message, userId);
+            throw;
+        }
+    }
+
+    public async Task<int> RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds,  CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        
+        const string query = """
+                                 DELETE FROM user_roles
+                                 WHERE user_roles.user_id = @UserId 
+                                   AND user_roles.role_id = @RoleId
+                             """;
+
+        try
+        {
+            var result = await connection.ExecuteAsync(
+                query, 
+                rolesIds.Select(roleId => new { UserId = userId, RoleId = roleId }).ToArray(), 
+                transaction: transaction);
+            
+            RemoveFromCache($"{RolesIdsKey}_{userId}");
+            
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing the roles ids for user id: {UserId}.", e, e.Message, userId);
+            throw;
+        }
+    }
 }

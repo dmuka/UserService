@@ -20,4 +20,31 @@ public interface IUserRoleRepository
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of role IDs.</returns>
     Task<IList<Guid>> GetRolesIdsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the roles associated with a specific user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="rolesIds">A collection of role IDs to associate with the user.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles updated.</returns>
+    Task<int> UpdateUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds roles to a specific user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="rolesIds">A collection of role IDs to add to the user.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles added.</returns>
+    Task<int> AddUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes roles from a specific user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="rolesIds">A collection of role IDs to remove from the user.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles removed.</returns>
+    Task<int> RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default);
 }
