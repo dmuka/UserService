@@ -33,7 +33,7 @@ public class DetailsModel(ISender sender) : PageModel
         UserInfo.FirstName = result.Value.FirstName;
         UserInfo.LastName = result.Value.LastName;
         UserInfo.Email = result.Value.Email;
-        UserInfo.Roles = result.Value.Roles;
+        UserInfo.Roles = result.Value.Roles.Select(role => role.name).ToArray();
         
         UserRoles = UserInfo.Roles
             .Select(role => new SelectListItem(role, string.Empty)).ToList();

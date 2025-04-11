@@ -1,0 +1,33 @@
+﻿@page "{id:Guid}"
+@model WebApi.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Edit user";
+}
+
+<h1>Edit user</h1>
+
+<form method="post" asp-antiforgery="true">
+    <div class="form-floating mb-3">
+        <input asp-for="@Model.UserInfo.UserName" class="form-control" />
+        <label asp-for="@Model.UserInfo.UserName" class="control-label"></label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="@Model.UserInfo.FirstName" class="form-control" />
+        <label asp-for="@Model.UserInfo.FirstName" class="control-label"></label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="@Model.UserInfo.LastName" class="form-control" />
+        <label asp-for="@Model.UserInfo.LastName" class="control-label"></label>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="@Model.UserInfo.Email" class="form-control" />
+        <label asp-for="@Model.UserInfo.Email" class="control-label"></label>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.UserInfo.SelectedRoles"></label>
+        <select asp-for="@Model.UserInfo.SelectedRoles" asp-items="@Model.UserRoles" class="form-control" ></select>
+    </div>
+    <div class="form-group mt-3">
+        <a asp-page="./Index" class="btn btn-secondary">Back to list</a>
+    </div>
+</form>

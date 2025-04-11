@@ -107,7 +107,7 @@ public class GetUserByIdQueryHandlerTests
             LastName = user.LastName,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
-            Roles = _roles.Select(role => role.Name).ToArray()
+            Roles = _roles.Select(role => (role.Name, role.Id.Value)).ToArray()
         };
         
         _mockRepository.Setup(x => x.GetUserByIdAsync(AuthorizedUserId, _cancellationToken))

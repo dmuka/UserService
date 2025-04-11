@@ -10,9 +10,9 @@ public sealed record UserResponse
     public required string LastName { get; init; }
     public required string PasswordHash { get; init; }
     public required string Email { get; init; }
-    public required string[] Roles { get; init; }
+    public required (string name, Guid id)[] Roles { get; init; }
 
-    public static UserResponse Create(User user, string[] roles)
+    public static UserResponse Create(User user, (string name, Guid id)[] roles)
     {
         var userResponse = new UserResponse
         {

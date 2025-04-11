@@ -30,7 +30,7 @@ public class GetUserByIdQueryHandler(
         
         var roles = await roleRepository.GetRolesByUserIdAsync(query.UserId, cancellationToken);
         
-        var userResponse = UserResponse.Create(user, roles.Select(role => role.Name).ToArray());
+        var userResponse = UserResponse.Create(user, roles.Select(role => (role.Name, role.Id.Value)).ToArray());
 
         return userResponse;
     }
