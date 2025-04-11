@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages.Users;
 
@@ -18,17 +19,17 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
     public class InputModel
     {
         [Required]
-        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(50, ErrorMessage = ErrorMessages.UserName, MinimumLength = 3)]
         [Display(Name = "User name")]
         public string UserName { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(100, ErrorMessage = ErrorMessages.UserFirstName, MinimumLength = 3)]
         [Display(Name = "First name")]
         public string FirstName { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(100, ErrorMessage = ErrorMessages.UserLastName, MinimumLength = 3)]
         [Display(Name = "Last name")]
         public string LastName { get; set; } = string.Empty;
         
@@ -38,14 +39,14 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = ErrorMessages.Password, MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = ErrorMessages.ConfirmPassword)]
         public string ConfirmPassword { get; set; } = string.Empty;
         
         [Display(Name = "User role(s)")]
