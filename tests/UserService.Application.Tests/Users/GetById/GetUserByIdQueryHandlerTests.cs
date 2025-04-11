@@ -89,7 +89,7 @@ public class GetUserByIdQueryHandlerTests
         var query = new GetUserByIdQuery(AuthorizedUserId);
         _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);   
         _mockUserContext.Setup(x => x.UserRole).Returns("Admin");
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value,
             "userName", 
             "John",

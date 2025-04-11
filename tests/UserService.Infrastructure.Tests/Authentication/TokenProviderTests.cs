@@ -54,7 +54,7 @@ public class TokenProviderTests
     public async Task CreateAccessToken_ValidUser_ReturnsToken()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             Guid.CreateVersion7(),
             "testuser",
             "firstName",

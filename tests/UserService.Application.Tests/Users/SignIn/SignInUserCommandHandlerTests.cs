@@ -41,7 +41,7 @@ public class SignInUserCommandHandlerTests
     public void SetUp()
     {
         _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
-        _existingUser = User.CreateUser(
+        _existingUser = User.Create(
             Guid.CreateVersion7(),
             ExistingUsername,
             "firstName",

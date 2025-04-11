@@ -317,7 +317,7 @@ public class UserRepository : BaseRepository, IUserRepository
             {
                 if (!userDictionary.TryGetValue(user.Id, out var userEntry))
                 {
-                    userEntry = User.CreateUser(
+                    userEntry = User.Create(
                         user.Id,
                         user.Username,
                         user.FirstName,

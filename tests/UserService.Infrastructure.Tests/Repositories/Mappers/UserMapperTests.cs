@@ -41,7 +41,7 @@ public class UserMapperTests
         _roleRepositoryMock.Setup(repository => repository.GetRoleByNameAsync("User", CancellationToken.None))
             .ReturnsAsync(Role.Create(Id, "User"));
         
-        _user = User.CreateUser(
+        _user = User.Create(
             Id,
             Username,
             FirstName,

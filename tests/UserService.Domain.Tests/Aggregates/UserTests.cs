@@ -29,7 +29,7 @@ public class UserTests
     public void Constructor_Should_Initialize_User_Correctly()
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value,
             ValidUsername, 
             ValidFirstName, 
@@ -58,7 +58,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyUsername(string username)
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             "", 
             ValidFirstName, 
@@ -84,7 +84,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyFirstName(string firstName)
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value,
             ValidUsername,
             firstName,
@@ -110,7 +110,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullOrEmptyLastName(string lastName)
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -135,7 +135,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullPasswordHash()
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -160,7 +160,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullEmail()
     {
         // Act & Arrange & Assert
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -185,7 +185,7 @@ public class UserTests
     public void Constructor_ShouldReturnResultWithFailure_ForNullRole()
     {
         // Act & Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -210,7 +210,7 @@ public class UserTests
     public void ChangeEmail_Should_Update_Email_Correctly()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -232,7 +232,7 @@ public class UserTests
     public void ChangeEmail_ShouldReturnFailureResult_ForNullEmail()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -259,7 +259,7 @@ public class UserTests
     public void ChangePassword_Should_Update_PasswordHash_Correctly()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -281,7 +281,7 @@ public class UserTests
     public void ChangePassword_Should_Throw_ArgumentNullException_For_Null_PasswordHash()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -309,7 +309,7 @@ public class UserTests
     public void RemoveRole_Should_Update_Roles_Correctly()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 
@@ -332,7 +332,7 @@ public class UserTests
     public void RemoveRole_Should_Throw_ArgumentNullException_For_Null_Role()
     {
         // Arrange
-        var user = User.CreateUser(
+        var user = User.Create(
             _userId.Value, 
             ValidUsername, 
             ValidFirstName, 

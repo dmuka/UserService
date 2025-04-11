@@ -40,7 +40,7 @@ public class User : Entity, IAggregationRoot
     /// <param name="userPermissionIds">Collection of the user permission ids.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
-    public static Result<User> CreateUser(
+    public static Result<User> Create(
         Guid userId,
         string userName,
         string firstName,

@@ -81,7 +81,7 @@ public class GetUserByNameQueryHandlerTests
     {
         // Arrange
         var query = new GetUserByNameQuery(ExistingUsername);
-        var user = User.CreateUser(
+        var user = User.Create(
             Guid.CreateVersion7(),
             ExistingUsername,
             "firstName",

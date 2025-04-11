@@ -40,7 +40,7 @@ public class SignUpUserCommandHandlerTests
     public void SetUp()
     {
         _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
-        _user = User.CreateUser(
+        _user = User.Create(
             Guid.CreateVersion7(),
             Username,
             "firstName",

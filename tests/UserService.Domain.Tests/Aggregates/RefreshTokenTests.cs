@@ -12,7 +12,7 @@ public class RefreshTokenTests
     private static readonly Guid Id = Guid.CreateVersion7();
     private const string SampleTokenValue = "Sample Token";
     
-    private readonly User _user = User.CreateUser(
+    private readonly User _user = User.Create(
         Id, 
         "username", 
         "firstName", 

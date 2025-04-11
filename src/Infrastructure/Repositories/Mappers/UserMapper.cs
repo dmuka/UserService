@@ -27,7 +27,7 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserDto>
         var defaultUserRole = new ConfigurationManager().GetSection("DefaultUserRole").Value ?? "User";
         var role = roleRepository.GetRoleByNameAsync(defaultUserRole).Result;
         
-        var user = User.CreateUser(
+        var user = User.Create(
             dto.Id, 
             dto.Username, 
             dto.FirstName, 

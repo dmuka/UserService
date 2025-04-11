@@ -14,7 +14,7 @@ namespace UserService.Application.Tests.Users.GetAll;
 public class GetAllUsersQueryHandlerTests
 {
     private readonly User _user = 
-        User.CreateUser(
+        User.Create(
             Guid.CreateVersion7(), 
             "name", 
             "First Name", 
