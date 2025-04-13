@@ -8,26 +8,68 @@
 
 <form method="post" asp-antiforgery="true">
     <div class="form-floating mb-3">
-        <input asp-for="@Model.UserInfo.UserName" class="form-control" />
-        <label asp-for="@Model.UserInfo.UserName" class="control-label"></label>
+        <input asp-for="UserInfo.UserName" class="form-control" />
+        <label asp-for="UserInfo.UserName" class="control-label"></label>
+        <span asp-validation-for="UserInfo.UserName" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <input asp-for="@Model.UserInfo.FirstName" class="form-control" />
-        <label asp-for="@Model.UserInfo.FirstName" class="control-label"></label>
+        <input asp-for="UserInfo.FirstName" class="form-control" />
+        <label asp-for="UserInfo.FirstName" class="control-label"></label>
+        <span asp-validation-for="UserInfo.FirstName" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <input asp-for="@Model.UserInfo.LastName" class="form-control" />
-        <label asp-for="@Model.UserInfo.LastName" class="control-label"></label>
+        <input asp-for="UserInfo.LastName" class="form-control" />
+        <label asp-for="UserInfo.LastName" class="control-label"></label>
+        <span asp-validation-for="UserInfo.LastName" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <input asp-for="@Model.UserInfo.Email" class="form-control" />
-        <label asp-for="@Model.UserInfo.Email" class="control-label"></label>
+        <input asp-for="UserInfo.Email" class="form-control" />
+        <label asp-for="UserInfo.Email" class="control-label"></label>
+        <span asp-validation-for="UserInfo.Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="@Model.UserInfo.SelectedRoles"></label>
-        <select asp-for="@Model.UserInfo.SelectedRoles" asp-items="@Model.UserRoles" class="form-control" ></select>
+        <label asp-for="UserInfo.SelectedRoles"></label>
+        <select asp-for="UserInfo.SelectedRoles" asp-items="Model.AllRoles" class="form-control"></select>
+        <span asp-validation-for="UserInfo.SelectedRoles" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="UserInfo.OldPassword" class="form-control" autocomplete="old-password" aria-required="true"/>
+        <label asp-for="UserInfo.OldPassword">Current password</label>
+        <span asp-validation-for="UserInfo.OldPassword" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="UserInfo.NewPassword" class="form-control" autocomplete="new-password" aria-required="true"/>
+        <label asp-for="UserInfo.NewPassword">New password</label>
+        <span asp-validation-for="UserInfo.NewPassword" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="UserInfo.ConfirmNewPassword" class="form-control" autocomplete="new-password" aria-required="true"/>
+        <label asp-for="UserInfo.ConfirmNewPassword">Confirm password</label>
+        <span asp-validation-for="UserInfo.ConfirmNewPassword" class="text-danger"></span>
     </div>
     <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-primary"/>
         <a asp-page="./Index" class="btn btn-secondary">Back to list</a>
     </div>
 </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function adjustSelectSize() {
+            let select = document.getElementById('Input_SelectedRoles');
+            if (!select) {
+                console.error('Select element not found');
+                return;
+            }
+
+            let optionsCount = select.options.length;
+            let maxVisibleOptions = 5;
+
+            select.size = Math.min(optionsCount, maxVisibleOptions);
+        }
+
+        window.onload = adjustSelectSize;
+    </script>
+}

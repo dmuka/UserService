@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages;
 
@@ -19,17 +20,17 @@ public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageMode
     public class InputModel
     {
         [Required]
-        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(50, ErrorMessage = ErrorMessages.UserName, MinimumLength = 3)]
         [Display(Name = "User name")]
         public string UserName { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(100, ErrorMessage = ErrorMessages.UserFirstName, MinimumLength = 3)]
         [Display(Name = "First name")]
         public string FirstName { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [StringLength(100, ErrorMessage = ErrorMessages.UserLastName, MinimumLength = 3)]
         [Display(Name = "Last name")]
         public string LastName { get; set; }
         
@@ -39,14 +40,14 @@ public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageMode
         public string Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = ErrorMessages.Password, MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = ErrorMessages.ConfirmPassword)]
         public string ConfirmPassword { get; set; }
     }
 
