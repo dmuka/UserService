@@ -6,6 +6,21 @@
 
 <link rel="stylesheet" href="~/css/site.css" />
 
+<style>
+    .position-relative {
+        position: relative;
+    }
+
+    .password-icon-overlay {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #333;
+        cursor: pointer;
+    }
+</style>
+
 <div class="center-container">
     <div class="form-container">
         <section>
@@ -20,12 +35,12 @@
                     <span asp-validation-for="Input.UserName" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <input asp-for="Input.FirstName" class="form-control" autocomplete="firstname" aria-required="true"/>
+                    <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true"/>
                     <label asp-for="Input.FirstName">First name</label>
                     <span asp-validation-for="Input.FirstName" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
-                    <input asp-for="Input.LastName" class="form-control" autocomplete="lastname" aria-required="true"/>
+                    <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true"/>
                     <label asp-for="Input.LastName">Last name</label>
                     <span asp-validation-for="Input.LastName" class="text-danger"></span>
                 </div>
@@ -34,15 +49,23 @@
                     <label asp-for="Input.Email">Email address</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
-                <div class="form-floating mb-3">
+                <div class="form-floating mb-3 position-relative">
                     <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true"/>
                     <label asp-for="Input.Password">Password</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+                    <a href="#" class="password-icon-overlay">
+                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                    </a>
                 </div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true"/>
                     <label asp-for="Input.ConfirmPassword">Confirm password</label>
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+                    <a href="#" class="password-icon-overlay">
+                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                    </a>
                 </div>
 
                 <div class="button-container" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
@@ -59,6 +82,30 @@
     <script>
         function redirectToSignIn() {
             window.location.href = '@Url.Page("./SignIn", new { returnUrl = Model.ReturnUrl })';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.password-icon-overlay').forEach(function(toggle) {
+                toggle.addEventListener('click', togglePasswordVisibility);
+            });
+        });
+
+        function togglePasswordVisibility(event) {
+            event.preventDefault();
+
+            const container = event.currentTarget.closest('.form-floating');
+            const inputField = container.querySelector('input');
+            const icon = event.currentTarget.querySelector('i');
+
+            if (inputField.type === "password") {
+                inputField.type = 'text';
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                inputField.type = 'password';
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
         }
     </script>
 }

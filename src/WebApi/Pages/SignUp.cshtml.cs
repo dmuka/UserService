@@ -15,48 +15,48 @@ public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageMode
     [BindProperty]
     public InputModel Input { get; set; } = new ();
 
-    public string ReturnUrl { get; set; } = string.Empty;
+    public string? ReturnUrl { get; set; } = null;
 
     public class InputModel
     {
         [Required]
-        [StringLength(50, ErrorMessage = ErrorMessages.UserName, MinimumLength = 3)]
+        [StringLength(Lengths.MaxUserName, ErrorMessage = ErrorMessages.UserName, MinimumLength = Lengths.MinUserName)]
         [Display(Name = "User name")]
-        public string UserName { get; set; }
+        public string UserName { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = ErrorMessages.UserFirstName, MinimumLength = 3)]
+        [StringLength(Lengths.MaxFirstName, ErrorMessage = ErrorMessages.UserFirstName, MinimumLength = Lengths.MinFirstName)]
         [Display(Name = "First name")]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = ErrorMessages.UserLastName, MinimumLength = 3)]
+        [StringLength(Lengths.MaxLastName, ErrorMessage = ErrorMessages.UserLastName, MinimumLength = Lengths.MinLastName)]
         [Display(Name = "Last name")]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
         
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100, ErrorMessage = ErrorMessages.Password, MinimumLength = 6)]
+        [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = ErrorMessages.ConfirmPassword)]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 
-    public void OnGet(string returnUrl = null)
+    public void OnGet(string? returnUrl = null)
     {
         ReturnUrl = returnUrl;
     }
 
-    public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
 
