@@ -307,6 +307,27 @@ public class UserRepository : BaseRepository, IUserRepository
         RemoveFromCache<User>();
     }
 
+    public async Task<int> RemoveUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        
+        const string query = """
+                                 DELETE
+                                 FROM Users 
+                                 WHERE Users.Id = @Id
+                             """;
+        
+        var parameters = new { Id = userId };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+        
+        var rows = await connection.ExecuteAsync(command);
+        RemoveFromCache<User>();
+
+        return rows;
+    }
+
     private static async Task<IEnumerable<User>> QueryUsers(IDbConnection connection, CommandDefinition command)
     {
         var userDictionary = new Dictionary<Guid, User>();

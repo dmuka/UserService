@@ -47,4 +47,12 @@ public interface IUserRoleRepository
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles removed.</returns>
     Task<int> RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes all roles from a specific user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles removed.</returns>
+    Task<int> RemoveAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default);
 }

@@ -144,7 +144,7 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
     }
 
-    public async Task<int> RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds,  CancellationToken cancellationToken = default)
+    public async Task<int> RemoveUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         var transaction = await connection.BeginTransactionAsync(cancellationToken);
@@ -169,6 +169,36 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         catch (Exception e)
         {
             _logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing the roles ids for user id: {UserId}.", e, e.Message, userId);
+            throw;
+        }
+    }
+    
+    public async Task<int> RemoveAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        
+        const string query = """
+                                 DELETE FROM user_roles
+                                 WHERE user_roles.user_id = @UserId
+                             """;
+        var parameters = new { UserId = userId };
+        
+        try
+        {
+            var result = await connection.ExecuteAsync(
+                query, 
+                parameters, 
+                transaction: transaction);
+            
+            RemoveFromCache($"{RolesIdsKey}_{userId}");
+            
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing all roles ids for user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }

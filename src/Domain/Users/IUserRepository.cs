@@ -70,4 +70,12 @@ public interface IUserRepository
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>    
     Task UpdateUserAsync(User user, CancellationToken cancellationToken = default);
+        
+    /// <summary>
+    /// Asynchronously removes a user from the database by their unique identifier.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user to remove.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation, containing the count of the removed rows.</returns>
+    Task<int> RemoveUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

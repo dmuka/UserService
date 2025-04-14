@@ -41,7 +41,7 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
 
     public async Task<bool> RefreshTokens()
     {
-        if (httpContextAccessor.HttpContext is null) return  false;
+        if (httpContextAccessor.HttpContext is null) return false;
         
         var refreshToken = GetRefreshToken();
         if (string.IsNullOrEmpty(refreshToken)) return false;
