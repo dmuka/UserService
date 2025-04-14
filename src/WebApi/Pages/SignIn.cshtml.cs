@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApi.Infrastructure;
+using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages;
 
@@ -24,8 +25,8 @@ public class SignInModel(
     public class InputModel
     {
         [Required]
-        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.",
-            MinimumLength = 4)]
+        [StringLength(Lengths.MaxUserName, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.",
+            MinimumLength = Lengths.MinUserName)]
         public string UserName { get; set; } = string.Empty;
 
         [EmailAddress]
@@ -33,7 +34,7 @@ public class SignInModel(
         public string? Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(Lengths.MaxPassword, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = Lengths.MinPassword)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
