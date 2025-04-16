@@ -68,6 +68,7 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
             return Page();
         }
 
+        var cancellationToken = HttpContext.RequestAborted;
         var command = new SignUpUserCommand(
             Input.UserName, 
             Input.Email, 
@@ -75,7 +76,7 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
             Input.LastName, 
             Input.Password,
             Input.SelectedRoles.Select(Guid.Parse).ToList());
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure) return Page();
 

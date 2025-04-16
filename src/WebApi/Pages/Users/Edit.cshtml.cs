@@ -92,9 +92,11 @@ public class EditModel(
         return Page();
     }
     
-    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
+
+        var cancellationToken = HttpContext.RequestAborted;
 
         var user = Domain.Users.User.Create(
             UserInfo.Id,
