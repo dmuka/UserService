@@ -1,6 +1,4 @@
-﻿using Npgsql;
-
-namespace Domain.Roles;
+﻿namespace Domain.Roles;
 
 /// <summary>
 /// Interface for user role repository operations.

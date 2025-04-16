@@ -10,7 +10,4 @@
   <ItemGroup>
     <Folder Include="Roles\Specifications\" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Npgsql" />
-  </ItemGroup>
 </Project>
