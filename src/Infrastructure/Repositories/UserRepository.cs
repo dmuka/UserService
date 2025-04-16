@@ -288,18 +288,18 @@ public class UserRepository : BaseRepository, IUserRepository
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         
-        var query = """
-                        UPDATE Users 
-                        SET 
-                            user_name = @Username, 
-                            first_name = @FirstName, 
-                            last_name = @LastName, 
-                            password_hash = @PasswordHash, 
-                            email = @Email
-                        WHERE Users.Id = @Id
-                    """;
+        const string query = """
+                                 UPDATE Users 
+                                 SET 
+                                     user_name = @Username, 
+                                     first_name = @FirstName, 
+                                     last_name = @LastName, 
+                                     password_hash = @PasswordHash, 
+                                     email = @Email
+                                 WHERE Users.Id = @Id
+                             """;
         
-        var parameters = new { user.Id, user.Username, user.FirstName, user.LastName, user.PasswordHash, user.Email };
+        var parameters = new { Id = user.Id.Value, user.Username, user.FirstName, user.LastName, PasswordHash = user.PasswordHash.Value, Email = user.Email.Value };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         

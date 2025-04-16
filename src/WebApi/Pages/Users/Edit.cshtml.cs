@@ -23,7 +23,7 @@ public class EditModel(
 
     public class InputModel
     {
-        internal Guid Id { get; set; }
+        public Guid Id { get; set; }
         
         [Required]
         [StringLength(Lengths.MaxUserName, ErrorMessage = ErrorMessages.UserName, MinimumLength = Lengths.MinUserName)]
@@ -64,22 +64,27 @@ public class EditModel(
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
-        public List<RoleId> SelectedRolesIds { get; set; } = [];
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var query = new GetUserByIdQuery(id);
         var result = await sender.Send(query);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddModelError(string.Empty, result.Error.Description);
+            
+            return Page();
+        }
         
-        if (result.IsFailure) return Page();
-        
-        UserInfo.SelectedRoles = result.Value.Roles.Select(role => role.name).ToList();
+        UserInfo.SelectedRoles = result.Value.Roles.Select(role => role.id.ToString()).ToList();
         AllRoles = (await roleRepository.GetAllRolesAsync())
             .Select(role => new SelectListItem
             {
                 Text = role.Name,
-                Selected = UserInfo.SelectedRoles.Contains(role.Name)
+                Value = role.Id.Value.ToString(),
+                Selected = UserInfo.SelectedRoles.Contains(role.Id.Value.ToString())
             })
             .ToList();
         
@@ -87,25 +92,35 @@ public class EditModel(
         UserInfo.FirstName = result.Value.FirstName;
         UserInfo.LastName = result.Value.LastName;
         UserInfo.Email = result.Value.Email;
-        UserInfo.SelectedRolesIds = result.Value.Roles.Select(role => new RoleId(role.id)).ToList();
-        
+        //UserInfo.SelectedRolesIds = result.Value.Roles.Select(role => new RoleId(role.id)).ToList();
+
+        TempData["Id"] = result.Value.Id;
+        TempData["Hash"] = result.Value.PasswordHash;
+         
         return Page();
     }
-    
+
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
+        var ps = passwordHasher.GetHash(UserInfo.OldPassword);
+        if (!passwordHasher.CheckPassword(UserInfo.OldPassword, TempData["Hash"]?.ToString()))
+        {
+            ModelState.AddModelError(string.Empty, "Incorrect old password.");
+
+            return Page();
+        }
 
         var cancellationToken = HttpContext.RequestAborted;
 
         var user = Domain.Users.User.Create(
-            UserInfo.Id,
+            (Guid)TempData["Id"],
             UserInfo.UserName,
             UserInfo.FirstName,
             UserInfo.LastName,
             passwordHasher.GetHash(UserInfo.NewPassword),
             UserInfo.Email,
-            UserInfo.SelectedRolesIds,
+            UserInfo.SelectedRoles.Select(role => new RoleId(Guid.Parse(role))).ToList(),
             []).Value;
         
         var command = new UpdateUserCommand(user);
