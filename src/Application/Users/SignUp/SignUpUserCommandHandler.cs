@@ -27,11 +27,12 @@ internal sealed class SignUpUserCommandHandler(
             return Result.Failure<Guid>(UserErrors.EmailAlreadyExists);
         }
 
-        var defaultUserRole = await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken);
-
         var roleIds = new List<RoleId>();
         
-        if (command.RolesIds is not null) roleIds = command.RolesIds.Select(roleId => new RoleId(roleId)).ToList();
+        if (command.RolesIds is not null) 
+        {
+            roleIds = command.RolesIds.Select(roleId => new RoleId(roleId)).ToList();
+        }
         
         var passwordHash = passwordHasher.GetHash(command.Password);
         
@@ -42,7 +43,9 @@ internal sealed class SignUpUserCommandHandler(
             command.LastName, 
             passwordHash,
             command.Email,
-            command.RolesIds is null ? [defaultUserRole.Id] : roleIds,
+            command.RolesIds is null 
+                ? [(await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken)).Id] 
+                : roleIds,
             new List<UserPermissionId>());
 
         if (user.IsFailure) return Result.Failure<Guid>(user.Error);

@@ -56,7 +56,7 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
     public async Task<IActionResult> OnGet()
     {
         AllRoles = (await roleRepository.GetAllRolesAsync())
-            .Select(role => new SelectListItem(role.Name, role.Id.ToString())).ToList();
+            .Select(role => new SelectListItem(role.Name, role.Id.Value.ToString())).ToList();
         
         return Page();
     }
@@ -79,6 +79,6 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
 
         if (result.IsFailure) return Page();
 
-        return RedirectToPage("Users/Index");
+        return LocalRedirect("/Users");
     }
 }
