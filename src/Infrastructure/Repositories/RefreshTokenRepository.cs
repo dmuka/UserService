@@ -1,12 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Dapper;
 using Domain.RefreshTokens;
-using Domain.Roles;
-using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
@@ -26,19 +21,25 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
     
     public async Task<RefreshToken?> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default)
     {
+        return await GetTokenByUserIdAsync(user.Id.Value, cancellationToken);
+    }
+    
+    public async Task<RefreshToken?> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
         var tokens = GetFromCache<RefreshToken>();
         
-        if (tokens is not null) return tokens.FirstOrDefault(token => token.UserId.Value == user.Id.Value);
+        if (tokens is not null) return tokens.FirstOrDefault(token => token.UserId.Value == userId);
         
         await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
             
-        var query = """
-                        SELECT refresh_tokens.*
-                        FROM refresh_tokens
-                        WHERE refresh_tokens.user_id = @UserId
-                    """;
+        const string query = """
+                                 SELECT refresh_tokens.*
+                                 FROM refresh_tokens
+                                 WHERE refresh_tokens.user_id = @UserId
+                             """;
         
-        var parameters = new { UserId = user.Id.Value };
+        var parameters = new { UserId = userId };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 
@@ -52,7 +53,7 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
                 token.Id,
                 token.Value,
                 token.ExpiresUtc,
-                user.Id).Value;
+                new UserId(userId)).Value;
         }
         catch (Exception e)
         {
@@ -63,17 +64,18 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
     public async Task<RefreshToken?> GetTokenAsync(string value, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
             
-        var query = """
-                        SELECT 
-                            refresh_tokens.id AS Id,
-                            refresh_tokens.value AS Value,
-                            refresh_tokens.expires_utc AS ExpiresUtc,
-                            refresh_tokens.user_id AS UserId
-                        FROM refresh_tokens
-                        WHERE refresh_tokens.value = @Value
-                        ORDER BY refresh_tokens.expires_utc DESC
-                    """;
+        const string query = """
+                                 SELECT 
+                                     refresh_tokens.id AS Id,
+                                     refresh_tokens.value AS Value,
+                                     refresh_tokens.expires_utc AS ExpiresUtc,
+                                     refresh_tokens.user_id AS UserId
+                                 FROM refresh_tokens
+                                 WHERE refresh_tokens.value = @Value
+                                 ORDER BY refresh_tokens.expires_utc DESC
+                             """;
         
         var parameters = new { Value = value };
         
@@ -101,11 +103,12 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
     public async Task AddTokenAsync(RefreshToken token, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
             
-        var query = """
-                        INSERT INTO refresh_tokens (id, value, expires_utc, user_id)
-                        VALUES (@Id, @Value, @ExpiresUtc, @UserId)
-                    """;
+        const string query = """
+                                 INSERT INTO refresh_tokens (id, value, expires_utc, user_id)
+                                 VALUES (@Id, @Value, @ExpiresUtc, @UserId)
+                             """;
         
         var parameters = new { Id = token.Id.Value, token.Value, token.ExpiresUtc, UserId = token.UserId.Value };
         
@@ -124,12 +127,13 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
     public async Task UpdateTokenAsync(RefreshToken token, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
             
-        var query = """
-                        UPDATE refresh_tokens
-                        SET value = @Value, expires_utc = @ExpiresUtc
-                        WHERE refresh_tokens.id = @Id
-                    """;
+        const string query = """
+                                 UPDATE refresh_tokens
+                                 SET value = @Value, expires_utc = @ExpiresUtc
+                                 WHERE refresh_tokens.id = @Id
+                             """;
         
         var parameters = new { Id = token.Id.Value, token.Value, token.ExpiresUtc };
         

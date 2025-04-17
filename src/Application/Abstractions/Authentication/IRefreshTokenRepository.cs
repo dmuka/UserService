@@ -15,7 +15,15 @@ public interface IRefreshTokenRepository
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>The refresh token associated with the user, or <c>null</c> if not found.</returns>
     Task<RefreshToken?> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default);
-
+    
+    /// <summary>
+    /// Retrieves a refresh token associated with a specific user id.
+    /// </summary>
+    /// <param name="userId">The user id whose refresh token is to be retrieved.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>The refresh token associated with the user id, or <c>null</c> if not found.</returns>
+    Task<RefreshToken?> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    
     /// <summary>
     /// Retrieves a refresh token by its value.
     /// </summary>

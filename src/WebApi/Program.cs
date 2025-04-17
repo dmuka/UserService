@@ -23,6 +23,7 @@ builder.Services
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
+builder.Services.AddHttpClient();
 builder.Services.AddRazorPages();
 builder.Services.AddAntiforgery(options => 
 {

@@ -1,11 +1,20 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Application.Abstractions.Authentication;
+using Infrastructure.Options.Authentication;
+using Microsoft.Extensions.Options;
 
 namespace WebApi.Infrastructure;
 
-public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
+public class TokenHandler(
+    IUserContext userContext, 
+    IHttpContextAccessor httpContextAccessor,
+    IRefreshTokenRepository refreshTokenRepository,
+    IHttpClientFactory httpClientFactory,
+    IOptions<AuthOptions> authOptions,
+    ILogger<TokenHandler> logger)
 {
-    public void StoreTokens(string accessToken, string refreshToken)
+    public void StoreToken(string accessToken)
     {
         if (httpContextAccessor.HttpContext is null) return;
         
@@ -14,19 +23,15 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
+            Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.ExpirationInMinutes)
         };
 
         httpContextAccessor.HttpContext.Response.Cookies.Append("AccessToken", accessToken, cookieOptions);
-        httpContextAccessor.HttpContext.Response.Cookies.Append("RefreshToken", refreshToken, cookieOptions);
     }
 
     public void ClearTokens()
     {
-        if (httpContextAccessor.HttpContext is null) return;
-        
-        httpContextAccessor.HttpContext.Response.Cookies.Delete("AccessToken");
-        httpContextAccessor.HttpContext.Response.Cookies.Delete("RefreshToken");
+        httpContextAccessor.HttpContext?.Response.Cookies.Delete("AccessToken");
     }
 
     public string? GetAccessToken()
@@ -34,38 +39,57 @@ public class TokenHandler(IHttpContextAccessor httpContextAccessor, IConfigurati
         return httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
     }
 
-    public string? GetRefreshToken()
+    public async Task<string> GetRefreshTokenAsync(CancellationToken cancellationToken = default)
     {
-        return httpContextAccessor.HttpContext?.Request.Cookies["RefreshToken"];
+        var userId = userContext.UserId;
+        var refreshToken = await refreshTokenRepository.GetTokenByUserIdAsync(userId, cancellationToken);
+
+        if (refreshToken is null || refreshToken.ExpiresUtc < DateTime.UtcNow) return null;
+        
+        return refreshToken.Value;
     }
 
-    public async Task<bool> RefreshTokens()
+    public async Task<bool> RefreshTokens(CancellationToken cancellationToken = default)
     {
         if (httpContextAccessor.HttpContext is null) return false;
         
-        var refreshToken = GetRefreshToken();
+        var refreshToken = await GetRefreshTokenAsync(cancellationToken);
         if (string.IsNullOrEmpty(refreshToken)) return false;
         
         var currentRequest = httpContextAccessor.HttpContext.Request;
         var baseUri = $"{currentRequest.Scheme}://{currentRequest.Host}";
-        var requestUri = new Uri(new Uri(baseUri), "users/signinbytoken");
+        var requestUri = new Uri(new Uri(baseUri), "api/users/signinbytoken");
         
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-        request.Content = new StringContent(JsonSerializer.Serialize(new { refreshToken }), 
-                         Encoding.UTF8, "application/json");
+        var client = httpClientFactory.CreateClient();
 
-        var response = await client.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return false;
-        
-        var content = await response.Content.ReadAsStringAsync();
-        var tokens = JsonSerializer.Deserialize<TokenResponse>(content);
-        
-        if (tokens is null) return false;
-            
-        StoreTokens(tokens.AccessToken, tokens.RefreshToken);
-        
-        return true;
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(new { refreshToken }),
+                    Encoding.UTF8,
+                    "application/json")
+            };
+
+            var response = await client.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode) return false;
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            var tokens = JsonSerializer.Deserialize<TokenResponse>(content);
+
+            if (tokens is null) return false;
+
+            StoreToken(tokens.AccessToken);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error (exception: {exception}, message: {message}) occurred while trying to refresh tokens for user id: {UserId}.", ex, ex.Message, userContext.UserId);
+
+            return false;
+        }
     }
 }
 
