@@ -37,3 +37,15 @@ main {
     max-width: 400px;
     width: 100%;
 }
+
+.pagination .page-item .page-link {
+    display: inline-block;
+    width: 100px;
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}

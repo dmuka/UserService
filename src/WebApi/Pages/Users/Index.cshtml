@@ -32,7 +32,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var user in Model.Users)
+    @foreach (var user in Model.PagedData.Items)
     {
         <tr>
             <td>@user.Username</td>
@@ -63,4 +63,20 @@
     }
     </tbody>
 </table>
-<p>Total users: @Model.Users.Count</p>
+<div class="pagination">
+    <div class="page-item @(Model.PagedData.PageNumber == 1 ? "disabled" : "")">
+        <a class="page-link" asp-page="./Index" asp-route-pageNumber="@(Model.PagedData.PageNumber - 1)">Previous</a>
+    </div>
+        
+    @for (var i = 1; i <= Model.PagedData.TotalPages; i++)
+    {
+        <div class="page-item @(i == Model.PagedData.PageNumber ? "active" : "")">
+            <a class="page-link" asp-page="./Index" asp-route-pageNumber="@i">@i</a>
+        </div>
+    }
+
+    <div class="page-item @(Model.PagedData.PageNumber == Model.PagedData.TotalPages ? "disabled" : "")">
+        <a class="page-link" asp-page="./Index" asp-route-pageNumber="@(Model.PagedData.PageNumber + 1)">Next</a>
+    </div>
+</div>
+<p>Total users: @Model.PagedData.TotalItems</p>
