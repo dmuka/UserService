@@ -42,14 +42,17 @@ main {
     display: inline-block;
     text-align: center;
 }
+
 .pagination .page-item {
     display: inline-block;
     margin: 0 5px;
 }
+
 .pagination .page-item.number .page-link {
     padding: 5px 10px;
     min-width: 30px;
 }
+
 .pagination .page-item.previous .page-link,
 .pagination .page-item.next .page-link {
     width: 60px;
@@ -60,6 +63,12 @@ main {
     display: flex;
     justify-content: flex-end;
     width: 100%;
+}
+
+.fit-content {
+     display: inline-block;
+     width: fit-content;    
+     min-width: 10px;
 }    
 
 .position-relative {

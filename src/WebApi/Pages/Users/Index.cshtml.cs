@@ -17,9 +17,10 @@ public class IndexModel(ISender sender) : PageModel
     [BindProperty(SupportsGet = true)]
     public string SearchString { get; set; } = string.Empty;
 
-    public async Task<IActionResult> OnGetAsync(int? pageNumber)
+    public async Task<IActionResult> OnGetAsync(int? pageNumber, int? pageSize)
     {
         CurrentPage = pageNumber ?? 1;
+        PageSize = pageSize ?? 10;
         
         var query = new GetAllUsersQuery();
         var result = await sender.Send(query);
