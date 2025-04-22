@@ -9,10 +9,9 @@ namespace WebApi.Pages.Users;
 [Authorize(Policy = "UserManagementPolicy")]
 public class IndexModel(ISender sender) : PageModel
 {
-    public PagedResult<UserResponse> PagedData { get; set; }
+    public PagedResult<UserResponse> PagedData { get; set; } = new();
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 2;
-    public IList<UserResponse> Users { get; set; } = [];
 
     [BindProperty(SupportsGet = true)]
     public string SearchString { get; set; } = string.Empty;
@@ -34,21 +33,24 @@ public class IndexModel(ISender sender) : PageModel
                 .Where(user =>
                     user.FirstName.Contains(SearchString) ||
                     user.LastName.Contains(SearchString) ||
-                    user.Email.Contains(SearchString));
+                    user.Email.Contains(SearchString))
+                .ToList();
         }
-
-        var userResponses = users as UserResponse[] ?? users.ToArray();
-        Users = userResponses
+        
+        var currentPageUsers = users
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToList();
 
+        var pagesCount = (int)Math.Ceiling(users.Count / (double)PageSize);
+
         PagedData = new PagedResult<UserResponse>()
         {
-            Items = Users,
+            Items = currentPageUsers,
             PageNumber = CurrentPage,
             PageSize = PageSize,
-            TotalItems = userResponses.Length
+            TotalItems = users.Count,
+            TotalPages = pagesCount
         };
 
         return Page();

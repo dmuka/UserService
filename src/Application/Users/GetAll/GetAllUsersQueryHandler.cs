@@ -10,15 +10,15 @@ public class GetAllUsersQueryHandler(
     IUserRepository repository,
     IRoleRepository roleRepository,
     IUserContext userContext) 
-    : IQueryHandler<GetAllUsersQuery, IEnumerable<UserResponse>>
+    : IQueryHandler<GetAllUsersQuery, IList<UserResponse>>
 {
-    public async Task<Result<IEnumerable<UserResponse>>> Handle(
+    public async Task<Result<IList<UserResponse>>> Handle(
         GetAllUsersQuery query, 
         CancellationToken cancellationToken)
     {
         if (userContext.UserRole != "Admin")
         {
-            return Result.Failure<IEnumerable<UserResponse>>(UserErrors.Unauthorized());
+            return Result.Failure<IList<UserResponse>>(UserErrors.Unauthorized());
         }
         
         var users = await repository.GetAllUsersAsync(cancellationToken);

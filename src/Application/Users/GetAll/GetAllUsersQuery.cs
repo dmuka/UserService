@@ -2,4 +2,4 @@
 
 namespace Application.Users.GetAll;
 
-public sealed record GetAllUsersQuery : IQuery<IEnumerable<UserResponse>>;
+public sealed record GetAllUsersQuery : IQuery<IList<UserResponse>>;
