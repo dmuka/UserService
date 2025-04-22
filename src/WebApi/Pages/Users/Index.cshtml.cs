@@ -11,7 +11,8 @@ public class IndexModel(ISender sender) : PageModel
 {
     public PagedResult<UserResponse> PagedData { get; set; } = new();
     public int CurrentPage { get; set; } = 1;
-    public int PageSize { get; set; } = 2;
+    public int PageSize { get; set; } = 10;
+    public int VisiblePagesRange { get; set; } = 3;
 
     [BindProperty(SupportsGet = true)]
     public string SearchString { get; set; } = string.Empty;
@@ -43,6 +44,8 @@ public class IndexModel(ISender sender) : PageModel
             .ToList();
 
         var pagesCount = (int)Math.Ceiling(users.Count / (double)PageSize);
+        var firstVisiblePage = Math.Max(1, CurrentPage - VisiblePagesRange / 2);
+        var lastVisiblePage = Math.Min(pagesCount, firstVisiblePage + VisiblePagesRange - 1);
 
         PagedData = new PagedResult<UserResponse>()
         {
@@ -50,7 +53,10 @@ public class IndexModel(ISender sender) : PageModel
             PageNumber = CurrentPage,
             PageSize = PageSize,
             TotalItems = users.Count,
-            TotalPages = pagesCount
+            TotalPages = pagesCount,
+            VisiblePagesRange = VisiblePagesRange,
+            FirstVisiblePage = firstVisiblePage,
+            LastVisiblePage = lastVisiblePage
         };
 
         return Page();

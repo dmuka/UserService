@@ -7,4 +7,7 @@ public class PagedResult<T>
     public int PageSize { get; set; }
     public int PageNumber { get; set; }
     public int TotalPages { get; set; }
+    public int VisiblePagesRange { get; set; }
+    public int FirstVisiblePage { get; set; }
+    public int LastVisiblePage { get; set; }
 }
