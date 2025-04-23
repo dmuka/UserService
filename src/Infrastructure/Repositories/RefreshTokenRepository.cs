@@ -61,6 +61,43 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
         }
     }
     
+    public async Task<RefreshToken?> GetTokenByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var tokens = GetFromCache<RefreshToken>();
+        
+        if (tokens is not null) return tokens.FirstOrDefault(token => token.Id.Value == id);
+        
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+            
+        const string query = """
+                                 SELECT refresh_tokens.*
+                                 FROM refresh_tokens
+                                 WHERE refresh_tokens.id = @Id
+                             """;
+        
+        var parameters = new { Id = id };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+
+        try
+        {
+            var token = await connection.QuerySingleOrDefaultAsync<RefreshTokenDto>(command);
+            
+            if (token == null) return null;
+
+            return RefreshToken.Create(
+                token.Id,
+                token.Value,
+                token.ExpiresUtc,
+                new UserId(token.UserId)).Value;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
+    
     public async Task<RefreshToken?> GetTokenAsync(string value, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);

@@ -51,7 +51,7 @@ public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : 
                 ? new SignInResponse 
                 {
                     AccessToken = result.Value.AccessToken, 
-                    RefreshToken = result.Value.RefreshToken
+                    SessionId = result.Value.SessionId.ToString()
                 } 
                 : throw new RpcException(new Status(GetStatusCode(result.Error.Type), result.Error.Description));
         } 
@@ -73,7 +73,7 @@ public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : 
                 ? new SignInResponse
                 {
                     AccessToken = result.Value.AccessToken, 
-                    RefreshToken = result.Value.RefreshToken
+                    SessionId = result.Value.SessionId.ToString()
                 } 
                 : throw new RpcException(new Status(GetStatusCode(result.Error.Type), result.Error.Description));
         } 

@@ -30,7 +30,10 @@ public class TokenProviderTests
         _authOptionsMock.Setup(x => x.Value).Returns(new AuthOptions
         {
             Secret = "12345678901234567890123456789012",
-            ExpirationInMinutes = 60,
+            AccessTokenExpirationInMinutes = 10,
+            AccessTokenCookieExpirationInMinutes = 15,
+            RefreshTokenExpirationInDays = 30,
+            SessionIdCookieExpirationInHours = 12,
             Issuer = "TestIssuer",
             Audience = "TestAudience"
         });

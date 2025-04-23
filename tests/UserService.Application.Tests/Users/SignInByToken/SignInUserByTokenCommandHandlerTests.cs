@@ -88,7 +88,7 @@ public class SignInUserByTokenCommandHandlerTests
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.AccessToken, Is.EqualTo("newAccessToken"));
-            Assert.That(result.Value.RefreshToken, Is.EqualTo("newRefreshToken"));
+            Assert.That(result.Value.SessionId, Is.EqualTo(_refreshTokenGuid));
         }
     }
 }

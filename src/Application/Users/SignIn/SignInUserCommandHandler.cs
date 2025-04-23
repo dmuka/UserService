@@ -43,6 +43,6 @@ internal sealed class SignInUserCommandHandler(
         
         await refreshTokenRepository.AddTokenAsync(refreshToken, cancellationToken);
 
-        return new SignInResponse(accessToken, refreshToken.Value);
+        return new SignInResponse(accessToken, refreshToken.Id.Value);
     }
 }

@@ -36,7 +36,7 @@ message SignInRequest
 message SignInResponse 
 { 
   string access_token = 1; 
-  string refresh_token = 2; 
+  string session_id = 2; 
 }
 
 message SignInByTokenRequest

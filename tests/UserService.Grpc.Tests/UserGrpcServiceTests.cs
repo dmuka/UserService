@@ -21,6 +21,7 @@ public class UserGrpcServiceTests
     private const string Password = "password";
     private const string AccessToken = "access-token";
     private const string RefreshToken = "refresh-token";
+    private readonly Guid SessionId = Guid.NewGuid();
     
     private readonly SignUpRequest _signUpRequest = new()
     {
@@ -93,7 +94,7 @@ public class UserGrpcServiceTests
     public async Task SignIn_ShouldReturnSignInResponse_WhenSuccessful()
     {
         // Arrange
-        var result = Result.Success(new SignInResponse(AccessToken, RefreshToken));
+        var result = Result.Success(new SignInResponse(AccessToken, SessionId));
         _senderMock.Setup(s => s.Send(It.IsAny<SignInUserCommand>(), _cancellationToken))
             .ReturnsAsync(result);
 
@@ -104,7 +105,7 @@ public class UserGrpcServiceTests
         {
             // Assert
             Assert.That(response.AccessToken, Is.EqualTo(AccessToken));
-            Assert.That(response.RefreshToken, Is.EqualTo(RefreshToken));
+            Assert.That(response.SessionId, Is.EqualTo(SessionId.ToString()));
         }
     }
 
@@ -126,7 +127,7 @@ public class UserGrpcServiceTests
     public async Task SignInByToken_ShouldReturnSignInResponse_WhenSuccessful()
     {
         // Arrange
-        var result = Result.Success(new SignInUserByTokenResponse(AccessToken, RefreshToken));
+        var result = Result.Success(new SignInUserByTokenResponse(AccessToken, SessionId));
         _senderMock.Setup(s => s.Send(It.IsAny<SignInUserByTokenCommand>(), _cancellationToken))
             .ReturnsAsync(result);
 
@@ -137,7 +138,7 @@ public class UserGrpcServiceTests
         {
             // Assert
             Assert.That(response.AccessToken, Is.EqualTo(AccessToken));
-            Assert.That(response.RefreshToken, Is.EqualTo(RefreshToken));
+            Assert.That(response.SessionId, Is.EqualTo(SessionId.ToString()));
         }
     }
 

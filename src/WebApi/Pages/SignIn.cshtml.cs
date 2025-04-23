@@ -69,7 +69,8 @@ public class SignInModel(
         if (result.IsSuccess)
         {
             logger.LogInformation("User logged in.");
-            tokenHandler.StoreToken(result.Value.AccessToken); 
+            tokenHandler.StoreToken(result.Value.AccessToken);
+            tokenHandler.StoreSessionId(result.Value.SessionId); 
 
             return LocalRedirect(returnUrl);
         }

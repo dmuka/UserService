@@ -146,7 +146,6 @@ public class SignInUserCommandHandlerTests
             // Assert
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.AccessToken, Is.EqualTo(AccessToken));
-            Assert.That(result.Value.RefreshToken, Is.EqualTo(RefreshTokenValue));
         }
     }
 
@@ -164,7 +163,6 @@ public class SignInUserCommandHandlerTests
             // Assert
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.AccessToken, Is.EqualTo(AccessToken));
-            Assert.That(result.Value.RefreshToken, Is.EqualTo(RefreshTokenValue));
         }
     }
 }

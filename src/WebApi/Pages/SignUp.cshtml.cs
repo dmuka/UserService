@@ -72,7 +72,7 @@ public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageMode
         var result = await sender.Send(signUpCommand);
         if (result.IsSuccess)
         {
-            logger.LogInformation("User created a new account with password.");
+            logger.LogInformation("User with id: {Id} created a new account with password.", result.Value);
                 
             var signInCommand = new SignInUserCommand(Input.UserName, Input.Password);
             await sender.Send(signInCommand);
