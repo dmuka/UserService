@@ -6,15 +6,15 @@ using Domain.Roles;
 namespace Application.Roles.GetAll;
 
 public class GetAllRolesQueryHandler(IRoleRepository repository, IUserContext userContext) 
-    : IQueryHandler<GetAllRolesQuery, IEnumerable<RoleResponse>>
+    : IQueryHandler<GetAllRolesQuery, IList<RoleResponse>>
 {
-    public async Task<Result<IEnumerable<RoleResponse>>> Handle(
+    public async Task<Result<IList<RoleResponse>>> Handle(
         GetAllRolesQuery query, 
         CancellationToken cancellationToken)
     {
         if (userContext.UserRole != "Admin")
         {
-            return Result.Failure<IEnumerable<RoleResponse>>(RoleErrors.Unauthorized());
+            return Result.Failure<IList<RoleResponse>>(RoleErrors.Unauthorized());
         }
         
         var roles = await repository.GetAllRolesAsync(cancellationToken);
@@ -22,7 +22,8 @@ public class GetAllRolesQueryHandler(IRoleRepository repository, IUserContext us
         var rolesResponse = roles
             .AsParallel()
             .AsOrdered()
-            .Select(RoleResponse.Create);
+            .Select(RoleResponse.Create)
+            .ToList();
 
         return rolesResponse;
     }

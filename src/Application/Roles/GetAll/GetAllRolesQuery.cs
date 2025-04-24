@@ -2,4 +2,4 @@
 
 namespace Application.Roles.GetAll;
 
-public sealed record GetAllRolesQuery : IQuery<IEnumerable<RoleResponse>>;
+public sealed record GetAllRolesQuery : IQuery<IList<RoleResponse>>;
