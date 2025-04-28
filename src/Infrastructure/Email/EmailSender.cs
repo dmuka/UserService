@@ -7,11 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Email;
 
-public class EmailService(IOptions<GmailOptions> options, IConfiguration configuration) : IEmailService
+public class EmailService(IOptions<SmtpOptions> options, IConfiguration configuration) : IEmailService
 {
     private readonly SmtpClient _smtpClient = new(options.Value.SmtpHost, options.Value.SmtpPort)
     {
-        Credentials = new NetworkCredential(configuration[options.Value.UserName], configuration[options.Value.Password]),
+        Credentials = new NetworkCredential(options.Value.UserName, options.Value.Password),
         EnableSsl = true 
     };
 

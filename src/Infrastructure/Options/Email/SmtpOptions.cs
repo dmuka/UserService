@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Options.Email;
 
-public record GmailOptions
+public record SmtpOptions
 {
     [Required, MinLength(2)]
     public required string SmtpHost { get; set; }

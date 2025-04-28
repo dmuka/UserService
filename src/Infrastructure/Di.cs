@@ -142,8 +142,8 @@
 
      private static IServiceCollection AddEmailService(this IServiceCollection services)
      {
-         services.AddOptions<GmailOptions>()
-             .BindConfiguration("GmailOptions")
+         services.AddOptions<SmtpOptions>()
+             .BindConfiguration("SmtpOptions")
              .ValidateDataAnnotations()
              .ValidateOnStart();
          
