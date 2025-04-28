@@ -1,5 +1,6 @@
 ﻿ using System.Text;
  using Application.Abstractions.Authentication;
+ using Application.Abstractions.Email;
  using Domain;
  using Domain.Roles;
  using Domain.Users;
@@ -7,10 +8,12 @@
  using Infrastructure.Authorization;
  using Infrastructure.Caching;
  using Infrastructure.Caching.Interfaces;
+ using Infrastructure.Email;
  using Infrastructure.Events;
  using Infrastructure.HealthChecks;
  using Infrastructure.Options.Authentication;
  using Infrastructure.Options.Db;
+ using Infrastructure.Options.Email;
  using Infrastructure.Repositories;
  using Microsoft.AspNetCore.Authentication.JwtBearer;
  using Microsoft.AspNetCore.Authorization;
@@ -31,6 +34,7 @@
              .AddAuthorizationLogic()
              .AddDbConnectionOptions()
              .AddHealthCheck()
+             .AddEmailService()
              .AddRepositories()
              .AddCache()
              .AddEventDispatcher();
@@ -132,6 +136,18 @@
              .AddCheck<CacheHealthCheck>(nameof(CacheHealthCheck), tags: ["cache"]);
 
          services.AddTransient<INpgsqlConnectionFactory, NpgsqlConnectionFactory>();
+         
+         return services;
+     }
+
+     private static IServiceCollection AddEmailService(this IServiceCollection services)
+     {
+         services.AddOptions<GmailOptions>()
+             .BindConfiguration("GmailOptions")
+             .ValidateDataAnnotations()
+             .ValidateOnStart();
+         
+         services.AddTransient<IEmailService, EmailService>();
          
          return services;
      }
