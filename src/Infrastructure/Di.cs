@@ -1,6 +1,10 @@
-﻿ using System.Text;
+﻿ using System.IdentityModel.Tokens.Jwt;
+ using System.Security.Claims;
+ using System.Text;
  using Application.Abstractions.Authentication;
  using Application.Abstractions.Email;
+ using Application.Abstractions.Messaging;
+ using Application.Users.SignInByToken;
  using Domain;
  using Domain.Roles;
  using Domain.Users;
@@ -85,6 +89,7 @@
              .ValidateDataAnnotations()
              .ValidateOnStart();
          
+         services.AddScoped<ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>, SignInUserByTokenCommandHandler>();
          //var authOptions = configuration.Get<AuthOptions>();
          
          services
@@ -93,7 +98,7 @@
                  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
              })
-             .AddCookie(options => options.LoginPath = "/SignIn")
+             //.AddCookie(options => options.LoginPath = "/SignIn")
              .AddJwtBearer(jwtBearerOptions =>
              {
                  jwtBearerOptions.RequireHttpsMetadata = false;
@@ -113,10 +118,54 @@
                          Log.Information("Token validated for user: {UserName}", user?.Identity?.Name);
                          return Task.CompletedTask;
                      },
-                     OnAuthenticationFailed = context =>
+                     OnAuthenticationFailed = async context =>
                      {
+                         var user = context.Principal;
+                         
+                         if (context.Exception is SecurityTokenExpiredException)
+                         {
+                             Log.Information("Token expired, attempting to renew.");
+
+                             var sessionId = context.HttpContext.Request.Cookies["SessionId"];
+                             
+                             if (!string.IsNullOrEmpty(sessionId))
+                             {
+                                 var refreshTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IRefreshTokenRepository>();
+                                 var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
+
+                                 if (refreshToken != null && refreshToken.ExpiresUtc > DateTime.UtcNow)
+                                 {
+                                     var refreshTokenHandler = context.HttpContext.RequestServices
+                                         .GetRequiredService<ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>>();
+
+                                     var command = new SignInUserByTokenCommand(refreshToken.Value);
+                                     var result = await refreshTokenHandler.Handle(command, CancellationToken.None);
+
+                                     if (result.IsSuccess)
+                                     {
+                                         context.HttpContext.Request.Headers.Authorization =
+                                              $"Bearer {result.Value.AccessToken}";                        
+                                         
+                                         var tokenHandler = new JwtSecurityTokenHandler();
+                                         var jwtToken = tokenHandler.ReadJwtToken(result.Value.AccessToken);
+                                         var identity = new ClaimsIdentity(jwtToken.Claims, "Bearer");
+                                         var principal = new ClaimsPrincipal(identity);
+                                         context.HttpContext.User = principal;
+                                         
+                                         context.HttpContext.Response.Cookies.Append("SessionId",
+                                             result.Value.SessionId.ToString());
+                                         
+                                         context.HttpContext.Response.Cookies.Append("AccessToken",
+                                             result.Value.AccessToken);
+                                         
+                                         context.Fail($"Token renewed successfully.");
+                                         return;
+                                     }
+                                 }
+                             }
+                         }
+                         
                          Log.Error(context.Exception, "Authentication failed");
-                         return Task.CompletedTask;
                      }
                  };
              });

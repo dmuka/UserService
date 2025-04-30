@@ -71,7 +71,11 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
         await connection.OpenAsync(cancellationToken);
             
         const string query = """
-                                 SELECT refresh_tokens.*
+                                 SELECT
+                                     refresh_tokens.id AS Id,
+                                     refresh_tokens.value AS Value,
+                                     refresh_tokens.expires_utc AS ExpiresUtc,
+                                     refresh_tokens.user_id AS UserId
                                  FROM refresh_tokens
                                  WHERE refresh_tokens.id = @Id
                              """;
@@ -82,7 +86,9 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
 
         try
         {
-            var token = await connection.QuerySingleOrDefaultAsync<RefreshTokenDto>(command);
+            var token = (await connection.QueryAsync<RefreshTokenDto>(command))
+                .OrderByDescending(token => token.ExpiresUtc)
+                .FirstOrDefault();
             
             if (token == null) return null;
 

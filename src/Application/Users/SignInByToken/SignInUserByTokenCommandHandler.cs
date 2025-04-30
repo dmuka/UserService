@@ -6,7 +6,7 @@ using Domain.Users;
 
 namespace Application.Users.SignInByToken;
 
-internal sealed class SignInUserByTokenCommandHandler(
+public sealed class SignInUserByTokenCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IUserRepository userRepository,
     ITokenProvider tokenProvider) : ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>

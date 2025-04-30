@@ -58,7 +58,7 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
 
         try
         {
-            tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
+            var principal = tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
