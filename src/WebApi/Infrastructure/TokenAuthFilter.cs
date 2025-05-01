@@ -27,15 +27,6 @@ public class TokenAuthFilter(
             context.Result = new RedirectToPageResult(Routes.SignIn);
             return;
         }
-
-        // if (!IsTokenValid(accessToken))
-        // {
-        //     if (!await tokenHandler.RefreshTokens())
-        //     {
-        //         context.Result = new RedirectToPageResult(Routes.SignIn);
-        //         return;
-        //     }
-        // }
         
         await next();
     }

@@ -15,8 +15,21 @@ public sealed class SignInUserByTokenCommandHandler(
     {
         var refreshToken = await refreshTokenRepository.GetTokenAsync(command.RefreshToken, cancellationToken);
 
-        if (refreshToken is null || refreshToken.ExpiresUtc <= DateTime.UtcNow)
+        if (refreshToken is null)
         {
+            return Result.Failure<SignInUserByTokenResponse>(RefreshTokenErrors.NotFoundByValue(command.RefreshToken));
+        }
+
+        if (refreshToken.ExpiresUtc <= DateTime.UtcNow)
+        {
+            await refreshTokenRepository.RemoveExpiredTokensAsync(cancellationToken);
+            
+            RefreshToken.Create(
+                Guid.CreateVersion7(), 
+                tokenProvider.CreateRefreshToken(),
+                DateTime.UtcNow.AddDays(command.TokenExpirationInDays),
+                refreshToken.UserId);
+            
             return Result.Failure<SignInUserByTokenResponse>(RefreshTokenErrors.InvalidExpiresDate);
         }
         

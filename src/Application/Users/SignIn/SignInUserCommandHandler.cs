@@ -3,6 +3,7 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain.RefreshTokens;
 using Domain.Users;
+using Microsoft.Extensions.Options;
 
 namespace Application.Users.SignIn;
 

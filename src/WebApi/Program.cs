@@ -8,6 +8,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
+using WebApi.Middleware;
 using WebApi.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -94,6 +95,8 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseMiddleware<TokenRenewalMiddleware>();
 
 app.UseAuthentication();
 

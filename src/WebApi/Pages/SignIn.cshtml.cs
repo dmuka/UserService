@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Application.Users.SignIn;
+using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using WebApi.Infrastructure;
 using WebApi.Infrastructure.PagesConstants;
 
@@ -11,7 +13,7 @@ namespace WebApi.Pages;
 public class SignInModel(
     ISender sender, 
     TokenHandler tokenHandler,
-    IHttpContextAccessor contextAccessor, 
+    IOptions<AuthOptions> authOptions, 
     ILogger<SignInModel> logger) : PageModel
 {
     [BindProperty]
@@ -63,6 +65,7 @@ public class SignInModel(
         var command = new SignInUserCommand(
             Input.UserName,
             Input.Password,
+            authOptions.Value.RefreshTokenExpirationInDays,
             Input.Email);
 
         var result = await sender.Send(command);

@@ -6,8 +6,10 @@ using Domain.Users;
 using Grpc.Core;
 using Grpc.Protos;
 using Grpc.Services;
+using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using SignInResponse = Application.Users.SignIn.SignInResponse;
 
@@ -21,7 +23,7 @@ public class UserGrpcServiceTests
     private const string Password = "password";
     private const string AccessToken = "access-token";
     private const string RefreshToken = "refresh-token";
-    private readonly Guid SessionId = Guid.NewGuid();
+    private readonly Guid SessionId = Guid.CreateVersion7();
     
     private readonly SignUpRequest _signUpRequest = new()
     {
@@ -46,6 +48,7 @@ public class UserGrpcServiceTests
     private Mock<ServerCallContext> _serverCallContextMock;
     
     private Mock<ILogger<UserGrpcService>> _loggerMock;
+    private Mock<IOptions<AuthOptions>> _authOptionsMock;
     private Mock<ISender> _senderMock;
     
     private UserGrpcService _service;
@@ -54,11 +57,23 @@ public class UserGrpcServiceTests
     public void Setup()
     {
         _serverCallContextMock = new Mock<ServerCallContext>();
-        //_serverCallContextMock.Setup(c => c.CancellationToken).Returns(_cancellationToken);
         
         _loggerMock = new Mock<ILogger<UserGrpcService>>();
         _senderMock = new Mock<ISender>();
-        _service = new UserGrpcService(_loggerMock.Object, _senderMock.Object);
+        
+        _authOptionsMock = new Mock<IOptions<AuthOptions>>();
+        _authOptionsMock.Setup(opt => opt.Value).Returns(new AuthOptions
+        {
+            Secret = "secret",
+            Issuer = "issuer",
+            Audience = "audience",
+            AccessTokenExpirationInMinutes = 1,
+            AccessTokenCookieExpirationInMinutes = 1,
+            SessionIdCookieExpirationInHours = 1,
+            RefreshTokenExpirationInDays = 1
+        });
+        
+        _service = new UserGrpcService(_authOptionsMock.Object, _loggerMock.Object, _senderMock.Object);
     }
 
     [Test]

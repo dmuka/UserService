@@ -7,6 +7,8 @@ using Domain.Users;
 using Domain.ValueObjects;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
+using Infrastructure.Options.Authentication;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace UserService.Application.Tests.Users.SignInByToken;
@@ -14,6 +16,8 @@ namespace UserService.Application.Tests.Users.SignInByToken;
 [TestFixture]
 public class SignInUserByTokenCommandHandlerTests
 {
+    private const int RefreshTokenExpirationInDays = 1;
+    
     private const string ValidToken = "validToken";
  
     private readonly Guid _refreshTokenGuid = Guid.CreateVersion7();
@@ -25,6 +29,7 @@ public class SignInUserByTokenCommandHandlerTests
     
     private Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private Mock<IUserRepository> _userRepositoryMock;
+    private Mock<IOptions<AuthOptions>> _authOptionsMock;
     private Mock<ITokenProvider> _tokenProviderMock;
     
     private SignInUserByTokenCommandHandler _handler;
@@ -65,6 +70,18 @@ public class SignInUserByTokenCommandHandlerTests
         _tokenProviderMock.Setup(provider => provider.CreateRefreshToken())
             .Returns("newRefreshToken");
         
+        _authOptionsMock = new Mock<IOptions<AuthOptions>>();
+        _authOptionsMock.Setup(opt => opt.Value).Returns(new AuthOptions
+        {
+            Secret = "secret",
+            Issuer = "issuer",
+            Audience = "audience",
+            AccessTokenExpirationInMinutes = 1,
+            AccessTokenCookieExpirationInMinutes = 1,
+            SessionIdCookieExpirationInHours = 1,
+            RefreshTokenExpirationInDays = 1
+        });
+        
         _handler = new SignInUserByTokenCommandHandler(
             _refreshTokenRepositoryMock.Object, 
             _userRepositoryMock.Object, 
@@ -75,7 +92,7 @@ public class SignInUserByTokenCommandHandlerTests
     public async Task Handle_ValidRefreshToken_ShouldReturnNewTokens()
     {
         // Arrange
-        var command = new SignInUserByTokenCommand(ValidToken);
+        var command = new SignInUserByTokenCommand(ValidToken, RefreshTokenExpirationInDays);
 
         _refreshTokenRepositoryMock.Setup(r => r.GetTokenAsync(command.RefreshToken, _cancellationToken))
             .ReturnsAsync(_validRefreshToken);

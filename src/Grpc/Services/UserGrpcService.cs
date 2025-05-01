@@ -4,13 +4,18 @@ using Application.Users.SignUp;
 using Core;
 using Grpc.Core;
 using Grpc.Protos;
+using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SignInResponse = Grpc.Protos.SignInResponse;
 
 namespace Grpc.Services;
 
-public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : Auth.AuthBase
+public class UserGrpcService(
+    IOptions<AuthOptions> authOptions, 
+    ILogger<UserGrpcService> logger, 
+    ISender sender) : Auth.AuthBase
 {
     public override async Task<SignUpResponse> SignUp(SignUpRequest request, ServerCallContext context) 
     { 
@@ -43,6 +48,7 @@ public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : 
             var command = new SignInUserCommand(
                 request.Username,
                 request.Password,
+                authOptions.Value.RefreshTokenExpirationInDays,
                 request.Email);
 
             var result = await sender.Send(command, context.CancellationToken);
@@ -65,7 +71,7 @@ public class UserGrpcService(ILogger<UserGrpcService> logger, ISender sender) : 
     { 
         try 
         { 
-            var command = new SignInUserByTokenCommand(request.RefreshToken);
+            var command = new SignInUserByTokenCommand(request.RefreshToken, authOptions.Value.RefreshTokenExpirationInDays);
             
             var result = await sender.Send(command, context.CancellationToken);
              

@@ -1,16 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Application.Users.SignIn;
 using Application.Users.SignUp;
+using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
 using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages;
 
 [AllowAnonymous]
-public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageModel
+public class SignUpModel(
+    IOptions<AuthOptions> authOptions,
+    ISender sender,
+    ILogger<SignUpModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new ();
@@ -74,7 +79,7 @@ public class SignUpModel(ISender sender, ILogger<SignUpModel> logger) : PageMode
         {
             logger.LogInformation("User with id: {Id} created a new account with password.", result.Value);
                 
-            var signInCommand = new SignInUserCommand(Input.UserName, Input.Password);
+            var signInCommand = new SignInUserCommand(Input.UserName, Input.Password, authOptions.Value.RefreshTokenExpirationInDays);
             await sender.Send(signInCommand);
                 
             return LocalRedirect(returnUrl);

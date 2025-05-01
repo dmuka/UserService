@@ -2,4 +2,4 @@
 
 namespace Application.Users.SignInByToken;
 
-public sealed record SignInUserByTokenCommand(string RefreshToken) : ICommand<SignInUserByTokenResponse>;
+public sealed record SignInUserByTokenCommand(string RefreshToken, int TokenExpirationInDays) : ICommand<SignInUserByTokenResponse>;

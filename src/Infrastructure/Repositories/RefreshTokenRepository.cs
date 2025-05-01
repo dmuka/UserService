@@ -190,5 +190,30 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
         {
             throw;
         }
+    }    
+    
+    public async Task RemoveExpiredTokensAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+            
+        const string query = """
+                                 DELETE
+                                 FROM refresh_tokens
+                                 WHERE refresh_tokens.expires_utc < @ExpiresUtc
+                             """;
+        
+        var parameters = new { ExpiresUtc = DateTime.UtcNow };
+        
+        var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
+        
+        try
+        {
+            await connection.ExecuteAsync(command);
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
     }
 }

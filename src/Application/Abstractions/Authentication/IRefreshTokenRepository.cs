@@ -46,4 +46,10 @@ public interface IRefreshTokenRepository
     /// <param name="token">The refresh token to update.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     Task UpdateTokenAsync(RefreshToken token, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Removes all expired refresh tokens in the repository.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    Task RemoveExpiredTokensAsync(CancellationToken cancellationToken = default);
 }
