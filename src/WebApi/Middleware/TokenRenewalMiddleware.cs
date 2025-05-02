@@ -48,6 +48,10 @@ public class TokenRenewalMiddleware(RequestDelegate next)
                 
                 cookieOptions.Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.AccessTokenCookieExpirationInMinutes);
                 context.Response.Cookies.Append("AccessToken", result.Value.AccessToken);
+                
+                Log.Information("Token successfully renewed.");
+
+                await next(context);
             }
             
             return;

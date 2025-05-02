@@ -112,58 +112,26 @@
                      {
                          var user = context.Principal;
                          Log.Information("Token validated for user: {UserName}", user?.Identity?.Name);
+                         foreach (var claim in user?.Claims)
+                         {
+                             Log.Information("Principal claim type: {ClaimType}, claim value: {ClaimValue}", claim.Type, claim.Value);
+                         }
+                         
                          return Task.CompletedTask;
+                     },
+                     OnAuthenticationFailed = async context =>
+                     {
+                         var user = context.Principal;
+                         
+                         if (context.Exception is SecurityTokenExpiredException)
+                         {
+                             Log.Information("Token expired, attempting to renew.");
+                     
+                             var sessionId = context.HttpContext.Request.Cookies["SessionId"];
+                         }
+                         
+                         Log.Error(context.Exception, "Authentication failed");
                      }
-                     // ,
-                     // OnAuthenticationFailed = async context =>
-                     // {
-                     //     var user = context.Principal;
-                     //     
-                     //     if (context.Exception is SecurityTokenExpiredException)
-                     //     {
-                     //         Log.Information("Token expired, attempting to renew.");
-                     //
-                     //         var sessionId = context.HttpContext.Request.Cookies["SessionId"];
-                     //         
-                     //         if (!string.IsNullOrEmpty(sessionId))
-                     //         {
-                     //             var refreshTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IRefreshTokenRepository>();
-                     //             var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
-                     //
-                     //             if (refreshToken != null && refreshToken.ExpiresUtc > DateTime.UtcNow)
-                     //             {
-                     //                 var refreshTokenHandler = context.HttpContext.RequestServices
-                     //                     .GetRequiredService<ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>>();
-                     //
-                     //                 var command = new SignInUserByTokenCommand(refreshToken.Value);
-                     //                 var result = await refreshTokenHandler.Handle(command, CancellationToken.None);
-                     //
-                     //                 if (result.IsSuccess)
-                     //                 {
-                     //                     context.HttpContext.Request.Headers.Authorization =
-                     //                          $"Bearer {result.Value.AccessToken}";                        
-                     //                     
-                     //                     var tokenHandler = new JwtSecurityTokenHandler();
-                     //                     var jwtToken = tokenHandler.ReadJwtToken(result.Value.AccessToken);
-                     //                     var identity = new ClaimsIdentity(jwtToken.Claims, "Bearer");
-                     //                     var principal = new ClaimsPrincipal(identity);
-                     //                     context.HttpContext.User = principal;
-                     //                     
-                     //                     context.HttpContext.Response.Cookies.Append("SessionId",
-                     //                         result.Value.SessionId.ToString());
-                     //                     
-                     //                     context.HttpContext.Response.Cookies.Append("AccessToken",
-                     //                         result.Value.AccessToken);
-                     //                     
-                     //                     context.Fail($"Token renewed successfully.");
-                     //                     return;
-                     //                 }
-                     //             }
-                     //         }
-                     //     }
-                     //     
-                     //     Log.Error(context.Exception, "Authentication failed");
-                     // }
                  };
              });
          

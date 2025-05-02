@@ -13,9 +13,9 @@ public class IndexModel(ISender sender) : PageModel
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public int VisiblePagesRange { get; set; } = 3;
-
+    
     [BindProperty(SupportsGet = true)]
-    public string SearchString { get; set; } = string.Empty;
+    public string? SearchString { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int? pageNumber, int? pageSize)
     {

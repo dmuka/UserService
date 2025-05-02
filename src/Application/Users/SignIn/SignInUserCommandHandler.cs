@@ -32,18 +32,23 @@ internal sealed class SignInUserCommandHandler(
 
         var accessToken = await tokenProvider.CreateAccessTokenAsync(user, cancellationToken);
 
-        var result = RefreshToken.Create(
-            Guid.CreateVersion7(),
-            tokenProvider.CreateRefreshToken(),
-            DateTime.UtcNow.AddHours(1),
-            user.Id);
+        var validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
 
-        if (result.IsFailure) return Result.Failure<SignInResponse>(result.Error);
-        
-        var refreshToken = result.Value;
-        
-        await refreshTokenRepository.AddTokenAsync(refreshToken, cancellationToken);
+        if (validRefreshToken is null || validRefreshToken.ExpiresUtc < DateTime.UtcNow)
+        {
+            var result = RefreshToken.Create(
+                Guid.CreateVersion7(),
+                tokenProvider.CreateRefreshToken(),
+                DateTime.UtcNow.AddDays(command.TokenExpirationInDays),
+                user.Id);
 
-        return new SignInResponse(accessToken, refreshToken.Id.Value);
+            if (result.IsFailure) return Result.Failure<SignInResponse>(result.Error);
+
+            validRefreshToken = result.Value;
+        }
+
+        await refreshTokenRepository.AddTokenAsync(validRefreshToken, cancellationToken);
+
+        return new SignInResponse(accessToken, validRefreshToken.Id.Value);
     }
 }
