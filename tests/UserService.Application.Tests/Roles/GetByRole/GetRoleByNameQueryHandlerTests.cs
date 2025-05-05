@@ -8,7 +8,7 @@ namespace UserService.Application.Tests.Roles.GetByRole;
 [TestFixture]
 public class GetRoleByNameQueryHandlerTests
 {
-    private readonly Role _role = Role.Create(Guid.CreateVersion7(), "Admin");
+    private readonly Role _role = Role.Create(Guid.CreateVersion7(), "Admin").Value;
     private const string NonExistentRoleName = "NonExistentRole";
     
     private readonly CancellationToken _cancellationToken = CancellationToken.None;

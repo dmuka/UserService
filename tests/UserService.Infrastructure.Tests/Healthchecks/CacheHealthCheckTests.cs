@@ -24,7 +24,7 @@ public class CacheHealthCheckTests
     {
         // Arrange
         _mockCacheService.Setup(x => x.GetEntity<Role>(It.IsAny<string>()))
-            .Returns(Role.Create(Guid.CreateVersion7(), "name"));
+            .Returns(Role.Create(Guid.CreateVersion7(), "name").Value);
         _mockCacheService.Setup(x => x.Remove(It.IsAny<string>()));
         _mockCacheService.Setup(x => 
             x.Create(

@@ -29,7 +29,7 @@ public class GetUserByNameQueryHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
+        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role").Value };
         
         _repositoryMock = new Mock<IUserRepository>();
         _roleRepositoryMock = new Mock<IRoleRepository>();

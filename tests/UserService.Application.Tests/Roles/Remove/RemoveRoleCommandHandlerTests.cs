@@ -1,5 +1,5 @@
 ﻿using Application.Abstractions.Authentication;
-using Application.Roles.RemoveRole;
+using Application.Roles.Remove;
 using Domain.Roles;
 using Moq;
 

@@ -40,7 +40,7 @@ public class SignInUserByTokenCommandHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
+        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role").Value };
         _user = User.Create(
             Guid.CreateVersion7(),
             "username",

@@ -10,4 +10,7 @@ public class Lengths
     public const int MaxLastName = 100;
     public const int MinPassword = 6;
     public const int MaxPassword = 100;
+    
+    public const int MinRoleName = 3;
+    public const int MaxRoleName = 50;
 }

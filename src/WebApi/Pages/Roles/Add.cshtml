@@ -1,0 +1,23 @@
+﻿@page
+@model WebApi.Pages.Roles.CreateModel
+@{
+    ViewData["Title"] = "Add a new role";
+}
+
+<h1>Add a new role</h1>
+
+<form method="post" asp-antiforgery="true">
+    <div class="form-floating mb-3">
+        <input asp-for="Input.RoleName" class="form-control" autocomplete="rolename" aria-required="true"/>
+        <label asp-for="Input.RoleName" class="control-label"></label>
+        <span asp-validation-for="Input.RoleName" class="text-danger"></span>
+    </div>
+    <div class="form-group mt-3">
+        <input type="submit" value="Create" class="btn btn-primary"/>
+        <a asp-page="Index" class="btn btn-secondary">Back to list</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

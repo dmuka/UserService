@@ -24,7 +24,7 @@ public class UpdateUserCommandHandler(
         await repository.UpdateUserAsync(command.User, cancellationToken);
         
         var roleIds = command.User.RoleIds.Select(roleId => roleId.Value);
-        var result =await userRoleRepository.UpdateUserRolesAsync(command.User.Id.Value, roleIds, cancellationToken);
+        var result = await userRoleRepository.UpdateUserRolesAsync(command.User.Id.Value, roleIds, cancellationToken);
 
         return result;
     }

@@ -83,3 +83,7 @@ main {
     color: #333;
     cursor: pointer;
 }
+
+.text-danger {
+    color: red;
+}

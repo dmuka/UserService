@@ -9,7 +9,7 @@ namespace UserService.Application.Tests.Roles.GetById;
 [TestFixture]
 public class GetRoleByIdQueryHandlerTests
 {
-    private readonly Role _role = Role.Create(Guid.CreateVersion7(), "Admin");
+    private readonly Role _role = Role.Create(Guid.CreateVersion7(), "Admin").Value;
     
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
     

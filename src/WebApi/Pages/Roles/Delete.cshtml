@@ -1,0 +1,31 @@
+﻿@page "{id:Guid}"
+@model WebApi.Pages.Roles.DeleteModel
+@{
+    ViewData["Title"] = "Delete role";
+}
+
+<h1>Delete role</h1>
+
+<h3>Are you sure you want to delete this role?</h3>
+
+<form method="post" asp-antiforgery="true">
+    <div class="form-floating mb-3">
+        <input asp-for="@Model.RoleInfo.RoleName" class="form-control" readonly />
+        <label asp-for="@Model.RoleInfo.RoleName" class="control-label"></label>
+    </div>    
+    <div class="text-danger">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="validation-summary-errors">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+    </div>
+    <div class="form-group mt-3">
+        <input type="submit" value="Delete" class="btn btn-danger"/>
+        <a asp-page="./Index" class="btn btn-secondary">Back to list</a>
+    </div>
+</form>

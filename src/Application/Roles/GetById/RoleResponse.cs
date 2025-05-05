@@ -1,6 +1,6 @@
 ﻿using Domain.Roles;
 
-namespace Application.Roles.GetByUserId;
+namespace Application.Roles.GetById;
 
 public sealed record RoleResponse
 {

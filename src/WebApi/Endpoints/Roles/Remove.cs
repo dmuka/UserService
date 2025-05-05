@@ -1,4 +1,4 @@
-﻿using Application.Roles.RemoveRole;
+﻿using Application.Roles.Remove;
 using MediatR;
 using WebApi.Extensions;
 using WebApi.Infrastructure;

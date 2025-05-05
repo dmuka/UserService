@@ -33,7 +33,7 @@ public class GetRoleByNameQueryHandlerTests
 
         _repositoryMock
             .Setup(repo => repo.GetRoleByNameAsync(roleName, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(role);
+            .ReturnsAsync(role.Value);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

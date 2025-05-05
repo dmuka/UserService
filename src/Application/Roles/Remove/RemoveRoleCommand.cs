@@ -1,5 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
 
-namespace Application.Roles.RemoveRole;
+namespace Application.Roles.Remove;
 
 public sealed record RemoveRoleCommand(Guid RoleId) : ICommand<int>;

@@ -1,0 +1,23 @@
+﻿@page "{id:Guid}"
+@model WebApi.Pages.Roles.EditModel
+@{
+    ViewData["Title"] = "Edit role";
+}
+
+<h1>Edit role</h1>
+
+<form method="post" asp-antiforgery="true">
+    <div class="form-floating mb-3">
+        <input asp-for="RoleInfo.RoleName" class="form-control" />
+        <label asp-for="RoleInfo.RoleName" class="control-label"></label>
+        <span asp-validation-for="RoleInfo.RoleName" class="text-danger"></span>
+    </div>
+    <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-primary"/>
+        <a asp-page="./Index" class="btn btn-secondary">Back to list</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

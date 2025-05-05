@@ -3,7 +3,7 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain.Roles;
 
-namespace Application.Roles.RemoveRole;
+namespace Application.Roles.Remove;
 
 public class RemoveRoleCommandHandler(
     IRoleRepository repository,

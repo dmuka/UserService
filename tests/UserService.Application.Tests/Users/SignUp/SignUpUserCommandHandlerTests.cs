@@ -39,7 +39,7 @@ public class SignUpUserCommandHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role") };
+        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role").Value };
         _user = User.Create(
             Guid.CreateVersion7(),
             Username,
@@ -64,7 +64,7 @@ public class SignUpUserCommandHandlerTests
         
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _roleRepositoryMock.Setup(repo => repo.GetRoleByNameAsync(RoleConstants.DefaultUserRole, _cancellationToken))
-            .ReturnsAsync(Role.Create(Guid.CreateVersion7(), RoleConstants.DefaultUserRole));
+            .ReturnsAsync(Role.Create(Guid.CreateVersion7(), RoleConstants.DefaultUserRole).Value);
         
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _passwordHasherMock.Setup(hasher => hasher.GetHash(Password))

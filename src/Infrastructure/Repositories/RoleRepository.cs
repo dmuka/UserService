@@ -77,7 +77,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
 
             RemoveFromCache<Role>();
             
-            return Role.Create(roleDto.Id, roleDto.Name);
+            return Role.Create(roleDto.Id, roleDto.Name).Value;
         }
         catch (Exception e)
         {
@@ -133,7 +133,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
         {
             var roleDtos = await connection.QueryAsync<RoleDto>(command);
             
-            return roleDtos.Select(dto => Role.Create(dto.Id, dto.Name)).ToList();
+            return roleDtos.Select(dto => Role.Create(dto.Id, dto.Name).Value).ToList();
         }
         catch (Exception e)
         {
@@ -163,7 +163,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
             var roleDto = await connection.QuerySingleOrDefaultAsync<RoleDto>(command);
             RemoveFromCache<Role>();
 
-            return roleDto is not null ? Role.Create(roleDto.Id, roleDto.Name) : null;
+            return roleDto is not null ? Role.Create(roleDto.Id, roleDto.Name).Value : null;
         }
         catch (Exception e)
         {
@@ -179,15 +179,17 @@ public class RoleRepository : BaseRepository, IRoleRepository
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT roles.*
+        const string query = $"""
+                                 SELECT 
+                                     roles.id AS "{nameof(RoleDto.Id)}",
+                                     roles.Name AS "{nameof(RoleDto.Name)}"
                                  FROM roles
                              """;
         
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
         roles = (await connection.QueryAsync<RoleDto>(command))
-            .Select(dto => Role.Create(dto.Id, dto.Name)).ToList();
+            .Select(dto => Role.Create(dto.Id, dto.Name).Value).ToList();
         CreateInCache(roles);
         
         return roles;
@@ -212,7 +214,7 @@ public class RoleRepository : BaseRepository, IRoleRepository
         return roleId;
     }
 
-    public async Task UpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
+    public async Task<int> UpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         
@@ -223,11 +225,13 @@ public class RoleRepository : BaseRepository, IRoleRepository
                                  WHERE roles.id = @Id
                              """;
         
-        var parameters = new { role.Name };
+        var parameters = new { Id = role.Id.Value, role.Name };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
         
-        await connection.ExecuteAsync(command);
+        var rows = await connection.ExecuteAsync(command);
         RemoveFromCache<Role>();
+
+        return rows;
     }
 }

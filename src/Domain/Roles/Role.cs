@@ -1,4 +1,6 @@
 ﻿using Core;
+using Domain.Roles.DomainEvents;
+using Domain.Roles.Specifications;
 using Domain.Users;
 
 namespace Domain.Roles;
@@ -11,9 +13,21 @@ public class Role : Entity, IAggregationRoot
 
     protected Role() { }
 
-    public static Role Create(Guid id, string name)
+    public static Result<Role> Create(Guid roleId, string roleName)
     {
-        return new Role(new RoleId(id), name);
+        var resultsWithFailures = ValidateRoleDetails(roleName);
+
+        if (resultsWithFailures.Length != 0)
+        {
+            return Result<Role>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
+        }
+
+        var role = new Role(new RoleId(roleId), roleName);
+        
+        var roleCreatedEvent = new RoleCreatedDomainEvent(roleId);
+        role.AddDomainEvent(roleCreatedEvent);
+        
+        return role;
     }
 
     private Role(RoleId id, string name)
@@ -26,5 +40,20 @@ public class Role : Entity, IAggregationRoot
     public void AddUser(UserId userId)
     {
         UserIds.Add(userId);
+    }
+    
+    /// <summary>
+    /// Validates role details.
+    /// </summary>
+    private static Result[] ValidateRoleDetails(string roleName)
+    {
+        var validationResults = new []
+        {
+            new RoleNameMustBeValid(roleName).IsSatisfied()
+        };
+            
+        var results = validationResults.Where(result => result.IsFailure);
+
+        return results.ToArray();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Roles.Add;
-using Application.Roles.AddRole;
+using Domain;
 using Domain.Roles;
 using Moq;
 
@@ -18,6 +18,8 @@ public class AddRoleCommandHandlerTests
         
     private Mock<IRoleRepository> _roleRepositoryMock;
     private Mock<IUserContext> _userContextMock;
+    private Mock<IEventDispatcher> _eventDispatcherMock;
+    
     private AddRoleCommandHandler _handler;
 
     [SetUp]
@@ -25,7 +27,9 @@ public class AddRoleCommandHandlerTests
     {
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new AddRoleCommandHandler(_roleRepositoryMock.Object, _userContextMock.Object);
+        _eventDispatcherMock = new Mock<IEventDispatcher>();
+        
+        _handler = new AddRoleCommandHandler(_roleRepositoryMock.Object, _userContextMock.Object, _eventDispatcherMock.Object);
     }
 
     [Test]

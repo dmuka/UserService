@@ -1,0 +1,67 @@
+﻿using System.ComponentModel.DataAnnotations;
+using Application.Abstractions.Authentication;
+using Application.Roles.GetById;
+using Application.Roles.Update;
+using Application.Users.GetById;
+using Application.Users.Update;
+using Domain.Roles;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using WebApi.Infrastructure.PagesConstants;
+
+namespace WebApi.Pages.Roles;
+
+public class EditModel(
+    ISender sender, 
+    IPasswordHasher passwordHasher, 
+    IRoleRepository roleRepository) : PageModel
+{
+    [BindProperty]
+    public InputModel RoleInfo { get; set; } = new();
+
+    public class InputModel
+    {
+        public Guid Id { get; set; }
+        
+        [Required]
+        [StringLength(Lengths.MaxRoleName, ErrorMessage = ErrorMessages.RoleName, MinimumLength = Lengths.MinRoleName)]
+        [Display(Name = "Role name")]
+        public string RoleName { get; set; } = string.Empty;
+    }
+
+    public async Task<IActionResult> OnGetAsync(Guid id)
+    {
+        var query = new GetRoleByIdQuery(id);
+        var result = await sender.Send(query);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddModelError(string.Empty, result.Error.Description);
+            
+            return Page();
+        }
+        
+        RoleInfo.RoleName = result.Value.Role.Name;
+        TempData["Id"] = result.Value.Role.Id.Value;
+        
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!ModelState.IsValid) return Page();
+
+        var cancellationToken = HttpContext.RequestAborted;
+
+        var role = Role.Create(
+            (Guid)TempData["Id"],
+            RoleInfo.RoleName).Value;
+        
+        var command = new UpdateRoleCommand(role);
+        var result = await sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? Page() : LocalRedirect(Routes.Roles);
+    }
+}
