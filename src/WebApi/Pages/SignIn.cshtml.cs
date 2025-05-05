@@ -65,6 +65,7 @@ public class SignInModel(
         var command = new SignInUserCommand(
             Input.UserName,
             Input.Password,
+            Input.RememberMe,
             authOptions.Value.RefreshTokenExpirationInDays,
             Input.Email);
 

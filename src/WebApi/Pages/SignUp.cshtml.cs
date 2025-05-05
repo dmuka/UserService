@@ -79,7 +79,11 @@ public class SignUpModel(
         {
             logger.LogInformation("User with id: {Id} created a new account with password.", result.Value);
                 
-            var signInCommand = new SignInUserCommand(Input.UserName, Input.Password, authOptions.Value.RefreshTokenExpirationInDays);
+            var signInCommand = new SignInUserCommand(
+                Input.UserName, 
+                Input.Password, 
+                false,
+                authOptions.Value.RefreshTokenExpirationInDays);
             await sender.Send(signInCommand);
                 
             return LocalRedirect(returnUrl);

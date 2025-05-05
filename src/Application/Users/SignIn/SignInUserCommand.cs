@@ -5,5 +5,6 @@ namespace Application.Users.SignIn;
 public sealed record SignInUserCommand(
     string Username, 
     string Password,
+    bool RememberMe,
     int TokenExpirationInDays,
     string? Email = null) : ICommand<SignInResponse>;

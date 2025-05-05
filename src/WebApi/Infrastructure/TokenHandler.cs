@@ -1,6 +1,5 @@
-﻿using System.Text;
-using System.Text.Json;
-using Application.Abstractions.Authentication;
+﻿using Application.Abstractions.Authentication;
+using Core;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -9,6 +8,7 @@ namespace WebApi.Infrastructure;
 public class TokenHandler(
     IUserContext userContext, 
     IHttpContextAccessor httpContextAccessor,
+    ITokenProvider tokenProvider,
     IRefreshTokenRepository refreshTokenRepository,
     IOptions<AuthOptions> authOptions,
     ILogger<TokenHandler> logger)
@@ -22,10 +22,10 @@ public class TokenHandler(
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.AccessTokenCookieExpirationInMinutes)
+            Expires = tokenProvider.GetExpirationValue(authOptions.Value.AccessTokenCookieExpirationInMinutes, ExpirationUnits.Minute)
         };
 
-        httpContextAccessor.HttpContext.Response.Cookies.Append("AccessToken", accessToken, cookieOptions);
+        httpContextAccessor.HttpContext.Response.Cookies.Append(CookiesNames.AccessToken, accessToken, cookieOptions);
     }
     
     public void StoreSessionId(Guid sessionId)
@@ -37,26 +37,26 @@ public class TokenHandler(
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.SessionIdCookieExpirationInHours)
+            Expires = tokenProvider.GetExpirationValue(authOptions.Value.SessionIdCookieExpirationInHours, ExpirationUnits.Hour)
         };
 
-        httpContextAccessor.HttpContext.Response.Cookies.Append("SessionId", sessionId.ToString(), cookieOptions);
+        httpContextAccessor.HttpContext.Response.Cookies.Append(CookiesNames.SessionId, sessionId.ToString(), cookieOptions);
     }
 
     public void ClearTokens()
     {
-        httpContextAccessor.HttpContext?.Response.Cookies.Delete("AccessToken");
-        httpContextAccessor.HttpContext?.Response.Cookies.Delete("SessionId");
+        httpContextAccessor.HttpContext?.Response.Cookies.Delete(CookiesNames.AccessToken);
+        httpContextAccessor.HttpContext?.Response.Cookies.Delete(CookiesNames.SessionId);
     }
 
     public string? GetAccessToken()
     {
-        return httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+        return httpContextAccessor.HttpContext?.Request.Cookies[CookiesNames.AccessToken];
     }
 
     public Guid? GetSessionId()
     {
-        var sessionId = httpContextAccessor.HttpContext?.Request.Cookies["SessionId"];
+        var sessionId = httpContextAccessor.HttpContext?.Request.Cookies[CookiesNames.SessionId];
 
         return sessionId is null ? null : Guid.Parse(sessionId);
     }

@@ -123,14 +123,7 @@
                      {
                          var user = context.Principal;
                          
-                         if (context.Exception is SecurityTokenExpiredException)
-                         {
-                             Log.Information("Token expired, attempting to renew.");
-                     
-                             var sessionId = context.HttpContext.Request.Cookies["SessionId"];
-                         }
-                         
-                         Log.Error(context.Exception, "Authentication failed");
+                         Log.Error(context.Exception, "Authentication failed ({User})", user?.Identity is null ? "Unknown" : user.Identity.Name);
                      }
                  };
              });

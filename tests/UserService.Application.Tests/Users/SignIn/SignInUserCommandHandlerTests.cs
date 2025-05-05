@@ -3,9 +3,7 @@ using Application.Users.SignIn;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UserService.Application.Tests.Users.SignIn;
@@ -26,6 +24,8 @@ public class SignInUserCommandHandlerTests
         
     private const string AccessToken = "accessToken";
     private const string RefreshTokenValue = "refreshTokenValue";
+
+    private bool _rememberMe = false;
     
     private IList<Role> _roles;
     
@@ -37,6 +37,8 @@ public class SignInUserCommandHandlerTests
     private Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private Mock<IPasswordHasher> _passwordHasherMock;
     private Mock<ITokenProvider> _tokenProviderMock;
+    private Mock<ILogger<SignInUserCommandHandler>> _loggerMock;
+    
     private SignInUserCommandHandler _handler;
 
     [SetUp]
@@ -65,23 +67,26 @@ public class SignInUserCommandHandlerTests
             .Returns(true);
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-        _tokenProviderMock.Setup(tp => tp.CreateAccessTokenAsync(_existingUser, _cancellationToken))
+        _tokenProviderMock.Setup(tp => tp.CreateAccessTokenAsync(_existingUser, _rememberMe, _cancellationToken))
             .Returns(Task.FromResult(AccessToken));
         _tokenProviderMock.Setup(tp => tp.CreateRefreshToken())
             .Returns(RefreshTokenValue);
+        
+        _loggerMock = new Mock<ILogger<SignInUserCommandHandler>>();
         
         _handler = new SignInUserCommandHandler(
             _userRepositoryMock.Object,
             _refreshTokenRepositoryMock.Object,
             _passwordHasherMock.Object,
-            _tokenProviderMock.Object);
+            _tokenProviderMock.Object,
+            _loggerMock.Object);
     }
 
     [Test]
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExistByUsername()
     {
         // Arrange
-        var command = new SignInUserCommand(NonExistingUsername, CorrectPassword, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(NonExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays);
         _userRepositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))
             .ReturnsAsync((User)null!);
 
@@ -100,7 +105,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExistByEmail()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RefreshTokenExpirationInDays, NonExistingEmail);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays, NonExistingEmail);
         _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(It.IsAny<string>(), _cancellationToken))
             .ReturnsAsync((User)null!);
 
@@ -119,7 +124,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnWrongPassword_WhenPasswordIsIncorrect()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, WrongPassword, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(ExistingUsername, WrongPassword, _rememberMe, RefreshTokenExpirationInDays);
         _passwordHasherMock.Setup(ph => ph.CheckPassword(command.Password, _existingUser.PasswordHash))
             .Returns(false);
 
@@ -138,7 +143,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnSignInResponse_WhenSignInIsSuccessful()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -155,7 +160,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnSignInResponse_WhenSignInByEmailIsSuccessful()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RefreshTokenExpirationInDays, ExistingEmail);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays, ExistingEmail);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);

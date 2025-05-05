@@ -30,7 +30,8 @@ message SignInRequest
 { 
   string username = 1; 
   string password = 2;
-  google.protobuf.StringValue email = 3;
+  bool remember_me = 3;
+  google.protobuf.StringValue email = 4;
 }
 
 message SignInResponse 

@@ -3,7 +3,7 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain.RefreshTokens;
 using Domain.Users;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Users.SignIn;
 
@@ -11,7 +11,8 @@ internal sealed class SignInUserCommandHandler(
     IUserRepository userRepository,
     IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher passwordHasher,
-    ITokenProvider tokenProvider) : ICommandHandler<SignInUserCommand, SignInResponse>
+    ITokenProvider tokenProvider,
+    ILogger<SignInUserCommandHandler> logger) : ICommandHandler<SignInUserCommand, SignInResponse>
 {
     public async Task<Result<SignInResponse>> Handle(SignInUserCommand command, CancellationToken cancellationToken)
     {
@@ -21,28 +22,45 @@ internal sealed class SignInUserCommandHandler(
 
         if (user is null)
         {
-            return command.Email is null
-                ? Result.Failure<SignInResponse>(UserErrors.NotFoundByUsername(command.Username))
-                : Result.Failure<SignInResponse>(UserErrors.NotFoundByEmail(command.Email));
+            var errorMessage = command.Email is null
+                ? UserErrors.NotFoundByUsername(command.Username)
+                : UserErrors.NotFoundByEmail(command.Email);
+            logger.LogWarning("User not found: {ErrorMessage}", errorMessage);
+            
+            return Result.Failure<SignInResponse>(errorMessage);
         }
 
         var isPasswordCorrect = passwordHasher.CheckPassword(command.Password, user.PasswordHash);
 
-        if (!isPasswordCorrect) return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
+        if (!isPasswordCorrect)
+        {
+            logger.LogWarning("Incorrect password for user: {Username}", user.Username);
+            
+            return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
+        }
 
-        var accessToken = await tokenProvider.CreateAccessTokenAsync(user, cancellationToken);
+        var accessToken = await tokenProvider.CreateAccessTokenAsync(user, command.RememberMe, cancellationToken);
 
-        var validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
+        RefreshToken? validRefreshToken = null;
+
+        if (!command.RememberMe) return new SignInResponse(accessToken, Guid.CreateVersion7());
+        
+        validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
 
         if (validRefreshToken is null || validRefreshToken.ExpiresUtc < DateTime.UtcNow)
         {
             var result = RefreshToken.Create(
                 Guid.CreateVersion7(),
                 tokenProvider.CreateRefreshToken(),
-                DateTime.UtcNow.AddDays(command.TokenExpirationInDays),
+                tokenProvider.GetExpirationValue(command.TokenExpirationInDays, ExpirationUnits.Minute, command.RememberMe),
                 user.Id);
 
-            if (result.IsFailure) return Result.Failure<SignInResponse>(result.Error);
+            if (result.IsFailure)
+            {
+                logger.LogError("Failed to create refresh token for user: {Username}", user.Username);
+                
+                return Result.Failure<SignInResponse>(result.Error);
+            }
 
             validRefreshToken = result.Value;
         }

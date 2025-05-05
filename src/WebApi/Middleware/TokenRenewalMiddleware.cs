@@ -1,9 +1,11 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignInByToken;
+using Core;
 using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Serilog;
+using WebApi.Infrastructure;
 
 namespace WebApi.Middleware;
 
@@ -16,14 +18,14 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         IOptions<AuthOptions> authOptions,
         ISender sender)
     {
-        var sessionId = context.Request.Cookies["SessionId"];
-        var accessToken = context.Request.Cookies["AccessToken"];
+        var sessionId = context.Request.Cookies[CookiesNames.SessionId];
+        var accessToken = context.Request.Cookies[CookiesNames.AccessToken];
         
         if (!string.IsNullOrEmpty(sessionId) 
             && !string.IsNullOrEmpty(accessToken) 
             && !tokenProvider.ValidateAccessToken(accessToken))
         {
-            Log.Information("Token expired, attempting to renew.");
+            Log.Information("Access token expired, attempting to renew.");
             
             var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
             
@@ -41,15 +43,17 @@ public class TokenRenewalMiddleware(RequestDelegate next)
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddHours(authOptions.Value.SessionIdCookieExpirationInHours)
+                    Expires = tokenProvider.GetExpirationValue(authOptions.Value.SessionIdCookieExpirationInHours, ExpirationUnits.Hour)
                 };
 
-                context.Response.Cookies.Append("SessionId", sessionId, cookieOptions);
+                context.Response.Cookies.Append(CookiesNames.SessionId, sessionId, cookieOptions);
+
+                cookieOptions.Expires =
+                    tokenProvider.GetExpirationValue(authOptions.Value.AccessTokenCookieExpirationInMinutes,
+                        ExpirationUnits.Minute);
+                context.Response.Cookies.Append(CookiesNames.AccessToken, result.Value.AccessToken);
                 
-                cookieOptions.Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.AccessTokenCookieExpirationInMinutes);
-                context.Response.Cookies.Append("AccessToken", result.Value.AccessToken);
-                
-                Log.Information("Token successfully renewed.");
+                Log.Information("Access token successfully renewed.");
 
                 await next(context);
             }

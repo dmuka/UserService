@@ -48,6 +48,7 @@ public class UserGrpcService(
             var command = new SignInUserCommand(
                 request.Username,
                 request.Password,
+                request.RememberMe,
                 authOptions.Value.RefreshTokenExpirationInDays,
                 request.Email);
 

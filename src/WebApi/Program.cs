@@ -8,6 +8,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
+using WebApi.Infrastructure;
 using WebApi.Middleware;
 using WebApi.Pages;
 
@@ -62,7 +63,7 @@ app.UseStatusCodePages(context =>
 
 app.Use(async (context, next) =>
 {
-    var token = context.Request.Cookies["AccessToken"];
+    var token = context.Request.Cookies[CookiesNames.AccessToken];
     if (!string.IsNullOrEmpty(token))
     {
         context.Request.Headers.Append("Authorization", $"Bearer {token}");

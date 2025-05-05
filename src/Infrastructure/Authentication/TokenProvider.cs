@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Abstractions.Authentication;
+using Core;
 using Domain.Roles;
 using Domain.Users;
 using Infrastructure.Options.Authentication;
@@ -15,7 +16,10 @@ namespace Infrastructure.Authentication;
 
 internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceScopeFactory scopeFactory) : ITokenProvider
 {
-    public async Task<string> CreateAccessTokenAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<string> CreateAccessTokenAsync(
+        User user, 
+        bool rememberMe,
+        CancellationToken cancellationToken = default)
     {
         var secretKey = authOptions.Value.Secret;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -38,10 +42,10 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(authOptions.Value.AccessTokenExpirationInMinutes),
             SigningCredentials = credentials,
             Issuer = authOptions.Value.Issuer,
-            Audience = authOptions.Value.Audience
+            Audience = authOptions.Value.Audience,
+            Expires = GetExpirationValue(authOptions.Value.AccessTokenExpirationInMinutes, ExpirationUnits.Minute, rememberMe)
         };
 
         var handler = new JsonWebTokenHandler();
@@ -81,5 +85,27 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
     public string CreateRefreshToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+    }
+
+    public DateTime GetExpirationValue(
+        int expirationValue,
+        ExpirationUnits expirationUnits,
+        bool rememberMe = false)
+    {
+        if (!rememberMe)
+        {
+            expirationValue /= 2;
+            if (expirationUnits == 0) expirationValue = 1;
+        }
+
+        var value = expirationUnits switch
+        {
+            ExpirationUnits.Minute => DateTime.UtcNow.AddMinutes(expirationValue),
+            ExpirationUnits.Hour => DateTime.UtcNow.AddHours(expirationValue),
+            ExpirationUnits.Day => DateTime.UtcNow.AddDays(expirationValue),
+            _ => DateTime.UtcNow.AddMinutes(expirationValue)
+        };
+        
+        return value;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignInByToken;
+using Core;
 using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.UserPermissions;
@@ -16,9 +17,11 @@ namespace UserService.Application.Tests.Users.SignInByToken;
 [TestFixture]
 public class SignInUserByTokenCommandHandlerTests
 {
-    private const int RefreshTokenExpirationInDays = 1;
+    private const int RefreshTokenExpirationInDays = 2;
     
     private const string ValidToken = "validToken";
+
+    private bool _rememberMe = false;
  
     private readonly Guid _refreshTokenGuid = Guid.CreateVersion7();
     private IList<Role> _roles;
@@ -60,8 +63,11 @@ public class SignInUserByTokenCommandHandlerTests
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, _cancellationToken))
+        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, _rememberMe, _cancellationToken))
             .Returns(Task.FromResult("newAccessToken"));
+        
+        _tokenProviderMock.Setup(provider => provider.GetExpirationValue(RefreshTokenExpirationInDays, ExpirationUnits.Day, _rememberMe))
+            .Returns(DateTime.UtcNow.AddDays(RefreshTokenExpirationInDays / 2));
         
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRepositoryMock.Setup(repository => repository.GetUserByIdAsync(_user.Id.Value, _cancellationToken))

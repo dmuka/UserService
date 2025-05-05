@@ -27,7 +27,7 @@ public sealed class SignInUserByTokenCommandHandler(
             RefreshToken.Create(
                 Guid.CreateVersion7(), 
                 tokenProvider.CreateRefreshToken(),
-                DateTime.UtcNow.AddDays(command.TokenExpirationInDays),
+                tokenProvider.GetExpirationValue(command.TokenExpirationInDays, ExpirationUnits.Day),
                 refreshToken.UserId);
             
             return Result.Failure<SignInUserByTokenResponse>(RefreshTokenErrors.InvalidExpiresDate);
@@ -40,10 +40,11 @@ public sealed class SignInUserByTokenCommandHandler(
             return Result.Failure<SignInUserByTokenResponse>(UserErrors.NotFound(refreshToken.UserId.Value));
         }
         
-        var accessToken = await tokenProvider.CreateAccessTokenAsync(user, cancellationToken);
+        var accessToken = await tokenProvider.CreateAccessTokenAsync(user, false, cancellationToken);
 
         refreshToken.ChangeValue(tokenProvider.CreateRefreshToken());
-        refreshToken.ChangeExpireDate(DateTime.UtcNow.AddDays(7));
+        var exp = tokenProvider.GetExpirationValue(command.TokenExpirationInDays, ExpirationUnits.Day);
+        refreshToken.ChangeExpireDate(tokenProvider.GetExpirationValue(command.TokenExpirationInDays, ExpirationUnits.Day));
         
         await refreshTokenRepository.UpdateTokenAsync(refreshToken, cancellationToken);
 

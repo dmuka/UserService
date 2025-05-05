@@ -18,6 +18,7 @@ internal sealed class SignIn(IOptions<AuthOptions> authOptions) : IEndpoint
             var command = new SignInUserCommand(
                 request.Username,
                 request.Password,
+                false,
                 authOptions.Value.RefreshTokenExpirationInDays,
                 request.Email);
 

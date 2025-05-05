@@ -16,6 +16,8 @@ public class TokenProviderTests
 {
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
     
+    private bool _rememberMe = false;
+    
     private Mock<IOptions<AuthOptions>> _authOptionsMock;
     private Mock<IServiceProvider> _serviceProviderMock;
     private Mock<IRoleRepository> _roleRepositoryMock;
@@ -68,7 +70,7 @@ public class TokenProviderTests
             new List<UserPermissionId>()).Value;
 
         // Act
-        var token = await _tokenProvider.CreateAccessTokenAsync(user, _cancellationToken);
+        var token = await _tokenProvider.CreateAccessTokenAsync(user, _rememberMe, _cancellationToken);
 
         // Assert
         Assert.That(token, Is.Not.Empty);
