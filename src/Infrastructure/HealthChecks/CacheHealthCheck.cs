@@ -12,7 +12,7 @@ public class CacheHealthCheck(ICacheService cache) : IHealthCheck
     {
         try
         {
-            var role = Role.Create(Guid.CreateVersion7(), Name);
+            var role = Role.Create(Guid.CreateVersion7(), Name).Value;
             
             cache.Create(Name, role);
 
