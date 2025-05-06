@@ -18,4 +18,6 @@ public record AuthOptions
     public required int SessionIdCookieExpirationInHours { get; set; }
     [Required, Range(0, 30)]
     public required int RefreshTokenExpirationInDays { get; set; }
+    [Required, Range(0, 30)]
+    public required int ResetPasswordTokenExpirationInMinutes { get; set; }
 }

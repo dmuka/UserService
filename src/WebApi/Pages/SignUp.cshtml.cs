@@ -20,7 +20,9 @@ public class SignUpModel(
     [BindProperty]
     public InputModel Input { get; set; } = new ();
 
-    public string? ReturnUrl { get; set; } = null;
+    public string? ReturnUrl { get; set; }
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public class InputModel
     {
@@ -73,8 +75,8 @@ public class SignUpModel(
             Input.FirstName, 
             Input.LastName, 
             Input.Password);
-            
-        var result = await sender.Send(signUpCommand);
+        var result = await sender.Send(signUpCommand, CancellationToken);
+        
         if (result.IsSuccess)
         {
             logger.LogInformation("User with id: {Id} created a new account with password.", result.Value);
@@ -84,7 +86,7 @@ public class SignUpModel(
                 Input.Password, 
                 false,
                 authOptions.Value.RefreshTokenExpirationInDays);
-            await sender.Send(signInCommand);
+            await sender.Send(signInCommand, CancellationToken);
                 
             return LocalRedirect(returnUrl);
         }

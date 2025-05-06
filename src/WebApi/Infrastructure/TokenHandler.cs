@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Core;
 using Infrastructure.Options.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 
 namespace WebApi.Infrastructure;
@@ -10,9 +11,12 @@ public class TokenHandler(
     IHttpContextAccessor httpContextAccessor,
     ITokenProvider tokenProvider,
     IRefreshTokenRepository refreshTokenRepository,
+    IDataProtectionProvider provider,
     IOptions<AuthOptions> authOptions,
     ILogger<TokenHandler> logger)
 {
+    private readonly IDataProtector _protector = provider.CreateProtector("PasswordReset");
+    
     public void StoreToken(string accessToken)
     {
         if (httpContextAccessor.HttpContext is null) return;
@@ -82,5 +86,30 @@ public class TokenHandler(
         if (refreshToken is null || refreshToken.ExpiresUtc < DateTime.UtcNow) return null;
         
         return refreshToken.Value;
+    }
+    
+    public string GetPasswordResetToken(string userId)
+    {
+        var data = $"{userId}:{DateTime.UtcNow.Ticks}";
+        return _protector.Protect(data);
+    }
+
+    public bool ValidatePasswordResetToken(string token, out string userId)
+    {
+        try
+        {
+            var parts = _protector.Unprotect(token).Split(':');
+            
+            userId = parts[0];
+            var timestamp = long.Parse(parts[1]);
+            var tokenAge = DateTime.UtcNow.Ticks - timestamp;
+            
+            return tokenAge < TimeSpan.FromMinutes(authOptions.Value.AccessTokenCookieExpirationInMinutes).Ticks;
+        }
+        catch
+        {
+            userId = null;
+            return false;
+        }
     }
 }

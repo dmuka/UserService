@@ -37,7 +37,8 @@ public class TokenProviderTests
             RefreshTokenExpirationInDays = 30,
             SessionIdCookieExpirationInHours = 12,
             Issuer = "TestIssuer",
-            Audience = "TestAudience"
+            Audience = "TestAudience",
+            ResetPasswordTokenExpirationInMinutes = 10
         });
         
         _roleRepositoryMock = new Mock<IRoleRepository>();
