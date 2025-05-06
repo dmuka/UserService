@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Serilog;
 using WebApi.Pages;
 
 namespace WebApi.Infrastructure;
@@ -16,7 +17,8 @@ public class TokenAuthFilter(
         if (context.HttpContext.Request.Path.StartsWithSegments(Routes.SignIn)
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.SignUp)
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPassword)
-            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPasswordConfirmation))
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPasswordConfirmation)
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ResetPassword))
         {
             await next();
             return;
@@ -26,6 +28,8 @@ public class TokenAuthFilter(
         
         if (string.IsNullOrEmpty(accessToken))
         {
+            Log.Information("No access token.");
+            
             context.Result = new RedirectToPageResult(Routes.SignIn);
             return;
         }

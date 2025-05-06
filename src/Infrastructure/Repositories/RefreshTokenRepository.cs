@@ -33,8 +33,12 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
             
-        const string query = """
-                                 SELECT refresh_tokens.*
+        const string query = $"""
+                                 SELECT 
+                                     refresh_tokens.id AS {nameof(RefreshToken.Id)},
+                                     refresh_tokens.expires_utc AS {nameof(RefreshToken.ExpiresUtc)},
+                                     refresh_tokens.value AS {nameof(RefreshToken.Value)},
+                                     refresh_tokens.user_id AS {nameof(RefreshToken.UserId)}
                                  FROM refresh_tokens
                                  WHERE refresh_tokens.user_id = @UserId
                              """;
@@ -45,7 +49,9 @@ public class RefreshTokenRepository : BaseRepository, IRefreshTokenRepository
 
         try
         {
-            var token = await connection.QuerySingleOrDefaultAsync<RefreshTokenDto>(command);
+            var tokenDtos = await connection.QueryAsync<RefreshTokenDto>(command);
+            
+            var token = tokenDtos.OrderByDescending(t => t.ExpiresUtc).FirstOrDefault();
             
             if (token == null) return null;
 

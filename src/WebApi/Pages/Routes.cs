@@ -7,6 +7,7 @@ public static class Routes
     public const string ForgotPassword = "/Account/ForgotPassword";
     public const string ForgotPasswordConfirmation = "/Account/ForgotPasswordConfirmation";
     public const string ResetPassword = "/Account/ResetPassword";
+    public const string ResetPasswordConfirmation = "/Account/ResetPasswordConfirmation";
     public const string Logout = "/Account/Logout";
     
     public const string Users = "/Users";

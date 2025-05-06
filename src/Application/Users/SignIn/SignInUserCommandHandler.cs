@@ -41,11 +41,7 @@ internal sealed class SignInUserCommandHandler(
 
         var accessToken = await tokenProvider.CreateAccessTokenAsync(user, command.RememberMe, cancellationToken);
 
-        RefreshToken? validRefreshToken = null;
-
-        if (!command.RememberMe) return new SignInResponse(accessToken, Guid.CreateVersion7());
-        
-        validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
+        var validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
 
         if (validRefreshToken is null || validRefreshToken.ExpiresUtc < DateTime.UtcNow)
         {
@@ -64,6 +60,8 @@ internal sealed class SignInUserCommandHandler(
 
             validRefreshToken = result.Value;
         }
+
+        if (!command.RememberMe) return new SignInResponse(accessToken, validRefreshToken.Id.Value);
 
         await refreshTokenRepository.AddTokenAsync(validRefreshToken, cancellationToken);
 

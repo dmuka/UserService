@@ -126,6 +126,6 @@ public class EditModel(
         var command = new UpdateUserCommand(user);
         var result = await sender.Send(command, cancellationToken);
         
-        return result.IsFailure ? Page() : LocalRedirect("/Users");
+        return result.IsFailure ? Page() : LocalRedirect(Routes.Users);
     }
 }

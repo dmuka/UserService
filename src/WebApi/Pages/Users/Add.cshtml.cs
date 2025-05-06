@@ -63,10 +63,7 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
+        if (!ModelState.IsValid) return Page();
 
         var cancellationToken = HttpContext.RequestAborted;
         var command = new SignUpUserCommand(
@@ -80,6 +77,6 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
 
         if (result.IsFailure) return Page();
 
-        return LocalRedirect("/Users");
+        return LocalRedirect(Routes.Users);
     }
 }

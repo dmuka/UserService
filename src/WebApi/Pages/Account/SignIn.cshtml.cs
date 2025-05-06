@@ -80,6 +80,7 @@ public class SignInModel(
         }
         
         ModelState.AddModelError(string.Empty, "Invalid login attempt");
+        
         return Page();
     }
 }

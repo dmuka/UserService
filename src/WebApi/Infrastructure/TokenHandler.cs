@@ -94,21 +94,22 @@ public class TokenHandler(
         return _protector.Protect(data);
     }
 
-    public bool ValidatePasswordResetToken(string token, out string userId)
+    public bool ValidatePasswordResetToken(string token, out string? userId)
     {
         try
         {
             var parts = _protector.Unprotect(token).Split(':');
             
             userId = parts[0];
-            var timestamp = long.Parse(parts[1]);
+            if (!long.TryParse(parts[1], out var timestamp)) return false;
             var tokenAge = DateTime.UtcNow.Ticks - timestamp;
             
-            return tokenAge < TimeSpan.FromMinutes(authOptions.Value.AccessTokenCookieExpirationInMinutes).Ticks;
+            return tokenAge < TimeSpan.FromMinutes(authOptions.Value.ResetPasswordTokenExpirationInMinutes).Ticks;
         }
         catch
         {
             userId = null;
+            
             return false;
         }
     }

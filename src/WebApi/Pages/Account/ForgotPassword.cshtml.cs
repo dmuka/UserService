@@ -48,7 +48,7 @@ public class ForgotPasswordModel(
 
         var resetCode = tokenHandler.GetPasswordResetToken(user.Id.Value.ToString());
         var callbackUrl = Url.Page(
-            "/Account/ResetPassword",
+            Routes.ResetPassword,
             pageHandler: null,
             values: new { resetCode },
             protocol: Request.Scheme);

@@ -49,6 +49,6 @@ public class DeleteModel(ISender sender) : PageModel
         var cancellationToken = HttpContext.RequestAborted;
         var result = await sender.Send(command, cancellationToken);
         
-        return result.IsFailure ? Page() : LocalRedirect("/Users");
+        return result.IsFailure ? Page() : LocalRedirect(Routes.Users);
     }
 }

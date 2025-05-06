@@ -25,6 +25,10 @@ public static class UserErrors
         Codes.Unauthorized,
         "You are not authorized to perform this action.");
 
+    public static Error WrongResetCode() => Error.Failure(
+        Codes.WrongResetCode,
+        "The provided reset code is invalid.");
+
     public static readonly Error EmailAlreadyExists = Error.Conflict(
         Codes.EmailExists,
         "The provided email already exists.");

@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.SignIn;
+using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
@@ -62,6 +63,9 @@ public class SignInUserCommandHandlerTests
             .ReturnsAsync(_existingUser);
         
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _refreshTokenRepositoryMock.Setup(repo => repo.GetTokenByUserAsync(_existingUser, _cancellationToken))
+            .ReturnsAsync(RefreshToken.Create(Guid.CreateVersion7(), RefreshTokenValue, DateTime.UtcNow.AddDays(1), _existingUser.Id).Value);
+        
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _passwordHasherMock.Setup(ph => ph.CheckPassword(CorrectPassword, _existingUser.PasswordHash))
             .Returns(true);
