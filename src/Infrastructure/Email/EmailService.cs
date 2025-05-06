@@ -17,7 +17,11 @@ public class EmailService(IOptions<SmtpOptions> options, IConfiguration configur
 
     public async Task SendEmailAsync(string toEmail, string subject, string body)
     {
-        var mailMessage = new MailMessage(options.Value.FromEmail, toEmail, subject, body);
+        var mailMessage = new MailMessage(options.Value.FromEmail, toEmail, subject, body)
+        {
+            IsBodyHtml = true
+        };
+        
         await _smtpClient.SendMailAsync(mailMessage);
     }
 }

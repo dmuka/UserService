@@ -1,5 +1,5 @@
 ﻿@page
-@model WebApi.Pages.SignUpModel
+@model WebApi.Pages.Account.SignUpModel
 @{
     ViewData["Title"] = "Sign up";
 }
@@ -53,7 +53,7 @@
                     </a>
                 </div>
 
-                <div class="button-container" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                <div class="button-container">
                     <button id="sign-up-submit" type="submit" class="w-25 btn btn-lg btn-primary">Sign up</button>
                     <button id="sign-in" type="button" class="w-25 btn btn-lg btn-secondary" onclick="redirectToSignIn()">Sign in</button>
                 </div>

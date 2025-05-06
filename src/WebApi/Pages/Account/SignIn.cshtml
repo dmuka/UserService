@@ -1,7 +1,6 @@
 ﻿@page
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using WebApi.Pages
-@model WebApi.Pages.SignInModel
+@model WebApi.Pages.Account.SignInModel
 @{
     ViewData["Title"] = "Sign in";
 }
@@ -52,7 +51,7 @@
                         @Html.DisplayNameFor(m => m.Input.RememberMe)
                     </label>
                 </div>
-                <div class="button-container" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                <div class="button-container">
                     <button id="sign-in-submit" type="submit" class="w-25 btn btn-lg btn-primary">Sign in</button>
                     <button id="sign-up" type="button" class="w-25 btn btn-lg btn-secondary" onclick="redirectToSignUp()">Sign up</button>
                 </div>
@@ -78,7 +77,6 @@
         function redirectToSignUp() {
             window.location.href = '@Url.Page(Routes.SignUp, new { returnUrl = Model.ReturnUrl })';
         }
-
 
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.password-icon-overlay').forEach(function(toggle) {

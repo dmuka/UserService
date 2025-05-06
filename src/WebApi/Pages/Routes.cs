@@ -2,10 +2,12 @@
 
 public static class Routes
 {
-    public const string SignIn = "/SignIn";
-    public const string SignUp = "/SignUp";
-    public const string ForgotPassword = "/ForgotPassword";
-    public const string Logout = "/Logout";
+    public const string SignIn = "/Account/SignIn";
+    public const string SignUp = "/Account/SignUp";
+    public const string ForgotPassword = "/Account/ForgotPassword";
+    public const string ForgotPasswordConfirmation = "/Account/ForgotPasswordConfirmation";
+    public const string ResetPassword = "/Account/ResetPassword";
+    public const string Logout = "/Account/Logout";
     
     public const string Users = "/Users";
     public const string Roles = "/Roles";

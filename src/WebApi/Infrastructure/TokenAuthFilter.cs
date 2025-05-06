@@ -15,7 +15,8 @@ public class TokenAuthFilter(
     {
         if (context.HttpContext.Request.Path.StartsWithSegments(Routes.SignIn)
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.SignUp)
-            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPassword))
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPassword)
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPasswordConfirmation))
         {
             await next();
             return;

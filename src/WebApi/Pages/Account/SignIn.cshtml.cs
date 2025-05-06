@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using WebApi.Infrastructure;
 using WebApi.Infrastructure.PagesConstants;
 
-namespace WebApi.Pages;
+namespace WebApi.Pages.Account;
 
 public class SignInModel(
     ISender sender, 

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using WebApi.Infrastructure.PagesConstants;
 
-namespace WebApi.Pages;
+namespace WebApi.Pages.Account;
 
 [AllowAnonymous]
 public class SignUpModel(

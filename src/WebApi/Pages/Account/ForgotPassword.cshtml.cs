@@ -1,15 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Application.Abstractions.Email;
-using Application.Users.SignIn;
 using Domain.Users;
-using Infrastructure.Options.Authentication;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
 using WebApi.Infrastructure;
 
-namespace WebApi.Pages;
+namespace WebApi.Pages.Account;
 
 public class ForgotPasswordModel(
     TokenHandler tokenHandler,
@@ -47,21 +43,21 @@ public class ForgotPasswordModel(
         {
             ModelState.AddModelError(string.Empty, UserErrors.NotFoundByEmail(Input.Email).Description);
             
-            return RedirectToPage("./ForgotPasswordConfirmation");
+            return Page();
         }
 
         var resetCode = tokenHandler.GetPasswordResetToken(user.Id.Value.ToString());
         var callbackUrl = Url.Page(
-            "/ResetPassword",
+            "/Account/ResetPassword",
             pageHandler: null,
             values: new { resetCode },
             protocol: Request.Scheme);
         
         await emailService.SendEmailAsync(
             Input.Email,
-            "Reset Password",
+            "Reset password",
             $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
 
-        return RedirectToPage("./ForgotPasswordConfirmation");
+        return RedirectToPage(Routes.ForgotPasswordConfirmation);
     }
 }

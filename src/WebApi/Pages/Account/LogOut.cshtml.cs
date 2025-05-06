@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApi.Infrastructure;
 
-namespace WebApi.Pages;
+namespace WebApi.Pages.Account;
 
 [AllowAnonymous]
 public class LogoutModel(TokenHandler tokenHandler, ILogger<LogoutModel> logger) : PageModel
