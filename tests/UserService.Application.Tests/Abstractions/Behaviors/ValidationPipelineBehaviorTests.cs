@@ -30,18 +30,18 @@ namespace UserService.Application.Tests.Abstractions.Behaviors
         {
             // Arrange
             var request = new TestRequest();
-            _validatorMock.Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestRequest>>(), _cancellationToken))
+            _validatorMock.Setup(validator => validator.ValidateAsync(It.IsAny<ValidationContext<TestRequest>>(), _cancellationToken))
                           .ReturnsAsync(new ValidationResult());
 
             var expectedResponse = new Result<TestResponse>(new TestResponse(), true, Error.None);
-            _nextMock.Setup(n => n()).ReturnsAsync(expectedResponse);
+            _nextMock.Setup(handler => handler(_cancellationToken)).ReturnsAsync(expectedResponse);
 
             // Act
             var response = await _behavior.Handle(request, _nextMock.Object, _cancellationToken);
 
             // Assert
             Assert.That(response, Is.EqualTo(expectedResponse));
-            _nextMock.Verify(n => n(), Times.Once);
+            _nextMock.Verify(handler => handler(_cancellationToken), Times.Once);
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace UserService.Application.Tests.Abstractions.Behaviors
             {
                 new ValidationFailure("Property", ErrorMessage)
             };
-            _validatorMock.Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestRequest>>(), _cancellationToken))
+            _validatorMock.Setup(validator => validator.ValidateAsync(It.IsAny<ValidationContext<TestRequest>>(), _cancellationToken))
                           .ReturnsAsync(new ValidationResult(validationFailures));
 
             // Act
@@ -68,6 +68,7 @@ namespace UserService.Application.Tests.Abstractions.Behaviors
         }
 
         public class TestRequest { }
+
         public class TestResponse { }
     }
 }
