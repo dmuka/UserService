@@ -92,7 +92,6 @@ public class EditModel(
         UserInfo.FirstName = result.Value.FirstName;
         UserInfo.LastName = result.Value.LastName;
         UserInfo.Email = result.Value.Email;
-        //UserInfo.SelectedRolesIds = result.Value.Roles.Select(role => new RoleId(role.id)).ToList();
 
         TempData["Id"] = result.Value.Id;
         TempData["Hash"] = result.Value.PasswordHash;
@@ -103,8 +102,7 @@ public class EditModel(
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
-        var ps = passwordHasher.GetHash(UserInfo.OldPassword);
-        if (!passwordHasher.CheckPassword(UserInfo.OldPassword, TempData["Hash"]?.ToString()))
+        if (!passwordHasher.CheckPassword(UserInfo.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
         {
             ModelState.AddModelError(string.Empty, "Incorrect old password.");
 
@@ -113,8 +111,17 @@ public class EditModel(
 
         var cancellationToken = HttpContext.RequestAborted;
 
+        if (Guid.TryParse(TempData["Id"]?.ToString(), out var id))
+        {
+            UserInfo.Id = id;
+        }
+        else
+        {
+            return Page();
+        }
+        
         var user = Domain.Users.User.Create(
-            (Guid)TempData["Id"],
+            UserInfo.Id,
             UserInfo.UserName,
             UserInfo.FirstName,
             UserInfo.LastName,

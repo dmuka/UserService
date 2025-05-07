@@ -2,21 +2,15 @@
 using Application.Abstractions.Authentication;
 using Application.Roles.GetById;
 using Application.Roles.Update;
-using Application.Users.GetById;
-using Application.Users.Update;
 using Domain.Roles;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages.Roles;
 
-public class EditModel(
-    ISender sender, 
-    IPasswordHasher passwordHasher, 
-    IRoleRepository roleRepository) : PageModel
+public class EditModel(ISender sender) : PageModel
 {
     [BindProperty]
     public InputModel RoleInfo { get; set; } = new();
@@ -55,9 +49,16 @@ public class EditModel(
 
         var cancellationToken = HttpContext.RequestAborted;
 
-        var role = Role.Create(
-            (Guid)TempData["Id"],
-            RoleInfo.RoleName).Value;
+        if (Guid.TryParse(TempData["Id"]?.ToString(), out var id))
+        {
+            RoleInfo.Id = id;
+        }
+        else
+        {
+            return Page();
+        }
+        
+        var role = Role.Create(RoleInfo.Id, RoleInfo.RoleName).Value;
         
         var command = new UpdateRoleCommand(role);
         var result = await sender.Send(command, cancellationToken);

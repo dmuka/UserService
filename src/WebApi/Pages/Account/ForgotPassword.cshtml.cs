@@ -18,9 +18,6 @@ public class ForgotPasswordModel(
     
     private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
-    [TempData]
-    public string ErrorMessage { get; set; } = string.Empty;
-
     public class InputModel
     {
         [Required]

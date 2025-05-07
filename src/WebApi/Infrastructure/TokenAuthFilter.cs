@@ -6,9 +6,7 @@ using WebApi.Pages;
 
 namespace WebApi.Infrastructure;
 
-public class TokenAuthFilter(
-    TokenHandler tokenHandler, 
-    ITokenProvider tokenProvider) : IAsyncPageFilter
+public class TokenAuthFilter(TokenHandler tokenHandler) : IAsyncPageFilter
 {
     public async Task OnPageHandlerExecutionAsync(
         PageHandlerExecutingContext context, 

@@ -10,7 +10,7 @@ public class LogoutModel(TokenHandler tokenHandler, ILogger<LogoutModel> logger)
 {
     public IActionResult OnGet() => Page();
 
-    public async Task<IActionResult> OnPost(string? returnUrl = null)
+    public IActionResult OnPost(string? returnUrl = null)
     {
         tokenHandler.ClearTokens();
         logger.LogInformation("User logged out.");

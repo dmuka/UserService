@@ -3,7 +3,6 @@ using Application.Users.SignInByToken;
 using Core;
 using Infrastructure.Options.Authentication;
 using MediatR;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
 using Serilog;
 using WebApi.Infrastructure;
@@ -17,17 +16,18 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         ITokenProvider tokenProvider,
         IRefreshTokenRepository refreshTokenRepository,
         IOptions<AuthOptions> authOptions,
-        IAntiforgery antiforgery,
         ISender sender)
     {
         var sessionId = context.Request.Cookies[CookiesNames.SessionId];
+        
+        if (sessionId is null) return;
+        
         var accessToken = context.Request.Cookies[CookiesNames.AccessToken];
         
-        if ((!string.IsNullOrEmpty(sessionId) && string.IsNullOrEmpty(accessToken)) ||
-            (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(accessToken) 
-            && !tokenProvider.ValidateAccessToken(accessToken)))
+        if (string.IsNullOrEmpty(accessToken) ||
+            (!string.IsNullOrEmpty(accessToken) && !tokenProvider.ValidateAccessToken(accessToken)))
         {
-            Log.Information("Access token expired, attempting to renew.");
+            Log.Information("Access token is missing or expired, attempting to renew.");
             
             var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
             

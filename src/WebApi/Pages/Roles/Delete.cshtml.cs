@@ -43,7 +43,7 @@ public class DeleteModel(ISender sender) : PageModel
         
         if (TempData.TryGetValue("Name", out var value))
         {
-            RoleInfo.RoleName = value.ToString();
+            RoleInfo.RoleName = value?.ToString() ?? string.Empty;
         }
             
         return Page();

@@ -35,23 +35,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseStatusCodePagesMiddleware();
 
-app.AddAuthorizationHeader();
-
 app.AddHealthChecks();
 
 app.UseRequestContextLogging();
-
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
+app.AddAuthorizationHeader();
 app.UseMiddleware<TokenRenewalMiddleware>();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapLocalGrpcServices();
 

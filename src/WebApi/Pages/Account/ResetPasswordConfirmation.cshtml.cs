@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApi.Infrastructure;
 
 namespace WebApi.Pages.Account;
 
-public class ResetPasswordConfirmationModel(TokenHandler tokenHandler) : PageModel
+public class ResetPasswordConfirmationModel : PageModel
 {
     public IActionResult OnGet()
     {
