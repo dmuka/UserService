@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Grpc.Infrastructure.Interceptors;
-using WebApi.Extensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebApi.Infrastructure;
 
 namespace WebApi;
@@ -9,23 +9,66 @@ public static class Di
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddEndpoints(Assembly.GetExecutingAssembly());
+        services
+            .AddGrpcServices()
+            .AddEndpoints(Assembly.GetExecutingAssembly())
+            .AddFilters()
+            .AddAntiforgeryServices()
+            .AddEndpointsApiExplorer()
+            .AddExceptionHandler<GlobalExceptionHandler>()
+            .AddProblemDetails()
+            .AddHttpClient()
+            .AddPresentationServices();
+        
+        return services;
+    }
+
+    private static IServiceCollection AddGrpcServices(this IServiceCollection services)
+    {
         services.AddGrpc(options =>
         {
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<LoggingInterceptor>();
         });
-        services.AddEndpointsApiExplorer();
-        
+         
+        return services;
+    }
+    
+    private static IServiceCollection AddEndpoints(this IServiceCollection services, Assembly assembly)
+    {
+        var serviceDescriptors = assembly
+            .DefinedTypes
+            .Where(type => type is { IsAbstract: false, IsInterface: false } &&
+                           type.IsAssignableTo(typeof(IEndpoint)))
+            .Select(type => ServiceDescriptor.Transient(typeof(IEndpoint), type))
+            .ToArray();
+
+        services.TryAddEnumerable(serviceDescriptors);
+
+        return services;
+    }
+    
+    private static IServiceCollection AddPresentationServices(this IServiceCollection services)
+    {
         services.AddScoped<TokenHandler>();
+
+        return services;
+    }
+    
+    private static IServiceCollection AddFilters(this IServiceCollection services)
+    {
         services.AddMvc(options =>
         {
             options.Filters.Add<TokenAuthFilter>();
         });
 
-        services.AddExceptionHandler<GlobalExceptionHandler>();
-        services.AddProblemDetails();
-        
+        return services;
+    }
+    
+    private static IServiceCollection AddAntiforgeryServices(this IServiceCollection services)
+    {
+        services.AddAntiforgery();
+
         return services;
     }
 }

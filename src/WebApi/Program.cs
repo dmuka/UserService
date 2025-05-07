@@ -1,16 +1,10 @@
-using System.Net;
 using Application;
-using Grpc.Services;
-using HealthChecks.UI.Client;
 using Infrastructure;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
 using WebApi.Extensions;
-using WebApi.Infrastructure;
 using WebApi.Middleware;
-using WebApi.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +19,8 @@ builder.Services
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddHttpClient();
+
 builder.Services.AddRazorPages();
-//builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 
@@ -40,50 +33,11 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseStatusCodePages(context =>
-{
-    var response = context.HttpContext.Response;
+app.UseStatusCodePagesMiddleware();
 
-    switch(response.StatusCode)
-    {
-        case (int)HttpStatusCode.Forbidden:
-            response.Redirect(Routes.Denied403);
-            break;
-        case (int)HttpStatusCode.Unauthorized:
-            response.Redirect(Routes.SignIn);
-            break;
-    }
+app.AddAuthorizationHeader();
 
-    return Task.CompletedTask;
-});
-
-app.Use(async (context, next) =>
-{
-    var token = context.Request.Cookies[CookiesNames.AccessToken];
-    if (!string.IsNullOrEmpty(token))
-    {
-        context.Request.Headers.Append("Authorization", $"Bearer {token}");
-    }
-    await next();
-});
-
-app.MapHealthChecks("healthch", new HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
-
-// Prevent 404 log entry
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/favicon.ico")
-    {
-        context.Response.StatusCode = StatusCodes.Status204NoContent;
-        return;
-    }
-
-    await next();
-});
+app.AddHealthChecks();
 
 app.UseRequestContextLogging();
 
@@ -99,7 +53,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapGrpcService<UserGrpcService>();
+app.MapLocalGrpcServices();
 
 app.MapRazorPages();
 
