@@ -19,9 +19,13 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         ISender sender)
     {
         var sessionId = context.Request.Cookies[CookiesNames.SessionId];
-        
-        if (sessionId is null) return;
-        
+
+        if (sessionId is null)
+        {
+            await next(context);
+            return;
+        }
+
         var accessToken = context.Request.Cookies[CookiesNames.AccessToken];
         
         if (string.IsNullOrEmpty(accessToken) ||

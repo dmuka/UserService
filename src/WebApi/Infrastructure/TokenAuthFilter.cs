@@ -1,5 +1,4 @@
-﻿using Application.Abstractions.Authentication;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using WebApi.Pages;
