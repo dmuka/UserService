@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using Infrastructure.Options.Email;
 using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
@@ -21,6 +22,11 @@ builder.Services
 
 
 builder.Services.AddRazorPages();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<SmtpOptions>();
+}
 
 var app = builder.Build();
 

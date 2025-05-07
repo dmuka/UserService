@@ -15,7 +15,8 @@ public class TokenAuthFilter(TokenHandler tokenHandler) : IAsyncPageFilter
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.SignUp)
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPassword)
             || context.HttpContext.Request.Path.StartsWithSegments(Routes.ForgotPasswordConfirmation)
-            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ResetPassword))
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ResetPassword)
+            || context.HttpContext.Request.Path.StartsWithSegments(Routes.ResetPasswordConfirmation))
         {
             await next();
             return;

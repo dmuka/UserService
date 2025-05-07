@@ -10,8 +10,6 @@ public record SmtpOptions
     public required int SmtpPort { get; set; }
     [Required, EmailAddress]
     public required string FromEmail { get; set; } 
-    [Required, MinLength(4)]
-    public required string UserName { get; set; }
-    [Required, MinLength(5)]
-    public required string Password { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }

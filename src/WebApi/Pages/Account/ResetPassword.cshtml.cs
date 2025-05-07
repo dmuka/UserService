@@ -9,7 +9,10 @@ using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages.Account;
 
-public class ResetPasswordModel(TokenHandler tokenHandler, ISender sender) : PageModel
+public class ResetPasswordModel(
+    TokenHandler tokenHandler, 
+    ISender sender,
+    ILogger<ResetPasswordConfirmationModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -34,7 +37,7 @@ public class ResetPasswordModel(TokenHandler tokenHandler, ISender sender) : Pag
 
     public IActionResult OnGet(string? resetCode = null)
     {
-        if (resetCode is null || !tokenHandler.ValidatePasswordResetToken(Input.Code, out _))
+        if (resetCode is null || !tokenHandler.ValidatePasswordResetToken(resetCode, out _))
         {
             ModelState.AddModelError("Code", "Valid reset code is required.");
 
@@ -42,7 +45,10 @@ public class ResetPasswordModel(TokenHandler tokenHandler, ISender sender) : Pag
         }
 
         Input = new InputModel { Code = resetCode };
-            
+
+        tokenHandler.ClearTokens();
+        logger.LogInformation("User logged out.");
+        
         return Page();
     }
 

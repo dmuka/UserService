@@ -95,7 +95,7 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
         if (!rememberMe)
         {
             expirationValue /= 2;
-            if (expirationUnits == 0) expirationValue = 1;
+            if (expirationValue == 0) expirationValue = 1;
         }
 
         var value = expirationUnits switch

@@ -36,7 +36,7 @@
              .AddAuthorizationLogic()
              .AddDbConnectionOptions()
              .AddHealthCheck()
-             .AddEmailService()
+             .AddEmailService(configuration)
              .AddRepositories()
              .AddCache()
              .AddEventDispatcher();
@@ -147,12 +147,31 @@
          return services;
      }
 
-     private static IServiceCollection AddEmailService(this IServiceCollection services)
+     private static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
      {
          services.AddOptions<SmtpOptions>()
              .BindConfiguration("SmtpOptions")
              .ValidateDataAnnotations()
              .ValidateOnStart();
+         
+         services.Configure<SmtpOptions>(options =>
+         {
+             var userName = configuration["SmtpOptionsSecrets:Username"];
+             var password = configuration["SmtpOptionsSecrets:Password"];
+             
+             if (string.IsNullOrWhiteSpace(userName) || userName.Length < 3 || userName.Length > 50)
+             {
+                 throw new InvalidOperationException("SMTP username is invalid. Please check your configuration.");
+             }
+
+             if (string.IsNullOrWhiteSpace(password) || password.Length < 6 || password.Length > 100)
+             {
+                 throw new InvalidOperationException("SMTP password is invalid. Please check your configuration.");
+             }
+             
+             options.UserName = userName;
+             options.Password = password;
+         });
          
          services.AddTransient<IEmailService, EmailService>();
          
