@@ -16,6 +16,8 @@ public class IndexModel(ISender sender) : PageModel
 
     [BindProperty(SupportsGet = true)]
     public string SearchString { get; set; } = string.Empty;
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public async Task<IActionResult> OnGetAsync(int? pageNumber, int? pageSize)
     {
@@ -23,7 +25,7 @@ public class IndexModel(ISender sender) : PageModel
         PageSize = pageSize ?? 10;
         
         var query = new GetAllRolesQuery();
-        var result = await sender.Send(query);
+        var result = await sender.Send(query, CancellationToken);
         
         if (result.IsFailure) return Page();
         

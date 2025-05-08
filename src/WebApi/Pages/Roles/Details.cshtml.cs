@@ -10,19 +10,18 @@ namespace WebApi.Pages.Roles;
 public class DetailsModel(ISender sender) : PageModel
 {
     public RoleDetails RoleInfo { get; set; } = new();
-
-    public List<SelectListItem> UserRoles { get; set; } = [];
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public class RoleDetails
     {
-        public Guid Id { get; set; }
         public string RoleName { get; set; } = string.Empty;
     } 
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var query = new GetRoleByIdQuery(id);
-        var result = await sender.Send(query);
+        var result = await sender.Send(query, CancellationToken);
         
         if (result.IsFailure) return Page();
         

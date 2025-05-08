@@ -23,6 +23,8 @@ public class SignInModel(
 
     [TempData]
     public string ErrorMessage { get; set; } = string.Empty;
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public class InputModel
     {
@@ -69,7 +71,7 @@ public class SignInModel(
             authOptions.Value.RefreshTokenExpirationInDays,
             Input.Email);
 
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, CancellationToken);
         if (result.IsSuccess)
         {
             logger.LogInformation("User logged in.");

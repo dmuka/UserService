@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Application.Abstractions.Authentication;
 using Application.Roles.GetById;
 using Application.Roles.Update;
 using Domain.Roles;
@@ -14,6 +13,8 @@ public class EditModel(ISender sender) : PageModel
 {
     [BindProperty]
     public InputModel RoleInfo { get; set; } = new();
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public class InputModel
     {
@@ -28,7 +29,7 @@ public class EditModel(ISender sender) : PageModel
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var query = new GetRoleByIdQuery(id);
-        var result = await sender.Send(query);
+        var result = await sender.Send(query, CancellationToken);
 
         if (result.IsFailure)
         {
@@ -47,8 +48,6 @@ public class EditModel(ISender sender) : PageModel
     {
         if (!ModelState.IsValid) return Page();
 
-        var cancellationToken = HttpContext.RequestAborted;
-
         if (Guid.TryParse(TempData["Id"]?.ToString(), out var id))
         {
             RoleInfo.Id = id;
@@ -61,7 +60,7 @@ public class EditModel(ISender sender) : PageModel
         var role = Role.Create(RoleInfo.Id, RoleInfo.RoleName).Value;
         
         var command = new UpdateRoleCommand(role);
-        var result = await sender.Send(command, cancellationToken);
+        var result = await sender.Send(command, CancellationToken);
         
         return result.IsFailure ? Page() : LocalRedirect(Routes.Roles);
     }

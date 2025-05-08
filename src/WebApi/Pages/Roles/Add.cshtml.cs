@@ -12,6 +12,8 @@ public class CreateModel(ISender sender) : PageModel
     [BindProperty] 
     public InputModel Input { get; set; } = new();
     
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
+    
     public class InputModel
     {
         [Required]
@@ -27,14 +29,10 @@ public class CreateModel(ISender sender) : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-
-        var cancellationToken = HttpContext.RequestAborted;
+        if (!ModelState.IsValid) return Page();
+        
         var command = new AddRoleCommand(Input.RoleName);
-        var result = await sender.Send(command, cancellationToken);
+        var result = await sender.Send(command, CancellationToken);
 
         if (result.IsFailure) return Page();
 

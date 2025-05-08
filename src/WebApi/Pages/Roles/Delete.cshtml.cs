@@ -9,6 +9,8 @@ namespace WebApi.Pages.Roles;
 public class DeleteModel(ISender sender) : PageModel
 {
     public RoleDetails RoleInfo { get; set; } = new();
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public class RoleDetails
     {
@@ -33,8 +35,7 @@ public class DeleteModel(ISender sender) : PageModel
     public async Task<IActionResult> OnPostAsync(Guid id)
     {
         var command = new RemoveRoleCommand(id);
-        var cancellationToken = HttpContext.RequestAborted;
-        var result = await sender.Send(command, cancellationToken);
+        var result = await sender.Send(command, CancellationToken);
 
         if (!result.IsFailure) return LocalRedirect(Routes.Roles);
         
