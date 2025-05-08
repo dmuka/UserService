@@ -19,7 +19,7 @@ public class SignInModel(
     [BindProperty]
     public InputModel Input { get; set; } = new ();
 
-    public string ReturnUrl { get; set; } = string.Empty;
+    public string? ReturnUrl { get; set; } = string.Empty;
 
     [TempData]
     public string ErrorMessage { get; set; } = string.Empty;

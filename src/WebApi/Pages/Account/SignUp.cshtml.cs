@@ -60,6 +60,8 @@ public class SignUpModel(
 
     public void OnGet(string? returnUrl = null)
     {
+        returnUrl ??= Url.Content("~/");
+        
         ReturnUrl = returnUrl;
     }
 

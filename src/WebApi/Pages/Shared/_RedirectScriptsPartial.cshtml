@@ -1,0 +1,18 @@
+﻿@using WebApi.Pages
+
+<script>
+    function redirectToSignIn() {
+        window.location.href = '@Url.Page(Routes.SignIn)';
+    }
+    function redirectToSignInWithCallback(url) {
+        const signInUrl = '@Url.Page(Routes.SignIn)';
+        window.location.href = signInUrl + '?returnUrl=' + encodeURIComponent(url);
+    }
+    function redirectToSignUp() {
+        window.location.href = '@Url.Page(Routes.SignUp)';
+    }
+    function redirectToSignUpWithCallback(url) {
+        const signUpUrl = '@Url.Page(Routes.SignUp)';
+        window.location.href = signUpUrl + '?returnUrl=' + encodeURIComponent(url);
+    }
+</script>

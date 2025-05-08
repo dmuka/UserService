@@ -53,7 +53,8 @@
 
                 <div class="button-container">
                     <button id="sign-up-submit" type="submit" class="w-25 btn btn-lg btn-primary">Sign up</button>
-                    <button id="sign-in" type="button" class="w-25 btn btn-lg btn-secondary" onclick="redirectToSignIn()">Sign in</button>
+                    <button id="sign-in" type="button" class="w-25 btn btn-lg btn-secondary" onclick='redirectToSignInWithCallback("@(Model.ReturnUrl ?? "")")'
+                    >Sign in</button>
                 </div>
             </form>
         </section>
@@ -62,33 +63,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>
-    <script>
-        function redirectToSignIn() {
-            window.location.href = '@Url.Page("./SignIn", new { returnUrl = Model.ReturnUrl })';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.password-icon-overlay').forEach(function(toggle) {
-                toggle.addEventListener('click', togglePasswordVisibility);
-            });
-        });
-
-        function togglePasswordVisibility(event) {
-            event.preventDefault();
-
-            const container = event.currentTarget.closest('.form-floating');
-            const inputField = container.querySelector('input');
-            const icon = event.currentTarget.querySelector('i');
-
-            if (inputField.type === "password") {
-                inputField.type = 'text';
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-            } else {
-                inputField.type = 'password';
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            }
-        }
-    </script>
+    <partial name="_PasswordIconScriptsPartial" />
+    <partial name="_RedirectScriptsPartial"/>
 }
