@@ -38,7 +38,7 @@ public class ForgotPasswordModel(
         var user = await userRepository.GetUserByEmailAsync(Input.Email, CancellationToken);
         if (user is null)
         {
-            ModelState.AddModelError(string.Empty, UserErrors.NotFoundByEmail(Input.Email).Description);
+            ModelState.AddModelError("NotFound", UserErrors.NotFoundByEmail(Input.Email).Description);
             
             return Page();
         }

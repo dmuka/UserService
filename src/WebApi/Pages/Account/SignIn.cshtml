@@ -25,13 +25,19 @@
                 </div>
 
                 <div id="emailInput" style="display: none">
-                    <partial name="./Shared/_EmailFieldPartial" model="Model.Input.Email" />
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true"/>
+                        <label asp-for="Input.Email">Email address</label>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
                 </div>
 
                 <div id="usernameInput" class="form-floating mb-3" style="display: block">
-                    <input asp-for="Input.UserName" name="Input.UserName" class="form-control" autocomplete="username" aria-required="true"/>
-                    <label asp-for="Input.UserName" class="form-label">User name</label>
-                    <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.UserName" name="Input.UserName" class="form-control" autocomplete="username" aria-required="true"/>
+                        <label asp-for="Input.UserName" class="form-label">User name</label>
+                        <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                    </div>
                 </div>
 
                 <div class="form-floating mb-3">
