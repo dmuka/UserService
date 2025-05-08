@@ -24,10 +24,8 @@
                     </select>
                 </div>
 
-                <div id="emailInput" class="form-floating mb-3" style="display: none">
-                    <input asp-for="Input.Email" name="Input.Email" type="email" class="form-control" autocomplete="email" aria-required="true"/>
-                    <label asp-for="Input.Email" class="form-label">Email address</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                <div id="emailInput" style="display: none">
+                    <partial name="./Shared/_EmailFieldPartial" model="Model.Input.Email" />
                 </div>
 
                 <div id="usernameInput" class="form-floating mb-3" style="display: block">
