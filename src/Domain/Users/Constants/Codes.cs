@@ -9,8 +9,13 @@ public static class Codes
     public const string EmailExists = "EmailAlreadyExists";
     public const string UsernameExists = "UsernameAlreadyExists";
     public const string InvalidUsername = "InvalidUsername";
+    public const string InvalidUserId = "InvalidUserId";
     public const string InvalidFirstName = "InvalidFirstName";
     public const string InvalidLastName = "InvalidLastName";
+    public const string InvalidMfaValue = "InvalidMfa";
+    public const string InvalidVerificationCode = "InvalidVerificationCode";
+    public const string InvalidMfaState = "InvalidMfaState";
     public const string EmptyRolesCollection = "EmptyRolesCollection";
+    public const string EmptyRecoveryCodesCollection = "EmptyRecoveryCodesCollection";
     public const string LastRoleRemove = "LastRoleRemove";
 }

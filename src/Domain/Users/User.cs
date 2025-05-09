@@ -4,6 +4,8 @@ using Domain.UserPermissions;
 using Domain.Users.DomainEvents;
 using Domain.Users.Specifications;
 using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.MfaSecrets;
+using Domain.ValueObjects.MfaState;
 using Domain.ValueObjects.PasswordHashes;
 
 namespace Domain.Users;
@@ -11,16 +13,22 @@ namespace Domain.Users;
 /// <summary>
 /// Represents a user in the system.
 /// </summary>
-public class User : Entity, IAggregationRoot
+public class User : Entity<UserId>, IAggregationRoot
 {
-    public new UserId Id { get; private set; }
     public string Username { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
-    public ICollection<RoleId> RoleIds { get; private set; }
-    public ICollection<UserPermissionId> UserPermissionIds { get; private set; }
+    public MfaState MfaState { get; private set; }
+    private List<RoleId> _roleIds = [];
+    public IReadOnlyCollection<RoleId> RoleIds => _roleIds.AsReadOnly();
+    private List<UserPermissionId> _userPermissionIds = [];
+    public IReadOnlyCollection<UserPermissionId> UserPermissionIds => _userPermissionIds.AsReadOnly();
+    
+    public bool IsMfaEnabled => MfaState.IsEnabled;
+    public MfaSecret? MfaSecret => MfaState.Secret;
+    public IReadOnlyCollection<string> RecoveryCodes => MfaState.RecoveryCodes;
 
     /// <summary>
     /// Default constructor for ORM compatibility.
@@ -28,7 +36,7 @@ public class User : Entity, IAggregationRoot
     protected User() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="User"/> class with specified user details.
+    /// Creates a new instance of the <see cref="User"/> class using the specified details.
     /// </summary>
     /// <param name="userId">The unique identifier for the user.</param>
     /// <param name="userName">The username of the user.</param>
@@ -36,33 +44,47 @@ public class User : Entity, IAggregationRoot
     /// <param name="lastName">The last name of the user.</param>
     /// <param name="passwordHash">The hashed password of the user.</param>
     /// <param name="email">The email address of the user.</param>
-    /// <param name="roleIds">Collection of the user role ids.</param>
-    /// <param name="userPermissionIds">Collection of the user permission ids.</param>
-    /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
-    /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
+    /// <param name="roleIds">A collection of the user's role IDs.</param>
+    /// <param name="userPermissionIds">A collection of the user's permission IDs.</param>
+    /// <param name="recoveryCodes">A collection of recovery codes for multifactor authentication.</param>
+    /// <param name="isMfaEnabled">Indicates whether multifactor authentication is enabled.</param>
+    /// <param name="mfaSecret">The multifactor authentication secret value.</param>
+    /// <returns>A <see cref="Result{TValue}"/> containing the created user or the validation errors.</returns>
     public static Result<User> Create(
         Guid userId,
         string userName,
         string firstName,
         string lastName,
-        string passwordHash, 
-        string email, 
+        string passwordHash,
+        string email,
         ICollection<RoleId> roleIds,
-        ICollection<UserPermissionId> userPermissionIds)
+        ICollection<UserPermissionId> userPermissionIds,
+        ICollection<string> recoveryCodes,
+        bool isMfaEnabled = false,
+        string? mfaSecret = null)
     {
         var resultsWithFailures = ValidateUserDetails(
-            userName, 
-            firstName, 
+            userName,
+            firstName,
             lastName,
             passwordHash,
             email,
             roleIds,
-            userPermissionIds);
+            userPermissionIds,
+            recoveryCodes,
+            mfaSecret,
+            isMfaEnabled);
 
         if (resultsWithFailures.Length != 0)
         {
             return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
         }
+
+        var mfaState = string.IsNullOrEmpty(mfaSecret)
+            ? MfaState.Disabled()
+            : isMfaEnabled
+                ? MfaState.Enabled(MfaSecret.Create(mfaSecret), recoveryCodes).Value
+                : MfaState.WithSecret(MfaSecret.Create(mfaSecret)).Value;
 
         var user = new User(
             new UserId(userId), 
@@ -70,7 +92,8 @@ public class User : Entity, IAggregationRoot
             firstName, 
             lastName, 
             PasswordHash.Create(passwordHash), 
-            Email.Create(email), 
+            Email.Create(email),
+            mfaState,
             roleIds,
             userPermissionIds);
     
@@ -86,7 +109,8 @@ public class User : Entity, IAggregationRoot
         string firstName,
         string lastName,
         PasswordHash passwordHash, 
-        Email email, 
+        Email email,
+        MfaState mfaState,
         ICollection<RoleId> roleIds,
         ICollection<UserPermissionId> userPermissionIds)
     {
@@ -96,15 +120,16 @@ public class User : Entity, IAggregationRoot
         LastName = lastName;
         PasswordHash = passwordHash;
         Email = email;
-        RoleIds = roleIds;
-        UserPermissionIds = userPermissionIds;
+        MfaState = mfaState;
+        _roleIds = new List<RoleId>(roleIds);
+        _userPermissionIds = new List<UserPermissionId>(userPermissionIds);
     }
 
     /// <summary>
     /// Changes the email address of the user.
     /// </summary>
     /// <param name="newEmail">The new email address.</param>
-    public Result ChangeEmail(Email newEmail)
+    public Result ChangeEmail(Email? newEmail)
     {
         if (newEmail is null) return Result.Failure<Email>(Error.NullValue);
         
@@ -120,7 +145,7 @@ public class User : Entity, IAggregationRoot
     /// Changes the password hash of the user.
     /// </summary>
     /// <param name="newPasswordHash">The new password hash.</param>
-    public Result ChangePassword(PasswordHash newPasswordHash)
+    public Result ChangePassword(PasswordHash? newPasswordHash)
     {
         if (newPasswordHash is null) return Result.Failure<PasswordHash>(Error.NullValue);
         
@@ -133,13 +158,13 @@ public class User : Entity, IAggregationRoot
     /// Removes the role of the user.
     /// </summary>
     /// <param name="roleId">The role id to remove.</param>
-    public Result RemoveRole(RoleId roleId)
+    public Result RemoveRole(RoleId? roleId)
     {
         if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
-        var validationResult = new UserMustHaveAtLeastOneRoleAfterRemoveRole(RoleIds).IsSatisfied();
+        var validationResult = new UserMustHaveAtLeastOneRoleAfterRemoveRole(_roleIds).IsSatisfied();
         if (validationResult.IsFailure) return validationResult;
         
-        RoleIds.Remove(roleId);
+        _roleIds.Remove(roleId);
         
         return Result.Success();
     }
@@ -148,11 +173,11 @@ public class User : Entity, IAggregationRoot
     /// Removes the permission of the user.
     /// </summary>
     /// <param name="userPermissionId">The permission to remove.</param>
-    public Result RemovePermission(UserPermissionId userPermissionId)
+    public Result RemovePermission(UserPermissionId? userPermissionId)
     {
         if (userPermissionId is null) return Result.Failure<UserPermissionId>(Error.NullValue);  
         
-        UserPermissionIds.Remove(userPermissionId);
+        _userPermissionIds.Remove(userPermissionId);
         
         return Result.Success();
     }
@@ -161,11 +186,52 @@ public class User : Entity, IAggregationRoot
     /// Adds the role of the user.
     /// </summary>
     /// <param name="roleId">The role id to add.</param>
-    public Result AddRole(RoleId roleId)
+    public Result AddRole(RoleId? roleId)
     {
         if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
         
-        RoleIds.Add(roleId); 
+        _roleIds.Add(roleId); 
+        
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Set-ups the MFA of the user.
+    /// </summary>
+    /// <param name="mfaSecret">The MFA secret key value.</param>
+    public Result SetupMfa(MfaSecret? mfaSecret)
+    {
+        if (mfaSecret is null) return Result.Failure<MfaSecret>(Error.NullValue);
+
+        var result = MfaState.UpdateSecret(mfaSecret);
+        if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
+        
+        MfaState = result.Value;
+        
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Disables the MFA of the user.
+    /// </summary>
+    public Result DisableMfa()
+    {
+        var result = MfaState.Disable();
+        
+        return result.IsEnabled 
+            ? Result.Failure(UserErrors.InvalidMfaState) 
+            : Result.Success();
+    }
+
+    /// <summary>
+    /// Enables the MFA of the user.
+    /// </summary>
+    public Result EnableMfa()
+    {
+        var result = MfaState.Enable();
+        if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
+            
+        MfaState = result.Value;
         
         return Result.Success();
     }
@@ -174,7 +240,14 @@ public class User : Entity, IAggregationRoot
     /// Adds the permission to the user.
     /// </summary>
     /// <param name="userPermissionId">The permission id to add.</param>
-    public void AddPermission(UserPermissionId userPermissionId) => UserPermissionIds.Add(userPermissionId);
+    public Result AddPermission(UserPermissionId? userPermissionId)
+    {
+        if (userPermissionId is null) return Result.Failure<UserPermissionId>(Error.NullValue);
+        
+        _userPermissionIds.Add(userPermissionId); 
+        
+        return Result.Success();
+    }
 
     /// <summary>
     /// Validates user details.
@@ -186,7 +259,10 @@ public class User : Entity, IAggregationRoot
         string passwordHash,
         string email,
         ICollection<RoleId> roleIds,
-        ICollection<UserPermissionId> userPermissionIds)
+        ICollection<UserPermissionId> userPermissionIds,
+        ICollection<string> recoveryCodes,
+        string? mfaSecret = null,
+        bool isMfaEnabled = false)
     {
         var validationResults = new []
         {
@@ -196,7 +272,8 @@ public class User : Entity, IAggregationRoot
             new MustBeNonNullValue<string>(passwordHash).IsSatisfied(),
             new EmailMustBeValid(email).IsSatisfied(),
             new UserMustHaveAtLeastOneRole(roleIds).IsSatisfied(),
-            new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied()
+            new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied(),
+            new UserMustHaveValidMfaState(mfaSecret, isMfaEnabled, recoveryCodes).IsSatisfied()
         };
             
         var results = validationResults.Where(result => result.IsFailure);

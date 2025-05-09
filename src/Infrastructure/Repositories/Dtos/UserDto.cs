@@ -8,4 +8,6 @@ public record UserDto : IDto
     public string LastName { get; set; }
     public string PasswordHash { get; set; }
     public string Email { get; set; }
+    public bool IsMfaEnabled { get; set; }
+    public string? MfaSecret { get; set; }
 }

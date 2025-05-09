@@ -20,7 +20,10 @@ public class RefreshTokenTests
         "hash", 
         "email@email.com",
         new List<RoleId> { new (Guid.CreateVersion7()) },
-        new List<UserPermissionId>()).Value;
+        new List<UserPermissionId>(),
+        ["recoveryCode"], 
+        false,
+        "MfaSecret").Value;
     
     [Test]
     public void Create_ShouldInitializeProperties()

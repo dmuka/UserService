@@ -51,6 +51,10 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
+        
+        public bool IsMfaEnabled { get; set; } = false;
+
+        public string? MfaSecret { get; set; } = null;
     }
     
     public async Task<IActionResult> OnGet()
@@ -72,6 +76,8 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
             Input.FirstName, 
             Input.LastName, 
             Input.Password,
+            Input.IsMfaEnabled,
+            Input.MfaSecret,
             Input.SelectedRoles.Select(Guid.Parse).ToList());
         var result = await sender.Send(command, cancellationToken);
 

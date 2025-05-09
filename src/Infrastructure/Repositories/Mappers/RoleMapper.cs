@@ -3,7 +3,7 @@ using Infrastructure.Repositories.Dtos;
 
 namespace Infrastructure.Repositories.Mappers;
 
-public class RoleMapper : IMapper<Role, RoleDto>
+public class RoleMapper : IMapper<Role, RoleId, RoleDto>
 {
     public RoleDto ToDto(Role role) => new() { Id = role.Id.Value, Name = role.Name };
 

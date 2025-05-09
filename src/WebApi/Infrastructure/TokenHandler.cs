@@ -12,8 +12,7 @@ public class TokenHandler(
     ITokenProvider tokenProvider,
     IRefreshTokenRepository refreshTokenRepository,
     IDataProtectionProvider provider,
-    IOptions<AuthOptions> authOptions,
-    ILogger<TokenHandler> logger)
+    IOptions<AuthOptions> authOptions)
 {
     private readonly IDataProtector _protector = provider.CreateProtector("PasswordReset");
     

@@ -2,7 +2,6 @@
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
 
@@ -17,10 +16,13 @@ public class UserTests
     private readonly UserId _userId = new(AuthorizedUserId);
     private readonly ICollection<RoleId> _validRolesIds = new List<RoleId> { new (RoleId) };
     private readonly ICollection<UserPermissionId> _userPermissionIds = [];
+    private readonly ICollection<string> _recoveryCodes = ["recoveryCode"];
 
     private const string ValidUsername = "testuser";
     private const string ValidFirstName = "John";
     private const string ValidLastName = "Doe";
+    private const bool MfaDisabled = false;
+    private const string MfaSecret = "MfaSecret";
     
     private static readonly PasswordHash ValidPasswordHash = PasswordHash.Create("hashedpassword").Value;
     private static readonly Email ValidEmail = Email.Create("test@example.com").Value;
@@ -37,7 +39,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
 
         using (Assert.EnterMultipleScope())
         {
@@ -66,7 +71,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -92,7 +100,10 @@ public class UserTests
             ValidPasswordHash,
             ValidEmail,
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -118,7 +129,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -143,7 +157,10 @@ public class UserTests
             null!, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -168,7 +185,10 @@ public class UserTests
             ValidPasswordHash, 
             null!, 
             _validRolesIds,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -193,7 +213,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             null!,
-            _userPermissionIds);
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret);
         
         using (Assert.EnterMultipleScope())
         {
@@ -218,7 +241,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
         var newEmail = Email.Create("newemail@example.com");
 
         // Act
@@ -240,7 +266,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
         
         // Act
         var result = user.ChangeEmail(null!);
@@ -267,7 +296,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
         var newPasswordHash = PasswordHash.Create("newhashedpassword");
 
         // Act
@@ -289,7 +321,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
         
         // Act
         var result = user.ChangePassword(null!);
@@ -317,7 +352,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
         var newRoleId = new RoleId(RoleId);
         user.AddRole(newRoleId);
 
@@ -340,7 +378,10 @@ public class UserTests
             ValidPasswordHash, 
             ValidEmail, 
             _validRolesIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes, 
+            MfaDisabled,
+            MfaSecret).Value;
 
         // Act
         var result = user.RemoveRole(null!);

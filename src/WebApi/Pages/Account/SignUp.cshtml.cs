@@ -56,6 +56,10 @@ public class SignUpModel(
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = ErrorMessages.ConfirmPassword)]
         public string ConfirmPassword { get; set; } = string.Empty;
+        
+        public bool IsMfaEnabled { get; set; } = false;
+
+        public string? MfaSecret { get; set; } = null;
     }
 
     public void OnGet(string? returnUrl = null)
@@ -76,7 +80,9 @@ public class SignUpModel(
             Input.Email, 
             Input.FirstName, 
             Input.LastName, 
-            Input.Password);
+            Input.Password,
+            Input.IsMfaEnabled,
+            Input.MfaSecret);
         var result = await sender.Send(signUpCommand, CancellationToken);
         
         if (result.IsSuccess)

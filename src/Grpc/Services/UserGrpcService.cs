@@ -26,7 +26,9 @@ public class UserGrpcService(
                 request.Email,
                 request.FirstName,
                 request.LastName,
-                request.Password);
+                request.Password,
+                request.IsMfaEnabled,
+                request.MfaSecret);
 
             var result = await sender.Send(command, context.CancellationToken);
              

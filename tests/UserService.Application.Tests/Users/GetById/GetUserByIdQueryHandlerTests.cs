@@ -97,7 +97,10 @@ public class GetUserByIdQueryHandlerTests
             "hash", 
             "email@email.com", 
             new List<RoleId> { new (RoleId) },
-            new List<UserPermissionId>()).Value;
+            new List<UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
 
         var expected = new UserResponse
         {

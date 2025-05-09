@@ -4,9 +4,8 @@ using Domain.Users;
 
 namespace Domain.UserPermissions;
 
-public class UserPermission : Entity
+public class UserPermission : Entity<UserPermissionId>
 {
-    public new UserPermissionId Id { get; private set; }
     public UserId UserId { get; private set; }
     public PermissionId PermissionId { get; private set; }
 

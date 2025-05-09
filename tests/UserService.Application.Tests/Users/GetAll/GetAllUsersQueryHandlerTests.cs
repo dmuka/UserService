@@ -5,6 +5,7 @@ using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects;
 using Domain.ValueObjects.Emails;
+using Domain.ValueObjects.MfaSecrets;
 using Domain.ValueObjects.PasswordHashes;
 using Moq;
 
@@ -22,7 +23,10 @@ public class GetAllUsersQueryHandlerTests
             PasswordHash.Create("hash").Value, 
             Email.Create("email@email.com").Value, 
             new List<RoleId> { new (Guid.CreateVersion7()) }, 
-            new List<UserPermissionId>()).Value;
+            new List<UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
     
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
     

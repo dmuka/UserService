@@ -41,6 +41,10 @@ public static class UserErrors
         Codes.InvalidUsername,
         "The provided username is invalid.");
 
+    public static readonly Error InvalidUserId = Error.Problem(
+        Codes.InvalidUserId,
+        "The provided user id is invalid.");
+
     public static readonly Error InvalidFirstName = Error.Problem(
         Codes.InvalidFirstName,
         "The provided first name is invalid.");
@@ -48,6 +52,22 @@ public static class UserErrors
     public static readonly Error InvalidLastName = Error.Problem(
         Codes.InvalidLastName,
         "The provided last name is invalid.");
+
+    public static readonly Error InvalidMfaSecret = Error.Problem(
+        Codes.InvalidMfaValue,
+        "The provided MFA secret value is invalid.");
+
+    public static readonly Error InvalidVerificationCode = Error.Problem(
+        Codes.InvalidVerificationCode,
+        "The provided verification code is invalid.");
+
+    public static readonly Error InvalidMfaState = Error.Problem(
+        Codes.InvalidMfaState,
+        "MFA can't be enabled without providing a secret and recovery codes.");
+
+    public static readonly Error EmptyRecoveryCodesCollection = Error.Problem(
+        Codes.EmptyRolesCollection,
+        "User must have at least one recovery code if MFA is enabled.");
 
     public static readonly Error EmptyRolesCollection = Error.Problem(
         Codes.EmptyRolesCollection,

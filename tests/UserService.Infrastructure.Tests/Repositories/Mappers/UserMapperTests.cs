@@ -22,6 +22,10 @@ public class UserMapperTests
     private const string LastName = "Doe";
     private const string Email = "jdoe@example.com";
     private const string Hash = "hashedPassword";
+    private const bool MfaDisabled = false;
+    private const string MfaSecret = "MfaSecret";
+    
+    private readonly ICollection<string> _recoveryCodes = ["recoveryCode"];
     
     private User _user;
     private IList<RoleId> _roleIds;
@@ -49,7 +53,10 @@ public class UserMapperTests
             Hash,
             Email,
             _roleIds,
-            _userPermissionIds).Value;
+            _userPermissionIds,
+            _recoveryCodes,
+            MfaDisabled,
+            MfaSecret).Value;
         
         _userMapper = new UserMapper(_roleRepositoryMock.Object);
     }

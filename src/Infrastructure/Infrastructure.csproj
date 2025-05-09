@@ -16,6 +16,8 @@
       <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
       <PackageReference Include="Microsoft.OpenApi" />
       <PackageReference Include="Npgsql" />
+      <PackageReference Include="Otp.NET" />
+      <PackageReference Include="QRCoder" />
     </ItemGroup>
 
     <ItemGroup>

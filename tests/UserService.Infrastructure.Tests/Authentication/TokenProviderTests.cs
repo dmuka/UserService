@@ -68,7 +68,10 @@ public class TokenProviderTests
             "hashedPassword",
             "testuser@example.com",
             new List<RoleId> { new (Guid.CreateVersion7()) },
-            new List<UserPermissionId>()).Value;
+            new List<UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
 
         // Act
         var token = await _tokenProvider.CreateAccessTokenAsync(user, _rememberMe, _cancellationToken);

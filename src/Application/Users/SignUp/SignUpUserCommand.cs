@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
+using Domain.UserPermissions;
 
 namespace Application.Users.SignUp;
 
@@ -8,5 +9,9 @@ public sealed record SignUpUserCommand(
     string FirstName, 
     string LastName, 
     string Password,
-    IEnumerable<Guid>? RolesIds = null)
+    bool IsMfaEnabled,
+    string? MfaSecret,
+    IEnumerable<Guid>? RolesIds = null,
+    IEnumerable<UserPermissionId>? UserPermissionIds = null,
+    IEnumerable<string>? RecoveryCodes = null)
     : ICommand<Guid>;

@@ -4,6 +4,8 @@ public static class Routes
 {
     public const string SignIn = "/Account/SignIn";
     public const string SignUp = "/Account/SignUp";
+    public const string SetupMfa = "/Account/SetupMfa";
+    public const string Mfa = "/Account/Mfa";
     public const string ForgotPassword = "/Account/ForgotPassword";
     public const string ForgotPasswordConfirmation = "/Account/ForgotPasswordConfirmation";
     public const string ResetPassword = "/Account/ResetPassword";

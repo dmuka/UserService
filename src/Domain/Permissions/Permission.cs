@@ -2,9 +2,8 @@
 
 namespace Domain.Permissions;
 
-public class Permission : Entity
+public class Permission : Entity<PermissionId>
 {
-    public new PermissionId Id { get; private set; }
     public string Name { get; private set; }
 
     /// <summary>

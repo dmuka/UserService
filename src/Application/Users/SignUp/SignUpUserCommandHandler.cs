@@ -46,7 +46,11 @@ internal sealed class SignUpUserCommandHandler(
             command.RolesIds is null 
                 ? [(await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken)).Id] 
                 : roleIds,
-            new List<UserPermissionId>());
+            command.UserPermissionIds?.ToList(),
+            command.RecoveryCodes?.ToList(),
+            command.IsMfaEnabled,
+            command.MfaSecret
+            );
 
         if (user.IsFailure) return Result.Failure<Guid>(user.Error);
 

@@ -49,7 +49,10 @@ public class SignInUserByTokenCommandHandlerTests
             "hash",
             "email@email.com",
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>()).Value;
+            new List<UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
         
         var expireDate = DateTime.UtcNow;
         var validExpireDate = expireDate.AddDays(1);

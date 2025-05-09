@@ -7,7 +7,14 @@ namespace WebApi.Endpoints.Users;
 
 internal sealed class SignUp : IEndpoint
 {
-    public sealed record Request(string Username, string Email, string FirstName, string LastName, string Password);
+    public sealed record Request(
+        string Username, 
+        string Email, 
+        string FirstName, 
+        string LastName, 
+        string Password,
+        bool IsMfaEnabled = false,
+        string? MfaSecret = null);
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
@@ -18,7 +25,9 @@ internal sealed class SignUp : IEndpoint
                 request.Email,
                 request.FirstName,
                 request.LastName,
-                request.Password);
+                request.Password,
+                request.IsMfaEnabled,
+                request.MfaSecret);
 
             var result = await sender.Send(command, cancellationToken);
 

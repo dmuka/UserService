@@ -1,8 +1,8 @@
 ﻿namespace Core;
 
-public abstract class Entity
+public abstract class Entity<TId> where TId : TypedId
 {
-    public TypedId Id { get; set; }
+    public TId Id { get; set; }
     
     /// <summary>
     /// A private list to hold domain events associated with this entity.

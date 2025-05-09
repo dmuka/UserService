@@ -64,6 +64,10 @@ public class EditModel(
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
+        
+        public bool IsMfaEnabled { get; set; } = false;
+
+        public string? MfaSecret { get; set; } = null;
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
@@ -128,7 +132,10 @@ public class EditModel(
             passwordHasher.GetHash(UserInfo.NewPassword),
             UserInfo.Email,
             UserInfo.SelectedRoles.Select(role => new RoleId(Guid.Parse(role))).ToList(),
-            []).Value;
+            [],
+            [],
+            UserInfo.IsMfaEnabled,
+            UserInfo.MfaSecret).Value;
         
         var command = new UpdateUserCommand(user);
         var result = await sender.Send(command, cancellationToken);

@@ -1,11 +1,12 @@
 ﻿using Core;
+using Domain.Users;
 
 namespace UserService.Core.Tests;
 
 [TestFixture]
 public class EntityTests
 {
-    private class TestEntity : Entity
+    private class TestEntity : Entity<UserId>
     {
     }
 

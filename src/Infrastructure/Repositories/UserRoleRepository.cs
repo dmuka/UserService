@@ -8,23 +8,50 @@ using Npgsql;
 
 namespace Infrastructure.Repositories;
 
-public class UserRoleRepository : BaseRepository, IUserRoleRepository
+/// <summary>
+/// A repository responsible for managing user-role relationships in the system.
+/// It provides methods to retrieve, update, and remove role assignments for users.
+/// </summary>
+public class UserRoleRepository(
+    ICacheService cache,
+    ILogger<UserRoleRepository> logger,
+    IOptions<PostgresOptions> postgresOptions)
+    : BaseRepository(cache), IUserRoleRepository
 {
+    /// <summary>
+    /// A constant string key used for caching or identifying a collection of user IDs.
+    /// It serves as a prefix or base key in operations where user IDs need to be cached,
+    /// retrieved, or manipulated in relation to roles.
+    /// </summary>
     private const string UsersIdsKey = "users_ids";
+
+    /// <summary>
+    /// A constant key used for caching role ID information.
+    /// This key is utilized to identify and retrieve cached data
+    /// related to roles assigned to users, ensuring efficient access
+    /// and reduced database calls within the repository.
+    /// </summary>
     private const string RolesIdsKey = "roles_ids";
-    
-    private readonly string? _connectionString;
-    private readonly ILogger<UserRoleRepository> _logger;
 
-    public UserRoleRepository(
-        ICacheService cache, 
-        ILogger<UserRoleRepository> logger, 
-        IOptions<PostgresOptions> postgresOptions) : base(cache)
-    {
-        _connectionString = postgresOptions.Value.GetConnectionString();
-        _logger = logger;
-    }
+    /// <summary>
+    /// Represents the database connection string used to establish a connection with a PostgreSQL database.
+    /// </summary>
+    /// <remarks>
+    /// Fetched dynamically from the <see cref="PostgresOptions"/> configuration object.
+    /// Used for executing database-related operations such as queries and transactions.
+    /// </remarks>
+    private readonly string? _connectionString = postgresOptions.Value.GetConnectionString();
 
+    /// Asynchronously retrieves a list of user IDs associated with a specific role ID.
+    /// <param name="roleId">
+    /// The unique identifier of the role whose associated user IDs need to be retrieved.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// An optional cancellation token that can be used to propagate a cancellation request to the task.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a list of user IDs associated with the specified role ID.
+    /// </returns>
     public async Task<IList<Guid>> GetUsersIdsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
         var usersIds = GetFromCache<Guid>($"{UsersIdsKey}_{roleId}");
@@ -55,11 +82,21 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the users ids by role id: {RoleId}.", e, e.Message, roleId);
+            logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the users ids by role id: {RoleId}.", e, e.Message, roleId);
             throw;
         }
     }
 
+    /// Asynchronously retrieves a list of role IDs associated with a specific user ID.
+    /// <param name="userId">
+    /// The unique identifier of the user whose associated role IDs need to be retrieved.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// An optional cancellation token that can be used to propagate a cancellation request to the task.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a list of role IDs associated with the specified user ID.
+    /// </returns>
     public async Task<IList<Guid>> GetRolesIdsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var rolesIds = GetFromCache<Guid>($"{RolesIdsKey}_{userId}");
@@ -90,11 +127,24 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the roles ids by user id: {UserId}.", e, e.Message, userId);
+            logger.LogError("An error (exception: {exception}, message: {message}) occurred while querying the roles ids by user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }
 
+    /// Asynchronously updates the roles associated with a specific user by adding new roles and removing old ones as necessary.
+    /// <param name="userId">
+    /// The unique identifier of the user whose roles need to be updated.
+    /// </param>
+    /// <param name="rolesIds">
+    /// A collection of role IDs that the user should be associated with after the update.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// An optional cancellation token that can be used to propagate a cancellation request to the task.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the total number of roles added or removed during the operation.
+    /// </returns>
     public async Task<int> UpdateUserRolesAsync(
         Guid userId, 
         IEnumerable<Guid> rolesIds,  
@@ -120,7 +170,17 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         
         return updatedRoles; 
     }
-    
+
+    /// Asynchronously removes all roles associated with a specific user ID.
+    /// <param name="userId">
+    /// The unique identifier of the user whose roles need to be removed.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// An optional cancellation token that can be used to propagate a cancellation request to the task.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the number of roles removed for the specified user ID.
+    /// </returns>
     public async Task<int> RemoveAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -146,11 +206,27 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing all roles ids for user id: {UserId}.", e, e.Message, userId);
+            logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing all roles ids for user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }
 
+    /// Asynchronously adds role associations for a user to the database and commits the changes within the provided database connection and transaction.
+    /// <param name="userId">
+    /// The unique identifier of the user for whom roles are being added.
+    /// </param>
+    /// <param name="rolesIds">
+    /// A collection of unique identifiers for the roles to be associated with the user.
+    /// </param>
+    /// <param name="connection">
+    /// The database connection to be used for executing the role-adding operation.
+    /// </param>
+    /// <param name="transaction">
+    /// The transaction within which the operation is executed to ensure atomicity.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the number of roles successfully added for the user.
+    /// </returns>
     private async Task<int> AddUserRolesAsync(
         Guid userId, 
         IEnumerable<Guid> rolesIds,  
@@ -173,11 +249,27 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while adding the roles ids for user id: {UserId}.", e, e.Message, userId);
+            logger.LogError("An error (exception: {exception}, message: {message}) occurred while adding the roles ids for user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }
 
+    /// Asynchronously removes specified roles from a user's role assignments in the database.
+    /// <param name="userId">
+    /// The unique identifier of the user whose roles need to be removed.
+    /// </param>
+    /// <param name="rolesIds">
+    /// A collection of unique role IDs that should be removed from the user's assignments.
+    /// </param>
+    /// <param name="connection">
+    /// The open database connection to be used for executing the query.
+    /// </param>
+    /// <param name="transaction">
+    /// The database transaction within which the query will be executed.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the number of roles removed.
+    /// </returns>
     private async Task<int> RemoveUserRolesAsync(
         Guid userId, 
         IEnumerable<Guid> rolesIds,  
@@ -201,7 +293,7 @@ public class UserRoleRepository : BaseRepository, IUserRoleRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing the roles ids for user id: {UserId}.", e, e.Message, userId);
+            logger.LogError("An error (exception: {exception}, message: {message}) occurred while removing the roles ids for user id: {UserId}.", e, e.Message, userId);
             throw;
         }
     }

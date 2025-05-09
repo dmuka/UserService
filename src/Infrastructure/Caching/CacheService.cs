@@ -11,7 +11,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
         Func<CancellationToken, Task<IList<T>>> getFromRepositoryAsync,
         CancellationToken cancellationToken,
         TimeSpan? absoluteExpiration = null,
-        TimeSpan? slidingExpiration = null) where T : Entity
+        TimeSpan? slidingExpiration = null) where T : Entity<TypedId>
     {
         if (cache.TryGetValue(cacheKey, out IList<T>? cachedData) 
             && cachedData is not null)
@@ -28,7 +28,7 @@ public class CacheService(IMemoryCache cache) : ICacheService
         return cachedData ?? [];
     }
     
-    public T? GetById<T>(string cacheKey, Guid id) where T : Entity
+    public T? GetById<T>(string cacheKey, Guid id) where T : Entity<TypedId>
     {
         var entities = cache.Get<IList<T>>(cacheKey);
         

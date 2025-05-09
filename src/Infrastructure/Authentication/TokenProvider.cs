@@ -30,7 +30,8 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
         [
             new Claim(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim("amr", user.IsMfaEnabled ? "mfa" : "pwd")
         ]);
 
         await using var scope = scopeFactory.CreateAsyncScope();

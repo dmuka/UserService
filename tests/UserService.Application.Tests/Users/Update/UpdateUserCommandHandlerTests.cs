@@ -37,7 +37,10 @@ public class UpdateUserCommandHandlerTests
             "hash",
             "email@example.com",
             new List<RoleId> { new(Guid.CreateVersion7()) },
-            new List<Domain.UserPermissions.UserPermissionId>()).Value;
+            new List<Domain.UserPermissions.UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
     }
 
     [Test]

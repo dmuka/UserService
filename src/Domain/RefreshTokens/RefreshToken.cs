@@ -6,9 +6,8 @@ using Domain.Users.Specifications;
 
 namespace Domain.RefreshTokens;
 
-public class RefreshToken : Entity
+public class RefreshToken : Entity<RefreshTokenId>
 {
-    public new RefreshTokenId Id { get; private set; }
     public string Value { get; private set; }
     public DateTime ExpiresUtc { get; private set; }
     public UserId UserId { get; private set; }
@@ -23,8 +22,8 @@ public class RefreshToken : Entity
     /// </summary>
     /// <param name="refreshTokenId">The unique identifier for the refresh token.</param>
     /// <param name="value">The refresh token value.</param>
-    /// <param name="expiresUtc">The refresh token expire date.</param>
-    /// <param name="userId">The id of the owner of the refresh token.</param>
+    /// <param name="expiresUtc">The refresh token expires date.</param>
+    /// <param name="userId">The id of the refresh token owner.</param>
     /// <exception cref="ArgumentException">Thrown when any string parameter is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Thrown when any object parameter is null.</exception>
     public static Result<RefreshToken> Create(

@@ -48,7 +48,10 @@ public class SignUpUserCommandHandlerTests
             "hash",
             Email,
             _roles.Select(role => role.Id).ToList(),
-            new List<UserPermissionId>()).Value;
+            new List<UserPermissionId>(),
+            ["recoveryCode"], 
+            false,
+            "MfaSecret").Value;
         
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRepositoryMock.Setup(r => r.IsUsernameExistsAsync(Username, _cancellationToken))
@@ -83,7 +86,7 @@ public class SignUpUserCommandHandlerTests
     public async Task Handle_UsernameAlreadyExists_ShouldReturnFailure()
     {
         // Arrange
-        var command = new SignUpUserCommand(ExistingUsername, Email, FirstName, LastName, Password);
+        var command = new SignUpUserCommand(ExistingUsername, Email, FirstName, LastName, Password, false, null);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -100,7 +103,7 @@ public class SignUpUserCommandHandlerTests
     public async Task Handle_EmailAlreadyExists_ShouldReturnFailure()
     {
         // Arrange
-        var command = new SignUpUserCommand(Username, ExistingEmail, FirstName, LastName, Password);
+        var command = new SignUpUserCommand(Username, ExistingEmail, FirstName, LastName, Password, false, null);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -117,7 +120,16 @@ public class SignUpUserCommandHandlerTests
     public async Task Handle_ValidCommand_ShouldReturnSuccess()
     {
         // Arrange
-        var command = new SignUpUserCommand(Username, Email, FirstName, LastName, Password);
+        var command = new SignUpUserCommand(
+            Username, 
+            Email, 
+            FirstName, 
+            LastName, 
+            Password, 
+            false, 
+            null,
+            new List<Guid> { Guid.CreateVersion7() },
+            new List<UserPermissionId>());
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
