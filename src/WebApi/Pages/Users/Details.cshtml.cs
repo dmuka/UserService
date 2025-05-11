@@ -19,6 +19,7 @@ public class DetailsModel(ISender sender) : PageModel
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string IsMfaEnabled { get; set; } = string.Empty;
         public string[] Roles { get; set; } = [];
     } 
 
@@ -33,6 +34,7 @@ public class DetailsModel(ISender sender) : PageModel
         UserInfo.FirstName = result.Value.FirstName;
         UserInfo.LastName = result.Value.LastName;
         UserInfo.Email = result.Value.Email;
+        UserInfo.IsMfaEnabled = result.Value.IsMfaEnabled;
         UserInfo.Roles = result.Value.Roles.Select(role => role.name).ToArray();
         
         UserRoles = UserInfo.Roles

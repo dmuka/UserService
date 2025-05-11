@@ -300,9 +300,9 @@ public class UserRepository(
 
         try
         {
-            var query = """
-                            INSERT INTO Users (id, user_name, first_name, last_name, password_hash, email)
-                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email)
+            var query = $"""
+                            INSERT INTO Users ({nameof(User.Id)}, {nameof(User.Username)}, {nameof(User.FirstName)}, {nameof(User.LastName)}, {nameof(User.PasswordHash)}, {nameof(User.Email)}, {nameof(User.IsMfaEnabled)}, {nameof(User.MfaSecret)})
+                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret)
                             RETURNING Id
                         """;
             
@@ -313,7 +313,9 @@ public class UserRepository(
                 user.FirstName, 
                 user.LastName, 
                 PasswordHash = user.PasswordHash.Value, 
-                Email = user.Email.Value
+                Email = user.Email.Value,
+                IsMfaEnabled = user.IsMfaEnabled,
+                MfaSecret = user.MfaSecret?.Value,
             };
             
             var command = new CommandDefinition(query, parameters, transaction, cancellationToken: cancellationToken);
@@ -359,18 +361,29 @@ public class UserRepository(
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         
-        const string query = """
-                                 UPDATE Users 
+        const string query = $"""
+                                 UPDATE users 
                                  SET 
-                                     user_name = @Username, 
-                                     first_name = @FirstName, 
-                                     last_name = @LastName, 
-                                     password_hash = @PasswordHash, 
-                                     email = @Email
+                                     {nameof(User.Username)} = @Username, 
+                                     {nameof(User.FirstName)} = @FirstName, 
+                                     {nameof(User.LastName)} = @LastName, 
+                                     {nameof(User.PasswordHash)} = @PasswordHash, 
+                                     {nameof(User.Email)} = @Email,
+                                     {nameof(User.IsMfaEnabled)} = @IsMfaEnabled,
+                                     {nameof(User.MfaSecret)} = @MfaSecret
                                  WHERE Users.Id = @Id
                              """;
         
-        var parameters = new { Id = user.Id.Value, user.Username, user.FirstName, user.LastName, PasswordHash = user.PasswordHash.Value, Email = user.Email.Value };
+        var parameters = new
+        { 
+            user.Username, 
+            user.FirstName, 
+            user.LastName, 
+            PasswordHash = user.PasswordHash.Value, 
+            Email = user.Email.Value,
+            IsMfaEnabled = user.IsMfaEnabled,
+            MfaSecret = user.MfaSecret?.Value
+        };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
 

@@ -27,6 +27,11 @@
         <label asp-for="UserInfo.Email" class="control-label"></label>
         <span asp-validation-for="UserInfo.Email" class="text-danger"></span>
     </div>
+    <div mb-3>
+        <label>
+            <input asp-for="UserInfo.IsMfaEnabled"/> is MFA enabled?
+        </label>
+    </div>
     <div class="mb-3">
         <label asp-for="UserInfo.SelectedRoles"></label>
         <select asp-for="UserInfo.SelectedRoles" asp-items="Model.AllRoles" class="form-control"></select>

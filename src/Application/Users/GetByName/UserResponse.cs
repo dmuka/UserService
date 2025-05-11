@@ -10,6 +10,7 @@ public sealed record UserResponse
     public required string LastName { get; init; }
     public required string PasswordHash { get; init; }
     public required string Email { get; init; }
+    public required string IsMfaEnabled { get; init; }   
     public required string[] Roles { get; init; }
 
     public static UserResponse Create(User user, string[] roles)
@@ -22,6 +23,7 @@ public sealed record UserResponse
             LastName = user.LastName,
             PasswordHash = user.PasswordHash,
             Email = user.Email,
+            IsMfaEnabled = user.IsMfaEnabled ? "yes" : "no",           
             Roles = roles
         };
         

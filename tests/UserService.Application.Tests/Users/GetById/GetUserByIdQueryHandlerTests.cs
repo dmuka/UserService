@@ -110,6 +110,7 @@ public class GetUserByIdQueryHandlerTests
             LastName = user.LastName,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
+            IsMfaEnabled = "no",
             Roles = _roles.Select(role => (role.Name, role.Id.Value)).ToArray()
         };
         

@@ -59,11 +59,9 @@ internal sealed class SignInUserCommandHandler(
             }
 
             validRefreshToken = result.Value;
+
+            await refreshTokenRepository.AddTokenAsync(validRefreshToken, cancellationToken);
         }
-
-        if (command.RememberMe) return new SignInResponse(accessToken, validRefreshToken.Id.Value);
-
-        await refreshTokenRepository.AddTokenAsync(validRefreshToken, cancellationToken);
 
         return new SignInResponse(accessToken, validRefreshToken.Id.Value);
     }

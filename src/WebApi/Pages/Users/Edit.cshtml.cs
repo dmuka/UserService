@@ -44,6 +44,12 @@ public class EditModel(
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [Display(Name = "Is MFA enabled")]
+        public bool IsMfaEnabled { get; set; }
+        
+        public string MfaSecret { get; set; } = string.Empty;
 
         [Required]
         [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
@@ -64,10 +70,6 @@ public class EditModel(
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
-        
-        public bool IsMfaEnabled { get; set; } = false;
-
-        public string? MfaSecret { get; set; } = null;
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
@@ -96,9 +98,11 @@ public class EditModel(
         UserInfo.FirstName = result.Value.FirstName;
         UserInfo.LastName = result.Value.LastName;
         UserInfo.Email = result.Value.Email;
+        UserInfo.IsMfaEnabled = result.Value.IsMfaEnabled == "true";
 
         TempData["Id"] = result.Value.Id;
         TempData["Hash"] = result.Value.PasswordHash;
+        TempData["IsMfaEnabled"] = result.Value.IsMfaEnabled;
          
         return Page();
     }
@@ -122,6 +126,12 @@ public class EditModel(
         else
         {
             return Page();
+        }
+
+        if (TempData["IsMfaEnabled"]?.ToString() == "false" 
+            && UserInfo.IsMfaEnabled)
+        {
+            LocalRedirect(Routes.SetupMfa);
         }
         
         var user = Domain.Users.User.Create(

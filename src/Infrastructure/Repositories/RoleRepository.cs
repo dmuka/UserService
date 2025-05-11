@@ -76,8 +76,10 @@ public class RoleRepository(
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT roles.*
+        const string query = $"""
+                                 SELECT 
+                                     roles.id AS {nameof(Role.Id)},
+                                     roles.name AS {nameof(Role.Name)}
                                  FROM roles
                                  WHERE roles.Id = @RoleId
                              """;
@@ -144,12 +146,14 @@ public class RoleRepository(
     {
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT roles.*
-                                 FROM roles
-                                 LEFT JOIN user_roles ON roles.Id = user_roles.role_id
-                                 WHERE user_roles.user_id = @UserId
-                             """;
+        const string query = $"""
+                                  SELECT
+                                      roles.id AS {nameof(Role.Id)},
+                                      roles.name AS {nameof(Role.Name)}
+                                  FROM roles
+                                  LEFT JOIN user_roles ON roles.Id = user_roles.role_id
+                                  WHERE user_roles.user_id = @UserId
+                              """;
         
         var parameters = new { UserId = userId };
         
@@ -182,11 +186,13 @@ public class RoleRepository(
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT roles.*
-                                 FROM roles
-                                 WHERE roles.name = @RoleName
-                             """;
+        const string query = $"""
+                                  SELECT
+                                      roles.id AS {nameof(Role.Id)},
+                                      roles.name AS {nameof(Role.Name)}
+                                  FROM roles
+                                  WHERE roles.name = @RoleName
+                              """;
         
         var parameters = new { RoleName = roleName };
         
