@@ -23,6 +23,10 @@ internal sealed class UserContext(IHttpContextAccessor httpContextAccessor) : IU
     public string UserRole =>
         httpContextAccessor.HttpContext?.User.GetUserClaimValue(ClaimTypes.Role) ??
         throw new ApplicationException(ContextUnavailable);
+    
+    public string AuthMethod =>
+        httpContextAccessor.HttpContext?.User.GetUserClaimValue(ClaimTypes.AuthenticationMethod) ??
+        throw new ApplicationException(ContextUnavailable);
 
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ??

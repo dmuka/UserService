@@ -114,6 +114,8 @@ public class UserRepository(
                                      users.first_name AS {nameof(User.FirstName)},
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
+                                     users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
+                                     users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
@@ -363,19 +365,20 @@ public class UserRepository(
         
         const string query = $"""
                                  UPDATE users 
-                                 SET 
-                                     {nameof(User.Username)} = @Username, 
-                                     {nameof(User.FirstName)} = @FirstName, 
-                                     {nameof(User.LastName)} = @LastName, 
-                                     {nameof(User.PasswordHash)} = @PasswordHash, 
-                                     {nameof(User.Email)} = @Email,
-                                     {nameof(User.IsMfaEnabled)} = @IsMfaEnabled,
-                                     {nameof(User.MfaSecret)} = @MfaSecret
+                                 SET
+                                     user_name = @Username, 
+                                     first_name = @FirstName, 
+                                     last_name = @LastName, 
+                                     password_hash = @PasswordHash, 
+                                     email = @Email,
+                                     is_mfa_enabled = @IsMfaEnabled,
+                                     mfa_secret = @MfaSecret
                                  WHERE Users.Id = @Id
                              """;
         
         var parameters = new
         { 
+            Id = user.Id.Value,
             user.Username, 
             user.FirstName, 
             user.LastName, 

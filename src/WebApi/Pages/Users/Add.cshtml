@@ -28,6 +28,11 @@
         <label asp-for="Input.Email" class="control-label"></label>
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
+    <div mb-3>
+        <label>
+            <input asp-for="Input.IsMfaEnabled"/> is MFA enabled?
+        </label>
+    </div>
     <div class="mb-3">
         <label asp-for="Input.SelectedRoles">Select roles</label>
         <select asp-for="Input.SelectedRoles" asp-items="Model.AllRoles" class="form-control"></select>

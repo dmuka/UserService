@@ -19,6 +19,6 @@ internal static class ClaimsPrincipalExtensions
         var userClaimValue = principal?
             .FindFirst(claim => claim.Type == claimType)?.Value;
 
-        return userClaimValue ?? throw new ApplicationException($"User {claimType} is unavailable.");
+        return userClaimValue ?? throw new ApplicationException($"Claim with type {claimType} is unavailable.");
     }
 }

@@ -9,17 +9,18 @@ namespace WebApi.Pages.Users;
 
 public class DeleteModel(ISender sender) : PageModel
 {
-    public DetailsModel.UserDetails UserInfo { get; set; } = new();
+    public InputModel Input { get; set; } = new();
 
     public List<SelectListItem> UserRoles { get; set; } = [];
 
-    public class UserDetails
+    public class InputModel
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public bool IsMfaEnabled { get; set; }
         public string[] Roles { get; set; } = [];
     } 
 
@@ -31,13 +32,14 @@ public class DeleteModel(ISender sender) : PageModel
         
         if (result.IsFailure) return Page();
         
-        UserInfo.Username = result.Value.Username;
-        UserInfo.FirstName = result.Value.FirstName;
-        UserInfo.LastName = result.Value.LastName;
-        UserInfo.Email = result.Value.Email;
-        UserInfo.Roles = result.Value.Roles.Select(role => role.name).ToArray();
+        Input.Username = result.Value.Username;
+        Input.FirstName = result.Value.FirstName;
+        Input.LastName = result.Value.LastName;
+        Input.Email = result.Value.Email;
+        Input.IsMfaEnabled = result.Value.IsMfaEnabled == "true";
+        Input.Roles = result.Value.Roles.Select(role => role.name).ToArray();
         
-        UserRoles = UserInfo.Roles
+        UserRoles = Input.Roles
             .Select(role => new SelectListItem(role, string.Empty)).ToList();
         
         return Page();

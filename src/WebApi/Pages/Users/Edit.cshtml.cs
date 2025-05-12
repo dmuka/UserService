@@ -17,7 +17,7 @@ public class EditModel(
     IRoleRepository roleRepository) : PageModel
 {
     [BindProperty]
-    public InputModel UserInfo { get; set; } = new();
+    public InputModel Input { get; set; } = new();
 
     public List<SelectListItem> AllRoles { get; set; } = [];
 
@@ -84,21 +84,21 @@ public class EditModel(
             return Page();
         }
         
-        UserInfo.SelectedRoles = result.Value.Roles.Select(role => role.id.ToString()).ToList();
+        Input.SelectedRoles = result.Value.Roles.Select(role => role.id.ToString()).ToList();
         AllRoles = (await roleRepository.GetAllRolesAsync())
             .Select(role => new SelectListItem
             {
                 Text = role.Name,
                 Value = role.Id.Value.ToString(),
-                Selected = UserInfo.SelectedRoles.Contains(role.Id.Value.ToString())
+                Selected = Input.SelectedRoles.Contains(role.Id.Value.ToString())
             })
             .ToList();
         
-        UserInfo.UserName = result.Value.Username;
-        UserInfo.FirstName = result.Value.FirstName;
-        UserInfo.LastName = result.Value.LastName;
-        UserInfo.Email = result.Value.Email;
-        UserInfo.IsMfaEnabled = result.Value.IsMfaEnabled == "true";
+        Input.UserName = result.Value.Username;
+        Input.FirstName = result.Value.FirstName;
+        Input.LastName = result.Value.LastName;
+        Input.Email = result.Value.Email;
+        Input.IsMfaEnabled = result.Value.IsMfaEnabled == "true";
 
         TempData["Id"] = result.Value.Id;
         TempData["Hash"] = result.Value.PasswordHash;
@@ -110,7 +110,7 @@ public class EditModel(
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
-        if (!passwordHasher.CheckPassword(UserInfo.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
+        if (!passwordHasher.CheckPassword(Input.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
         {
             ModelState.AddModelError(string.Empty, "Incorrect old password.");
 
@@ -121,7 +121,7 @@ public class EditModel(
 
         if (Guid.TryParse(TempData["Id"]?.ToString(), out var id))
         {
-            UserInfo.Id = id;
+            Input.Id = id;
         }
         else
         {
@@ -129,23 +129,23 @@ public class EditModel(
         }
 
         if (TempData["IsMfaEnabled"]?.ToString() == "false" 
-            && UserInfo.IsMfaEnabled)
+            && Input.IsMfaEnabled)
         {
             LocalRedirect(Routes.SetupMfa);
         }
         
         var user = Domain.Users.User.Create(
-            UserInfo.Id,
-            UserInfo.UserName,
-            UserInfo.FirstName,
-            UserInfo.LastName,
-            passwordHasher.GetHash(UserInfo.NewPassword),
-            UserInfo.Email,
-            UserInfo.SelectedRoles.Select(role => new RoleId(Guid.Parse(role))).ToList(),
+            Input.Id,
+            Input.UserName,
+            Input.FirstName,
+            Input.LastName,
+            passwordHasher.GetHash(Input.NewPassword),
+            Input.Email,
+            Input.SelectedRoles.Select(role => new RoleId(Guid.Parse(role))).ToList(),
             [],
             [],
-            UserInfo.IsMfaEnabled,
-            UserInfo.MfaSecret).Value;
+            Input.IsMfaEnabled,
+            Input.MfaSecret).Value;
         
         var command = new UpdateUserCommand(user);
         var result = await sender.Send(command, cancellationToken);

@@ -37,6 +37,12 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [Display(Name = "Is MFA enabled")]
+        public bool IsMfaEnabled { get; set; }
+        
+        public string MfaSecret { get; set; } = string.Empty;
 
         [Required]
         [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
@@ -51,10 +57,6 @@ public class CreateModel(ISender sender, IRoleRepository roleRepository) : PageM
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
-        
-        public bool IsMfaEnabled { get; set; } = false;
-
-        public string? MfaSecret { get; set; } = null;
     }
     
     public async Task<IActionResult> OnGet()

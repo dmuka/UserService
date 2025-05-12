@@ -10,4 +10,5 @@ public interface IUserContext
     string Email { get; }
     string UserRole { get; }
     bool IsAuthenticated { get; }
+    string AuthMethod { get; }
 }

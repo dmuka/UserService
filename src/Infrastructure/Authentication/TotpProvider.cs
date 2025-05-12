@@ -1,10 +1,11 @@
 ﻿using Application.Abstractions.Authentication;
+using Microsoft.Extensions.Logging;
 using OtpNet;
 using QRCoder;
 
 namespace Infrastructure.Authentication;
 
-public class TotpProvider : ITotpProvider
+public class TotpProvider(ILogger<TotpProvider> logger) : ITotpProvider
 {
     public string GenerateSecretKey()
     {
@@ -30,7 +31,10 @@ public class TotpProvider : ITotpProvider
     public bool ValidateTotp(string secretKey, int code)
     {
         var totp = new Totp(Base32Encoding.ToBytes(secretKey));
+        var verificationResult = totp.VerifyTotp(code.ToString(), out var timeWindowUsed, VerificationWindow.RfcSpecifiedNetworkDelay);
+
+        logger.LogInformation("TOTP validation used time window: {windows}", timeWindowUsed);
         
-        return totp.VerifyTotp(code.ToString(), out var timeWindowUsed, VerificationWindow.RfcSpecifiedNetworkDelay);
+        return verificationResult;
     }
 }

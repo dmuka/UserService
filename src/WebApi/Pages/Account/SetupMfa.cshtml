@@ -8,22 +8,27 @@
 
 <div>
     <p>Scan the QR code below with Microsoft or Google Authenticator (or any TOTP compatible app):</p>
-    <div id="qrCode"></div>
+    <div id="qrCode">
+        <img src="data:image/png;base64,@Model.QrCode" alt="QR Code" style="width: 200px; height: 200px;" />
+    </div>
+    <div asp-validation-summary="All" class="text-danger"></div>
     <form method="post">
         <div class="form-group">
             <label>Verification Code</label>
             <div class="mfa-code-inputs">
-                <input type="text" class="mfa-digit" maxlength="1" name="digit1" autocomplete="off" />
-                <input type="text" class="mfa-digit" maxlength="1" name="digit2" autocomplete="off" />
-                <input type="text" class="mfa-digit" maxlength="1" name="digit3" autocomplete="off" />
-                <input type="text" class="mfa-digit" maxlength="1" name="digit4" autocomplete="off" />
-                <input type="text" class="mfa-digit" maxlength="1" name="digit5" autocomplete="off" />
-                <input type="text" class="mfa-digit" maxlength="1" name="digit6" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit1" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[0].ToString() : "")" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit2" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[1].ToString() : "")" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit3" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[2].ToString() : "")" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit4" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[3].ToString() : "")" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit5" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[4].ToString() : "")" autocomplete="off" />
+                <input type="text" class="mfa-digit" maxlength="1" name="digit6" value="@(Model.VerificationCode?.Length > 0 ? Model.VerificationCode[5].ToString() : "")" autocomplete="off" />
                 <input type="hidden" asp-for="VerificationCode" id="VerificationCode" />
             </div>
             <span asp-validation-for="VerificationCode" class="text-danger"></span>
         </div>
-        <button type="submit" class="btn btn-primary">Verify</button>
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-primary">Verify</button>
+        </div>
     </form>
 </div>
 
@@ -51,15 +56,8 @@
 </style>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            new QRCode(document.getElementById("qrCode"), {
-                text: "@Html.Raw(Model.QrCode)",
-                width: 200,
-                height: 200
-            });
-            
+        document.addEventListener('DOMContentLoaded', () => {            
             const digitInputs = document.querySelectorAll('.mfa-digit');
             const hiddenInput = document.getElementById('VerificationCode');
 
@@ -91,10 +89,12 @@
                     }
                 });
             });
-
+            
             function updateHiddenInput() {                
                 hiddenInput.value = Array.from(digitInputs).map(input => input.value).join('');
             }
+            
+            updateHiddenInput();
         });
     </script>
 }
