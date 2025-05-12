@@ -6,7 +6,7 @@ namespace Domain.ValueObjects.MfaState;
 /// <summary>
 /// Represents the MFA state of a user, encapsulating the MFA secret and enabled status.
 /// </summary>
-public class MfaState : ValueObject
+public sealed class MfaState : ValueObject
 {
     public bool IsEnabled { get; private set; }
     public MfaSecret? Secret { get; private set; }
@@ -50,7 +50,7 @@ public class MfaState : ValueObject
     /// <param name="recoveryCodes">Collection of the recovery codes.</param>
     public static Result<MfaState> Enabled(MfaSecret? secret, ICollection<string> recoveryCodes)
     {
-        return secret is null || recoveryCodes is null || recoveryCodes.Count == 0
+        return secret is null || recoveryCodes.Count == 0
             ? Result.Failure<MfaState>(Users.UserErrors.InvalidMfaState) : 
             new MfaState(true, secret, DateTime.UtcNow, recoveryCodes.ToList());
     }
@@ -60,7 +60,7 @@ public class MfaState : ValueObject
     /// </summary>
     public Result<MfaState> Enable()
     {
-        return Secret is null || _recoveryCodes is null || _recoveryCodes.Count == 0
+        return Secret is null || _recoveryCodes.Count == 0
             ? Result.Failure<MfaState>(Users.UserErrors.InvalidMfaState) 
             : new MfaState(true, Secret, DateTime.UtcNow, _recoveryCodes);
     }
@@ -79,6 +79,17 @@ public class MfaState : ValueObject
         return secret is null 
             ? Result.Failure<MfaState>(Error.NullValue) 
             : new MfaState(IsEnabled, secret, LastVerificationDate, _recoveryCodes);
+    }
+
+    /// <summary>
+    /// Updates the recovery codes while keeping the enabled status the same.
+    /// </summary>
+    /// <param name="recoveryCodesHashes">The new recovery codes.</param>
+    public Result<MfaState> UpdateRecoveryCodesHashes(ICollection<string>? recoveryCodesHashes)
+    {
+        return recoveryCodesHashes is null 
+            ? Result.Failure<MfaState>(Error.NullValue) 
+            : new MfaState(IsEnabled, Secret, LastVerificationDate, recoveryCodesHashes.ToList());
     }
     
     /// <summary>

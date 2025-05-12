@@ -46,7 +46,7 @@ public class User : Entity<UserId>, IAggregationRoot
     /// <param name="email">The email address of the user.</param>
     /// <param name="roleIds">A collection of the user's role IDs.</param>
     /// <param name="userPermissionIds">A collection of the user's permission IDs.</param>
-    /// <param name="recoveryCodes">A collection of recovery codes for multifactor authentication.</param>
+    /// <param name="recoveryCodes">A collection of the user's recovery codes.</param>
     /// <param name="isMfaEnabled">Indicates whether multifactor authentication is enabled.</param>
     /// <param name="mfaSecret">The multifactor authentication secret value.</param>
     /// <returns>A <see cref="Result{TValue}"/> containing the created user or the validation errors.</returns>
@@ -58,8 +58,8 @@ public class User : Entity<UserId>, IAggregationRoot
         string passwordHash,
         string email,
         ICollection<RoleId> roleIds,
-        ICollection<UserPermissionId> userPermissionIds,
-        ICollection<string> recoveryCodes,
+        ICollection<UserPermissionId>? userPermissionIds,
+        ICollection<string>? recoveryCodes = null,
         bool isMfaEnabled = false,
         string? mfaSecret = null)
     {
@@ -80,7 +80,7 @@ public class User : Entity<UserId>, IAggregationRoot
             return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
         }
 
-        var mfaState = string.IsNullOrEmpty(mfaSecret)
+        var mfaState = string.IsNullOrEmpty(mfaSecret) || recoveryCodes?.Count != 0
             ? MfaState.Disabled()
             : isMfaEnabled
                 ? MfaState.Enabled(MfaSecret.Create(mfaSecret), recoveryCodes).Value
@@ -112,7 +112,7 @@ public class User : Entity<UserId>, IAggregationRoot
         Email email,
         MfaState mfaState,
         ICollection<RoleId> roleIds,
-        ICollection<UserPermissionId> userPermissionIds)
+        ICollection<UserPermissionId>? userPermissionIds)
     {
         Id = userId;
         Username = userName;
@@ -122,7 +122,9 @@ public class User : Entity<UserId>, IAggregationRoot
         Email = email;
         MfaState = mfaState;
         _roleIds = new List<RoleId>(roleIds);
-        _userPermissionIds = new List<UserPermissionId>(userPermissionIds);
+        _userPermissionIds = userPermissionIds is not null 
+            ? [..userPermissionIds] 
+            : [];
     }
 
     /// <summary>
@@ -199,11 +201,15 @@ public class User : Entity<UserId>, IAggregationRoot
     /// Set-ups the MFA of the user.
     /// </summary>
     /// <param name="mfaSecret">The MFA secret key value.</param>
-    public Result SetupMfa(MfaSecret? mfaSecret)
+    /// <param name="recoveryCodesHashes">The collection of recovery codes hashes.</param>
+    public Result SetupMfa(MfaSecret? mfaSecret, ICollection<string> recoveryCodesHashes)
     {
         if (mfaSecret is null) return Result.Failure<MfaSecret>(Error.NullValue);
 
         var result = MfaState.UpdateSecret(mfaSecret);
+        if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
+        
+        result = MfaState.UpdateRecoveryCodesHashes(recoveryCodesHashes);
         if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
         
         MfaState = result.Value;
@@ -259,8 +265,8 @@ public class User : Entity<UserId>, IAggregationRoot
         string passwordHash,
         string email,
         ICollection<RoleId> roleIds,
-        ICollection<UserPermissionId> userPermissionIds,
-        ICollection<string> recoveryCodes,
+        ICollection<UserPermissionId>? userPermissionIds,
+        ICollection<string>? recoveryCodes,
         string? mfaSecret = null,
         bool isMfaEnabled = false)
     {

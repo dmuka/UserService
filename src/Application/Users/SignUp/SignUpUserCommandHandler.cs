@@ -3,7 +3,6 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain;
 using Domain.Roles;
-using Domain.UserPermissions;
 using Domain.Users;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
@@ -46,10 +45,7 @@ internal sealed class SignUpUserCommandHandler(
             command.RolesIds is null 
                 ? [(await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken)).Id] 
                 : roleIds,
-            command.UserPermissionIds?.ToList(),
-            command.RecoveryCodes?.ToList(),
-            command.IsMfaEnabled,
-            command.MfaSecret
+            command.UserPermissionIds?.ToList()
             );
 
         if (user.IsFailure) return Result.Failure<Guid>(user.Error);

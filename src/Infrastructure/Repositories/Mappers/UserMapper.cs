@@ -33,7 +33,7 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserId, 
             dto.Email, 
             new List<RoleId> { role.Id },
             new List<UserPermissionId>(),
-            new List<string>(),
+            dto.RecoveryCodes,
             dto.IsMfaEnabled,
             dto.MfaSecret).Value;
         

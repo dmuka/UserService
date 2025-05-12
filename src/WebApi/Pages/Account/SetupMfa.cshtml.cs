@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Application.Abstractions.Authentication;
+﻿using Application.Abstractions.Authentication;
 using Application.Users.EnableMfa;
 using Application.Users.GenerateQr;
 using MediatR;
@@ -18,6 +17,7 @@ public class SetupMfaModel(
     [BindProperty]
     public string VerificationCode { get; set; } = string.Empty;
     
+    [TempData]
     public IList<string> RecoveryCodes { get; set; } = [];
 
     public async Task<IActionResult> OnGetAsync()
@@ -60,8 +60,13 @@ public class SetupMfaModel(
         var command = new EnableMfaCommand(userContext.UserId.ToString(), code);
         var result = await sender.Send(command);
 
-        if (result.IsSuccess) return RedirectToPage("Mfa");
-        
+        if (result.IsSuccess)
+        {
+            RecoveryCodes = result.Value;
+            
+            return RedirectToPage("Mfa");
+        }
+
         ModelState.AddModelError("MFA error", result.Error.Description);
         
         return Page();

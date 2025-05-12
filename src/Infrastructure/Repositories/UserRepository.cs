@@ -6,7 +6,6 @@ using Domain.Users;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -15,7 +14,7 @@ namespace Infrastructure.Repositories;
 
 /// <summary>
 /// A repository for managing user-related data within the PostgreSQL database.
-/// Includes functionality for checking existence of usernames or emails, retrieving users by various identifiers, and managing CRUD operations.
+/// Includes functionality for checking the existence of usernames or emails, retrieving users by various identifiers, and managing CRUD operations.
 /// Uses caching to enhance the performance of data retrieval.
 /// </summary>
 public class UserRepository(
@@ -117,6 +116,7 @@ public class UserRepository(
                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -166,6 +166,7 @@ public class UserRepository(
                                       users.last_name AS {nameof(User.LastName)},
                                       users.email AS {nameof(User.Email)},
                                       users.password_hash AS {nameof(User.PasswordHash)},
+                                      users.recovery_codes AS {nameof(User.RecoveryCodes)},
                                       roles.id AS {nameof(Role.Id)},
                                       roles.name AS {nameof(Role.Name)}
                                   FROM Users users
@@ -215,6 +216,7 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -263,6 +265,7 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -303,8 +306,8 @@ public class UserRepository(
         try
         {
             var query = $"""
-                            INSERT INTO Users ({nameof(User.Id)}, {nameof(User.Username)}, {nameof(User.FirstName)}, {nameof(User.LastName)}, {nameof(User.PasswordHash)}, {nameof(User.Email)}, {nameof(User.IsMfaEnabled)}, {nameof(User.MfaSecret)})
-                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret)
+                            INSERT INTO Users ({nameof(User.Id)}, {nameof(User.Username)}, {nameof(User.FirstName)}, {nameof(User.LastName)}, {nameof(User.PasswordHash)}, {nameof(User.Email)}, {nameof(User.IsMfaEnabled)}, {nameof(User.MfaSecret)}, {nameof(User.RecoveryCodes)})
+                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret, @RecoveryCodes)
                             RETURNING Id
                         """;
             
@@ -316,8 +319,9 @@ public class UserRepository(
                 user.LastName, 
                 PasswordHash = user.PasswordHash.Value, 
                 Email = user.Email.Value,
-                IsMfaEnabled = user.IsMfaEnabled,
+                user.IsMfaEnabled,
                 MfaSecret = user.MfaSecret?.Value,
+                user.RecoveryCodes
             };
             
             var command = new CommandDefinition(query, parameters, transaction, cancellationToken: cancellationToken);
@@ -372,7 +376,8 @@ public class UserRepository(
                                      password_hash = @PasswordHash, 
                                      email = @Email,
                                      is_mfa_enabled = @IsMfaEnabled,
-                                     mfa_secret = @MfaSecret
+                                     mfa_secret = @MfaSecret,
+                                     recovery_codes = @RecoveryCodes
                                  WHERE Users.Id = @Id
                              """;
         
@@ -384,8 +389,9 @@ public class UserRepository(
             user.LastName, 
             PasswordHash = user.PasswordHash.Value, 
             Email = user.Email.Value,
-            IsMfaEnabled = user.IsMfaEnabled,
-            MfaSecret = user.MfaSecret?.Value
+            user.IsMfaEnabled,
+            MfaSecret = user.MfaSecret?.Value,
+            user.RecoveryCodes
         };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
@@ -456,7 +462,7 @@ public class UserRepository(
                         user.Email,
                         new List<RoleId> { new (role.Id) },
                         new List<UserPermissionId>(),
-                        new List<string>(),
+                        user.RecoveryCodes,
                         user.IsMfaEnabled,
                         user.MfaSecret).Value;
                     userDictionary.Add(user.Id, userEntry);

@@ -1,0 +1,36 @@
+﻿@page
+@model WebApi.Pages.Account.MfaSuccessModel
+@{
+    ViewData["Title"] = "MFA setup successful";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <p>Your multi-factor authentication has been successfully enabled.</p>
+    <h3>Recovery Codes</h3>
+    <p>
+        Store these recovery codes in a safe place. You can use them to log in if you lose access to your authenticator app.
+        Each code can be used only once.
+    </p>
+    <ul>
+        @foreach (var recoveryCode in Model.RecoveryCodes)
+        {
+            <li>@recoveryCode</li>
+        }
+    </ul>
+    <p><strong>Warning:</strong> You will not see these codes again. Save them now!</p>
+    <a asp-page="Mfa" class="btn btn-primary">Continue</a>
+</div>
+
+<style>
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        margin: 10px 0;
+        font-family: monospace;
+        font-size: 16px;
+    }
+</style>

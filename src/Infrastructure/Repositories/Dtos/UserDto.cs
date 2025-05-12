@@ -10,4 +10,5 @@ public record UserDto : IDto
     public string Email { get; set; }
     public bool IsMfaEnabled { get; set; }
     public string? MfaSecret { get; set; }
+    public List<string>? RecoveryCodes { get; set; }
 }
