@@ -36,11 +36,12 @@ public sealed class MfaState : ValueObject
     /// Creates an MFA state with the secret set but not yet enabled and empty collection of the recovery codes.
     /// </summary>
     /// <param name="secret">The MFA secret.</param>
-    public static Result<MfaState> WithSecret(MfaSecret? secret)
+    /// <param name="recoveryCodesHashes">Collection of the recovery codes.</param>
+    public static Result<MfaState> WithArtifacts(MfaSecret? secret, ICollection<string>? recoveryCodesHashes)
     {
-        return secret is null 
+        return secret is null || recoveryCodesHashes is null || recoveryCodesHashes.Count == 0
             ? Result.Failure<MfaState>(Error.NullValue) 
-            : new MfaState(false, secret, null, []);
+            : new MfaState(false, secret, null, recoveryCodesHashes.ToList());
     }
 
     /// <summary>
@@ -70,28 +71,6 @@ public sealed class MfaState : ValueObject
     /// </summary>
     public static MfaState Disable() => Disabled();
 
-    /// <summary>
-    /// Updates the MFA secret while keeping the enabled status the same.
-    /// </summary>
-    /// <param name="secret">The new MFA secret.</param>
-    public Result<MfaState> UpdateSecret(MfaSecret? secret)
-    {
-        return secret is null 
-            ? Result.Failure<MfaState>(Error.NullValue) 
-            : new MfaState(IsEnabled, secret, LastVerificationDate, _recoveryCodes);
-    }
-
-    /// <summary>
-    /// Updates the recovery codes while keeping the enabled status the same.
-    /// </summary>
-    /// <param name="recoveryCodesHashes">The new recovery codes.</param>
-    public Result<MfaState> UpdateRecoveryCodesHashes(ICollection<string>? recoveryCodesHashes)
-    {
-        return recoveryCodesHashes is null 
-            ? Result.Failure<MfaState>(Error.NullValue) 
-            : new MfaState(IsEnabled, Secret, LastVerificationDate, recoveryCodesHashes.ToList());
-    }
-    
     /// <summary>
     /// Adds the recovery code while keeping the enabled status the same.
     /// </summary>

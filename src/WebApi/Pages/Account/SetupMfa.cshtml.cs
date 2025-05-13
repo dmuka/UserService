@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.EnableMfa;
-using Application.Users.GenerateQr;
+using Application.Users.GenerateMfaArtifacts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,6 +12,7 @@ public class SetupMfaModel(
     IUserContext userContext, 
     ILogger<SetupMfaModel> logger) : PageModel
 {
+    [TempData]
     public string QrCode { get; set; } = string.Empty;
     
     [BindProperty]
@@ -24,13 +25,14 @@ public class SetupMfaModel(
     {
         if (userContext.AuthMethod == "mfa") return RedirectToPage("Mfa");
 
-        var command = new GenerateQrCommand(userContext.UserId.ToString());
+        var command = new GenerateMfaArtifactsCommand(userContext.UserId.ToString());
         var result = await sender.Send(command);
         
         if (result.IsSuccess)
         {
-            logger.LogInformation("Qr code successfully generated.");
-            QrCode = result.Value;
+            logger.LogInformation("Qr code and recovery codes generated successfully.");
+            QrCode = result.Value.qr;
+            RecoveryCodes = result.Value.codes;
             
             return Page();
         }
@@ -44,9 +46,9 @@ public class SetupMfaModel(
     {
         if (!ModelState.IsValid) return Page();
         
-        if (TempData.TryGetValue("Qr", out var value))
+        if (TempData.TryGetValue("Qr", out var qr))
         {
-            QrCode = value?.ToString() ?? string.Empty;            
+            QrCode = qr?.ToString() ?? string.Empty;            
             TempData.Keep("Qr");
         }
         
@@ -62,8 +64,6 @@ public class SetupMfaModel(
 
         if (result.IsSuccess)
         {
-            RecoveryCodes = result.Value;
-            
             return RedirectToPage("Mfa");
         }
 

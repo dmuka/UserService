@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text.Json;
 using Dapper;
 using Domain.Roles;
 using Domain.UserPermissions;
@@ -116,7 +117,10 @@ public class UserRepository(
                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
-                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
+                                     CASE
+                                         WHEN users.recovery_codes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
+                                         END AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -166,7 +170,10 @@ public class UserRepository(
                                       users.last_name AS {nameof(User.LastName)},
                                       users.email AS {nameof(User.Email)},
                                       users.password_hash AS {nameof(User.PasswordHash)},
-                                      users.recovery_codes AS {nameof(User.RecoveryCodes)},
+                                      CASE
+                                          WHEN users.recovery_codes IS NOT NULL
+                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
+                                          END AS {nameof(User.RecoveryCodes)},
                                       roles.id AS {nameof(Role.Id)},
                                       roles.name AS {nameof(Role.Name)}
                                   FROM Users users
@@ -216,7 +223,10 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
-                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
+                                     CASE
+                                         WHEN users.recovery_codes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
+                                         END AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -265,7 +275,10 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
-                                     users.recovery_codes AS {nameof(User.RecoveryCodes)},
+                                     CASE
+                                         WHEN users.recovery_codes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
+                                         END AS {nameof(User.RecoveryCodes)},
                                      roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
@@ -307,7 +320,7 @@ public class UserRepository(
         {
             var query = $"""
                             INSERT INTO Users ({nameof(User.Id)}, {nameof(User.Username)}, {nameof(User.FirstName)}, {nameof(User.LastName)}, {nameof(User.PasswordHash)}, {nameof(User.Email)}, {nameof(User.IsMfaEnabled)}, {nameof(User.MfaSecret)}, {nameof(User.RecoveryCodes)})
-                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret, @RecoveryCodes)
+                            VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret, @RecoveryCodes::jsonb)
                             RETURNING Id
                         """;
             
@@ -321,7 +334,7 @@ public class UserRepository(
                 Email = user.Email.Value,
                 user.IsMfaEnabled,
                 MfaSecret = user.MfaSecret?.Value,
-                user.RecoveryCodes
+                RecoveryCodes = user.RecoveryCodes is not null ? JsonSerializer.Serialize(user.RecoveryCodes) : null
             };
             
             var command = new CommandDefinition(query, parameters, transaction, cancellationToken: cancellationToken);
@@ -377,7 +390,7 @@ public class UserRepository(
                                      email = @Email,
                                      is_mfa_enabled = @IsMfaEnabled,
                                      mfa_secret = @MfaSecret,
-                                     recovery_codes = @RecoveryCodes
+                                     recovery_codes = @RecoveryCodes::jsonb
                                  WHERE Users.Id = @Id
                              """;
         
@@ -391,7 +404,7 @@ public class UserRepository(
             Email = user.Email.Value,
             user.IsMfaEnabled,
             MfaSecret = user.MfaSecret?.Value,
-            user.RecoveryCodes
+            RecoveryCodes = user.RecoveryCodes is not null ? JsonSerializer.Serialize(user.RecoveryCodes) : null
         };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);

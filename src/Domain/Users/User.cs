@@ -80,11 +80,11 @@ public class User : Entity<UserId>, IAggregationRoot
             return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
         }
 
-        var mfaState = string.IsNullOrEmpty(mfaSecret) || recoveryCodes?.Count != 0
+        var mfaState = string.IsNullOrEmpty(mfaSecret) || recoveryCodes is null || recoveryCodes.Count == 0
             ? MfaState.Disabled()
             : isMfaEnabled
                 ? MfaState.Enabled(MfaSecret.Create(mfaSecret), recoveryCodes).Value
-                : MfaState.WithSecret(MfaSecret.Create(mfaSecret)).Value;
+                : MfaState.WithArtifacts(MfaSecret.Create(mfaSecret), recoveryCodes).Value;
 
         var user = new User(
             new UserId(userId), 
@@ -206,10 +206,7 @@ public class User : Entity<UserId>, IAggregationRoot
     {
         if (mfaSecret is null) return Result.Failure<MfaSecret>(Error.NullValue);
 
-        var result = MfaState.UpdateSecret(mfaSecret);
-        if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
-        
-        result = MfaState.UpdateRecoveryCodesHashes(recoveryCodesHashes);
+        var result = MfaState.WithArtifacts(mfaSecret, recoveryCodesHashes);
         if (result.IsFailure) return Result.Failure(UserErrors.InvalidMfaState);
         
         MfaState = result.Value;

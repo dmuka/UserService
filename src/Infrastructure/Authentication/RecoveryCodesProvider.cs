@@ -3,7 +3,7 @@ using Application.Abstractions.Authentication;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class RecoveryCodesProvider(PasswordHasher hasher) : IRecoveryCodesProvider
+internal sealed class RecoveryCodesProvider(IPasswordHasher hasher) : IRecoveryCodesProvider
 {
     public List<(string code, string hashCode)> GenerateRecoveryCodes(int count = 8)
     {
