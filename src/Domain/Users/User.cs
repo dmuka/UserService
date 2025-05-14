@@ -80,7 +80,9 @@ public class User : Entity<UserId>, IAggregationRoot
             return Result<User>.ValidationFailure(ValidationError.FromResults(resultsWithFailures));
         }
 
-        var mfaState = string.IsNullOrEmpty(mfaSecret) || recoveryCodes is null || recoveryCodes.Count == 0
+        var mfaState = string.IsNullOrEmpty(mfaSecret) 
+                       || recoveryCodes is null 
+                       || recoveryCodes.Count == 0
             ? MfaState.Disabled()
             : isMfaEnabled
                 ? MfaState.Enabled(MfaSecret.Create(mfaSecret), recoveryCodes).Value

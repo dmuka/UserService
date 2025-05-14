@@ -20,13 +20,15 @@ public class SetupMfaModel(
     
     [TempData]
     public IList<string> RecoveryCodes { get; set; } = [];
+    
+    private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
     public async Task<IActionResult> OnGetAsync()
     {
         if (userContext.AuthMethod == "mfa") return RedirectToPage("Mfa");
 
         var command = new GenerateMfaArtifactsCommand(userContext.UserId.ToString());
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, CancellationToken);
         
         if (result.IsSuccess)
         {
@@ -52,6 +54,19 @@ public class SetupMfaModel(
             TempData.Keep("Qr");
         }
         
+        if (TempData.TryGetValue("RecoveryCodes", out var rc))
+        {
+            if (rc is List<string> recoveryCodesArray)
+            {
+                RecoveryCodes = recoveryCodesArray.ToList();
+            }
+            else
+            {
+                RecoveryCodes = [];
+            }            
+            TempData.Keep("RecoveryCodes");
+        }
+        
         if (!int.TryParse(VerificationCode, out var code))
         {
             ModelState.AddModelError("Verification code", "Invalid verification code.");
@@ -60,11 +75,11 @@ public class SetupMfaModel(
         }
         
         var command = new EnableMfaCommand(userContext.UserId.ToString(), code);
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, CancellationToken);
 
         if (result.IsSuccess)
         {
-            return RedirectToPage("Mfa");
+            return RedirectToPage("MfaCreationConfirmation");
         }
 
         ModelState.AddModelError("MFA error", result.Error.Description);

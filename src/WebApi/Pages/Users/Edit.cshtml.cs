@@ -98,7 +98,7 @@ public class EditModel(
         Input.FirstName = result.Value.FirstName;
         Input.LastName = result.Value.LastName;
         Input.Email = result.Value.Email;
-        Input.IsMfaEnabled = result.Value.IsMfaEnabled == "true";
+        Input.IsMfaEnabled = result.Value.IsMfaEnabled == "yes";
 
         TempData["Id"] = result.Value.Id;
         TempData["Hash"] = result.Value.PasswordHash;
@@ -132,6 +132,12 @@ public class EditModel(
             && Input.IsMfaEnabled)
         {
             LocalRedirect(Routes.SetupMfa);
+        }
+
+        if (TempData["IsMfaEnabled"]?.ToString() == "true" 
+            && !Input.IsMfaEnabled)
+        {
+            Input.MfaSecret = null;
         }
         
         var user = Domain.Users.User.Create(
