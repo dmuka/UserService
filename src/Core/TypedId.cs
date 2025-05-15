@@ -4,6 +4,18 @@ public abstract class TypedId(Guid value) : IEquatable<TypedId>
 {
     public Guid Value { get; } = value;
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Result{TypedId}" /> to a <see cref="TypedId" />.
+    /// </summary>
+    /// <param name="TypedIdResult">The result with the user id to convert.</param>
+    public static implicit operator TypedId(Result<TypedId> TypedIdResult) => TypedIdResult.Value;
+    
+    /// <summary>
+    /// Implicitly converts a <see cref="TypedId"/> to a guid.
+    /// </summary>
+    /// <param name="id">The user id to convert.</param>
+    public static implicit operator Guid(TypedId id) => id.Value;
+    
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj))

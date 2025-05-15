@@ -124,6 +124,7 @@ public class UserRepository(
                                          WHEN users.recovery_codes_hashes IS NOT NULL
                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
                                              END AS {nameof(User.RecoveryCodesHashes)},
+                                     roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -178,6 +179,7 @@ public class UserRepository(
                                           WHEN users.recovery_codes_hashes IS NOT NULL
                                               THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
                                               END AS {nameof(User.RecoveryCodesHashes)},
+                                      roles.id AS {nameof(Role.Id)},
                                       roles.name AS {nameof(Role.Name)}
                                   FROM Users users
                                       INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -232,6 +234,7 @@ public class UserRepository(
                                          WHEN users.recovery_codes_hashes IS NOT NULL
                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
                                              END AS {nameof(User.RecoveryCodesHashes)},
+                                     roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -285,6 +288,7 @@ public class UserRepository(
                                          WHEN users.recovery_codes_hashes IS NOT NULL
                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
                                          END AS {nameof(User.RecoveryCodesHashes)},
+                                     roles.id AS {nameof(Role.Id)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -489,7 +493,7 @@ public class UserRepository(
                         user.Email,
                         new List<RoleName> { RoleName.Create(role.Name) },
                         new List<UserPermissionId>(),
-                        user.RecoveryCodes,
+                        user.RecoveryCodesHashes,
                         user.IsMfaEnabled,
                         user.MfaSecret).Value;
                     userDictionary.Add(user.Id, userEntry);

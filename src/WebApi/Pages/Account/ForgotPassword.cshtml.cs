@@ -10,8 +10,7 @@ namespace WebApi.Pages.Account;
 public class ForgotPasswordModel(
     TokenHandler tokenHandler,
     IUserRepository userRepository,
-    IEmailService emailService,
-    ILogger<ForgotPasswordModel> logger) : PageModel
+    IEmailService emailService) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new ();

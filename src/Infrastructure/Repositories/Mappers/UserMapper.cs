@@ -34,7 +34,7 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserId, 
             dto.Email, 
             new List<RoleName> { RoleName.Create(role?.Name ?? defaultUserRole) },
             new List<UserPermissionId>(),
-            dto.RecoveryCodes,
+            dto.RecoveryCodesHashes,
             dto.IsMfaEnabled,
             dto.MfaSecret).Value;
         

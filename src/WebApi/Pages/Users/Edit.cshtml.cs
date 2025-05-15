@@ -52,18 +52,19 @@ public class EditModel(
         
         public string? MfaSecret { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = true)]
         [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
         [DataType(DataType.Password)]
         [Display(Name = "Old password")]
         public string OldPassword { get; set; } = string.Empty;
 
-        [Required]
+        [Required(AllowEmptyStrings = true)]
         [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
         [DataType(DataType.Password)]
         [Display(Name = "New password")]
         public string NewPassword { get; set; } = string.Empty;
 
+        [Required(AllowEmptyStrings = true)]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm new password")]
         [Compare("NewPassword", ErrorMessage = ErrorMessages.ConfirmPassword)]
@@ -111,6 +112,17 @@ public class EditModel(
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
+
+        if ((Input.NewPassword != string.Empty || Input.OldPassword != string.Empty)
+            && (Input.NewPassword == string.Empty 
+                || Input.OldPassword == string.Empty 
+                || Input.ConfirmNewPassword == string.Empty))
+        {
+            ModelState.AddModelError(string.Empty, "If you want change password, you must enter old password, new password and confirm new password.");
+
+            return Page();
+        };
+        
         if (!passwordHasher.CheckPassword(Input.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
         {
             ModelState.AddModelError(string.Empty, "Incorrect old password.");
@@ -148,7 +160,9 @@ public class EditModel(
             Input.UserName,
             Input.FirstName,
             Input.LastName,
-            passwordHasher.GetHash(Input.NewPassword),
+            Input.NewPassword == "" 
+                ? passwordHasher.GetHash(Input.OldPassword) 
+                : passwordHasher.GetHash(Input.NewPassword),
             Input.Email,
             selectedRoles,
             [],
