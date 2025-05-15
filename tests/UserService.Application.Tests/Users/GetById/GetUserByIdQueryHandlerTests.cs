@@ -3,9 +3,7 @@ using Application.Users.GetById;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Moq;
 using Shouldly;
 
@@ -14,9 +12,11 @@ namespace UserService.Application.Tests.Users.GetById;
 [TestFixture]
 public class GetUserByIdQueryHandlerTests
 {
+    private const string AdminName = "Admin";
+    
     private static readonly Guid AuthorizedUserId = Guid.CreateVersion7();
     private static readonly Guid UnauthorizedUserId = Guid.CreateVersion7();
-    private static readonly Guid RoleId = Guid.CreateVersion7();
+    private static readonly RoleName AdminRoleName = RoleName.Create(AdminName);
     
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
     
@@ -31,7 +31,7 @@ public class GetUserByIdQueryHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), "Role").Value };
+        _roles = new List<Role> { Role.Create(Guid.CreateVersion7(), AdminName).Value };
         
         _mockRepository = new Mock<IUserRepository>();
         _mockRoleRepository = new Mock<IRoleRepository>();
@@ -88,7 +88,7 @@ public class GetUserByIdQueryHandlerTests
         // Arrange
         var query = new GetUserByIdQuery(AuthorizedUserId);
         _mockUserContext.Setup(x => x.UserId).Returns(AuthorizedUserId);   
-        _mockUserContext.Setup(x => x.UserRole).Returns("Admin");
+        _mockUserContext.Setup(x => x.UserRole).Returns(AdminName);
         var user = User.Create(
             _userId.Value,
             "userName", 
@@ -96,7 +96,7 @@ public class GetUserByIdQueryHandlerTests
             "Doe", 
             "hash", 
             "email@email.com", 
-            new List<RoleId> { new (RoleId) },
+            new List<RoleName> { AdminRoleName },
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,

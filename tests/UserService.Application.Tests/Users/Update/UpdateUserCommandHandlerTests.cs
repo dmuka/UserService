@@ -1,17 +1,18 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.Update;
 using Domain.Users;
-using Domain.ValueObjects;
 using Moq;
-using NUnit.Framework;
-using Core;
 using Domain.Roles;
+using Domain.ValueObjects.RoleNames;
 
 namespace UserService.Application.Tests.Users.Update;
 
 [TestFixture]
 public class UpdateUserCommandHandlerTests
 {
+    private const string Name = "Admin";
+    private readonly RoleName AdminRoleName = RoleName.Create(Name);
+    
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
 
     private Mock<IUserRepository> _userRepositoryMock;
@@ -36,7 +37,7 @@ public class UpdateUserCommandHandlerTests
             "LastName",
             "hash",
             "email@example.com",
-            new List<RoleId> { new(Guid.CreateVersion7()) },
+            new List<RoleName> { AdminRoleName },
             new List<Domain.UserPermissions.UserPermissionId>(),
             ["recoveryCode"], 
             false,
@@ -66,12 +67,12 @@ public class UpdateUserCommandHandlerTests
     {
         // Arrange
         var command = new UpdateUserCommand(_user);
-        _userContextMock.Setup(x => x.UserRole).Returns("Admin");
+        _userContextMock.Setup(x => x.UserRole).Returns(Name);
 
         _userRepositoryMock.Setup(x => x.UpdateUserAsync(_user, _cancellationToken))
             .Returns(Task.CompletedTask);
         
-        _userRoleRepositoryMock.Setup(x => x.UpdateUserRolesAsync(_user.Id.Value, It.IsAny<IEnumerable<Guid>>(), _cancellationToken))
+        _userRoleRepositoryMock.Setup(x => x.UpdateUserRolesAsync(_user.Id.Value, It.IsAny<IEnumerable<string>>(), _cancellationToken))
             .ReturnsAsync(1);
 
         // Act

@@ -11,7 +11,7 @@ public sealed record SignUpUserCommand(
     string Password,
     bool IsMfaEnabled,
     string? MfaSecret,
-    IEnumerable<Guid>? RolesIds = null,
+    IEnumerable<string>? RolesNames = null,
     IEnumerable<UserPermissionId>? UserPermissionIds = null,
     IEnumerable<string>? RecoveryCodes = null)
     : ICommand<Guid>;

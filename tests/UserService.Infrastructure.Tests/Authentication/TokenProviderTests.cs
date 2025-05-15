@@ -1,8 +1,7 @@
 ﻿using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Infrastructure.Authentication;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,9 +14,9 @@ namespace UserService.Infrastructure.Tests.Authentication;
 public class TokenProviderTests
 {
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
-    
-    private bool _rememberMe = false;
-    
+
+    private const bool RememberMe = false;
+
     private Mock<IOptions<AuthOptions>> _authOptionsMock;
     private Mock<IServiceProvider> _serviceProviderMock;
     private Mock<IRoleRepository> _roleRepositoryMock;
@@ -67,14 +66,14 @@ public class TokenProviderTests
             "lastName",
             "hashedPassword",
             "testuser@example.com",
-            new List<RoleId> { new (Guid.CreateVersion7()) },
+            new List<RoleName> { RoleName.Create("Role") },
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,
             "MfaSecret").Value;
 
         // Act
-        var token = await _tokenProvider.CreateAccessTokenAsync(user, _rememberMe, _cancellationToken);
+        var token = await _tokenProvider.CreateAccessTokenAsync(user, RememberMe, _cancellationToken);
 
         // Assert
         Assert.That(token, Is.Not.Empty);

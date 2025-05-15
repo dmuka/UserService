@@ -1,8 +1,8 @@
 ﻿using Core;
 using Domain.RefreshTokens;
-using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
+using Domain.ValueObjects.RoleNames;
 
 namespace UserService.Domain.Tests.Aggregates;
 
@@ -19,7 +19,7 @@ public class RefreshTokenTests
         "lastName", 
         "hash", 
         "email@email.com",
-        new List<RoleId> { new (Guid.CreateVersion7()) },
+        new List<RoleName> { RoleName.Create("Role") },
         new List<UserPermissionId>(),
         ["recoveryCode"], 
         false,
@@ -80,7 +80,7 @@ public class RefreshTokenTests
         var expiresUtc = DateTime.UtcNow.AddDays(1);
 
         // Act
-        var result = RefreshToken.Create(Id, newValue, expiresUtc, _user.Id);
+        var result = RefreshToken.Create(Id, newValue!, expiresUtc, _user.Id);
         
         // Assert
         using (Assert.EnterMultipleScope())
@@ -122,7 +122,7 @@ public class RefreshTokenTests
         var expiresUtc = DateTime.UtcNow.AddDays(1);
 
         // Act
-        var result = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, null);
+        var result = RefreshToken.Create(Id, SampleTokenValue, expiresUtc, null!);
         
         // Assert
         using (Assert.EnterMultipleScope())

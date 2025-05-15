@@ -4,9 +4,7 @@ using Domain;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Moq;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
@@ -47,7 +45,7 @@ public class SignUpUserCommandHandlerTests
             "lastName",
             "hash",
             Email,
-            _roles.Select(role => role.Id).ToList(),
+            _roles.Select(role => RoleName.Create(role.Name).Value).ToList(),
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,
@@ -77,7 +75,6 @@ public class SignUpUserCommandHandlerTests
         
         _handler = new SignUpUserCommandHandler(
             _userRepositoryMock.Object,
-            _roleRepositoryMock.Object,
             _passwordHasherMock.Object,
             _eventDispatcherMock.Object);
     }
@@ -128,7 +125,7 @@ public class SignUpUserCommandHandlerTests
             Password, 
             false, 
             null,
-            new List<Guid> { Guid.CreateVersion7() },
+            new List<string> { "Role" },
             new List<UserPermissionId>());
 
         // Act

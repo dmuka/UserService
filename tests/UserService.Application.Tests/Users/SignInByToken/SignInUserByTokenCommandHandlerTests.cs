@@ -5,9 +5,7 @@ using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -18,11 +16,12 @@ namespace UserService.Application.Tests.Users.SignInByToken;
 public class SignInUserByTokenCommandHandlerTests
 {
     private const int RefreshTokenExpirationInDays = 2;
+    private const int RefreshTokenExpirationInDaysOneDay = 1;
     
     private const string ValidToken = "validToken";
 
-    private bool _rememberMe = false;
- 
+    private const bool RememberMe = false;
+
     private readonly Guid _refreshTokenGuid = Guid.CreateVersion7();
     private IList<Role> _roles;
     private User _user;
@@ -48,7 +47,7 @@ public class SignInUserByTokenCommandHandlerTests
             "lastName",
             "hash",
             "email@email.com",
-            _roles.Select(role => role.Id).ToList(),
+            _roles.Select(role => RoleName.Create(role.Name).Value).ToList(),
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,
@@ -66,11 +65,11 @@ public class SignInUserByTokenCommandHandlerTests
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, _rememberMe, _cancellationToken))
+        _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, RememberMe, _cancellationToken))
             .Returns(Task.FromResult("newAccessToken"));
         
-        _tokenProviderMock.Setup(provider => provider.GetExpirationValue(RefreshTokenExpirationInDays, ExpirationUnits.Day, _rememberMe))
-            .Returns(DateTime.UtcNow.AddDays(RefreshTokenExpirationInDays / 2));
+        _tokenProviderMock.Setup(provider => provider.GetExpirationValue(RefreshTokenExpirationInDays, ExpirationUnits.Day, RememberMe))
+            .Returns(DateTime.UtcNow.AddDays(RefreshTokenExpirationInDaysOneDay));
         
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRepositoryMock.Setup(repository => repository.GetUserByIdAsync(_user.Id.Value, _cancellationToken))

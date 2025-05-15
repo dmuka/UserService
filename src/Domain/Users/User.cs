@@ -1,5 +1,4 @@
 ﻿using Core;
-using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users.DomainEvents;
 using Domain.Users.Specifications;
@@ -7,6 +6,7 @@ using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.MfaSecrets;
 using Domain.ValueObjects.MfaState;
 using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 
 namespace Domain.Users;
 
@@ -21,14 +21,14 @@ public class User : Entity<UserId>, IAggregationRoot
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
     public MfaState MfaState { get; private set; }
-    private List<RoleId> _roleIds = [];
-    public IReadOnlyCollection<RoleId> RoleIds => _roleIds.AsReadOnly();
+    private List<RoleName> _roleNames = [];
+    public IReadOnlyCollection<RoleName> RoleNames => _roleNames.AsReadOnly();
     private List<UserPermissionId> _userPermissionIds = [];
     public IReadOnlyCollection<UserPermissionId> UserPermissionIds => _userPermissionIds.AsReadOnly();
     
     public bool IsMfaEnabled => MfaState.IsEnabled;
     public MfaSecret? MfaSecret => MfaState.Secret;
-    public IReadOnlyCollection<string> RecoveryCodes => MfaState.RecoveryCodes;
+    public IReadOnlyCollection<string>? RecoveryCodesHashes => MfaState.RecoveryCodesHashes;
 
     /// <summary>
     /// Default constructor for ORM compatibility.
@@ -44,7 +44,7 @@ public class User : Entity<UserId>, IAggregationRoot
     /// <param name="lastName">The last name of the user.</param>
     /// <param name="passwordHash">The hashed password of the user.</param>
     /// <param name="email">The email address of the user.</param>
-    /// <param name="roleIds">A collection of the user's role IDs.</param>
+    /// <param name="roleNames">A collection of the user's role names.</param>
     /// <param name="userPermissionIds">A collection of the user's permission IDs.</param>
     /// <param name="recoveryCodes">A collection of the user's recovery codes.</param>
     /// <param name="isMfaEnabled">Indicates whether multifactor authentication is enabled.</param>
@@ -57,7 +57,7 @@ public class User : Entity<UserId>, IAggregationRoot
         string lastName,
         string passwordHash,
         string email,
-        ICollection<RoleId> roleIds,
+        ICollection<RoleName> roleNames,
         ICollection<UserPermissionId>? userPermissionIds,
         ICollection<string>? recoveryCodes = null,
         bool isMfaEnabled = false,
@@ -69,7 +69,7 @@ public class User : Entity<UserId>, IAggregationRoot
             lastName,
             passwordHash,
             email,
-            roleIds,
+            roleNames,
             userPermissionIds,
             recoveryCodes,
             mfaSecret,
@@ -96,7 +96,7 @@ public class User : Entity<UserId>, IAggregationRoot
             PasswordHash.Create(passwordHash), 
             Email.Create(email),
             mfaState,
-            roleIds,
+            roleNames,
             userPermissionIds);
     
         var userRegisteredEvent = new UserRegisteredDomainEvent(userId);
@@ -113,7 +113,7 @@ public class User : Entity<UserId>, IAggregationRoot
         PasswordHash passwordHash, 
         Email email,
         MfaState mfaState,
-        ICollection<RoleId> roleIds,
+        ICollection<RoleName> roleNames,
         ICollection<UserPermissionId>? userPermissionIds)
     {
         Id = userId;
@@ -123,7 +123,7 @@ public class User : Entity<UserId>, IAggregationRoot
         PasswordHash = passwordHash;
         Email = email;
         MfaState = mfaState;
-        _roleIds = new List<RoleId>(roleIds);
+        _roleNames = new List<RoleName>(roleNames);
         _userPermissionIds = userPermissionIds is not null 
             ? [..userPermissionIds] 
             : [];
@@ -161,14 +161,14 @@ public class User : Entity<UserId>, IAggregationRoot
     /// <summary>
     /// Removes the role of the user.
     /// </summary>
-    /// <param name="roleId">The role id to remove.</param>
-    public Result RemoveRole(RoleId? roleId)
+    /// <param name="roleName">The role name to remove.</param>
+    public Result RemoveRole(RoleName? roleName)
     {
-        if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
-        var validationResult = new UserMustHaveAtLeastOneRoleAfterRemoveRole(_roleIds).IsSatisfied();
+        if (roleName is null) return Result.Failure<RoleName>(Error.NullValue);
+        var validationResult = new UserMustHaveAtLeastOneRoleAfterRemoveRole(_roleNames).IsSatisfied();
         if (validationResult.IsFailure) return validationResult;
         
-        _roleIds.Remove(roleId);
+        _roleNames.Remove(roleName);
         
         return Result.Success();
     }
@@ -189,12 +189,12 @@ public class User : Entity<UserId>, IAggregationRoot
     /// <summary>
     /// Adds the role of the user.
     /// </summary>
-    /// <param name="roleId">The role id to add.</param>
-    public Result AddRole(RoleId? roleId)
+    /// <param name="roleName">The role id to add.</param>
+    public Result AddRole(RoleName? rolename)
     {
-        if (roleId is null) return Result.Failure<RoleId>(Error.NullValue);
+        if (rolename is null) return Result.Failure<RoleName>(Error.NullValue);
         
-        _roleIds.Add(roleId); 
+        _roleNames.Add(rolename); 
         
         return Result.Success();
     }
@@ -263,7 +263,7 @@ public class User : Entity<UserId>, IAggregationRoot
         string lastName,
         string passwordHash,
         string email,
-        ICollection<RoleId> roleIds,
+        ICollection<RoleName> roleNames,
         ICollection<UserPermissionId>? userPermissionIds,
         ICollection<string>? recoveryCodes,
         string? mfaSecret = null,
@@ -276,7 +276,7 @@ public class User : Entity<UserId>, IAggregationRoot
             new LastNameMustBeValid(lastName).IsSatisfied(),
             new MustBeNonNullValue<string>(passwordHash).IsSatisfied(),
             new EmailMustBeValid(email).IsSatisfied(),
-            new UserMustHaveAtLeastOneRole(roleIds).IsSatisfied(),
+            new UserMustHaveAtLeastOneRole(roleNames).IsSatisfied(),
             new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied(),
             new UserMustHaveValidMfaState(mfaSecret, isMfaEnabled, recoveryCodes).IsSatisfied()
         };

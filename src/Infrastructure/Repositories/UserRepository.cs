@@ -4,6 +4,7 @@ using Dapper;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
+using Domain.ValueObjects.RoleNames;
 using Infrastructure.Caching.Interfaces;
 using Infrastructure.Options.Db;
 using Infrastructure.Repositories.Dtos;
@@ -33,15 +34,15 @@ public class UserRepository(
     /// <returns>Returns true if the username exists, otherwise false.</returns>
     public async Task<bool> IsUsernameExistsAsync(string userName, CancellationToken cancellationToken = default)
     {
-        var users = GetFromCache<User, UserId>();
+        var usersCache = GetFromCache<User, UserId>();
         
-        if (users is not null) return users.Count(user => user.Username == userName) > 1;
+        if (usersCache is not null) return usersCache.Count(user => user.Username == userName) > 1;
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT COUNT(users.user_name)
-                                 FROM Users users
+        const string query = $"""
+                                 SELECT COUNT({nameof(User.Username)})
+                                 FROM users
                                  WHERE users.user_name = @UserName
                              """;
         
@@ -70,15 +71,15 @@ public class UserRepository(
     /// <returns>Returns true if the email exists, otherwise false.</returns>
     public async Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
-        var users = GetFromCache<User, UserId>();
+        var usersCache = GetFromCache<User, UserId>();
         
-        if (users is not null) return users.Count(user => user.Email == email) > 1;
+        if (usersCache is not null) return usersCache.Count(user => user.Email == email) > 1;
         
         await using var connection = new NpgsqlConnection(_connectionString);
             
-        const string query = """
-                                 SELECT COUNT(users.email)
-                                 FROM Users users
+        const string query = $"""
+                                 SELECT COUNT({nameof(User.Email)})
+                                 FROM users
                                  WHERE users.email = @Email
                              """;
         
@@ -117,11 +118,12 @@ public class UserRepository(
                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
+                                     users.mfa_secret AS {nameof(User.MfaSecret)},
                                      CASE
-                                         WHEN users.recovery_codes IS NOT NULL
-                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
-                                         END AS {nameof(User.RecoveryCodes)},
-                                     roles.id AS {nameof(Role.Id)},
+                                         WHEN users.recovery_codes_hashes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
+                                             END AS {nameof(User.RecoveryCodesHashes)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -170,11 +172,12 @@ public class UserRepository(
                                       users.last_name AS {nameof(User.LastName)},
                                       users.email AS {nameof(User.Email)},
                                       users.password_hash AS {nameof(User.PasswordHash)},
+                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
+                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                       CASE
-                                          WHEN users.recovery_codes IS NOT NULL
-                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
-                                          END AS {nameof(User.RecoveryCodes)},
-                                      roles.id AS {nameof(Role.Id)},
+                                          WHEN users.recovery_codes_hashes IS NOT NULL
+                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
+                                              END AS {nameof(User.RecoveryCodesHashes)},
                                       roles.name AS {nameof(Role.Name)}
                                   FROM Users users
                                       INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -223,11 +226,12 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
+                                     users.mfa_secret AS {nameof(User.MfaSecret)},
                                      CASE
-                                         WHEN users.recovery_codes IS NOT NULL
-                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
-                                         END AS {nameof(User.RecoveryCodes)},
-                                     roles.id AS {nameof(Role.Id)},
+                                         WHEN users.recovery_codes_hashes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
+                                             END AS {nameof(User.RecoveryCodesHashes)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -275,11 +279,12 @@ public class UserRepository(
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
+                                     users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
+                                     users.mfa_secret AS {nameof(User.MfaSecret)},
                                      CASE
-                                         WHEN users.recovery_codes IS NOT NULL
-                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes))
-                                         END AS {nameof(User.RecoveryCodes)},
-                                     roles.id AS {nameof(Role.Id)},
+                                         WHEN users.recovery_codes_hashes IS NOT NULL
+                                             THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))
+                                         END AS {nameof(User.RecoveryCodesHashes)},
                                      roles.name AS {nameof(Role.Name)}
                                  FROM Users users
                                      INNER JOIN user_roles UserRoles ON users.id = UserRoles.user_id 
@@ -319,7 +324,16 @@ public class UserRepository(
         try
         {
             var query = $"""
-                            INSERT INTO Users ({nameof(User.Id)}, {nameof(User.Username)}, {nameof(User.FirstName)}, {nameof(User.LastName)}, {nameof(User.PasswordHash)}, {nameof(User.Email)}, {nameof(User.IsMfaEnabled)}, {nameof(User.MfaSecret)}, {nameof(User.RecoveryCodes)})
+                            INSERT INTO Users 
+                                ({nameof(User.Id)}, 
+                                {nameof(User.Username)}, 
+                                {nameof(User.FirstName)}, 
+                                {nameof(User.LastName)}, 
+                                {nameof(User.PasswordHash)}, 
+                                {nameof(User.Email)}, 
+                                {nameof(User.IsMfaEnabled)}, 
+                                {nameof(User.MfaSecret)}, 
+                                {nameof(User.RecoveryCodesHashes)})
                             VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret, @RecoveryCodes::jsonb)
                             RETURNING Id
                         """;
@@ -334,7 +348,7 @@ public class UserRepository(
                 Email = user.Email.Value,
                 user.IsMfaEnabled,
                 MfaSecret = user.MfaSecret?.Value,
-                RecoveryCodes = user.RecoveryCodes is not null ? JsonSerializer.Serialize(user.RecoveryCodes) : null
+                RecoveryCodes = user.RecoveryCodesHashes is not null ? JsonSerializer.Serialize(user.RecoveryCodesHashes) : null
             };
             
             var command = new CommandDefinition(query, parameters, transaction, cancellationToken: cancellationToken);
@@ -346,11 +360,11 @@ public class UserRepository(
                         VALUES (@UserId, @RoleId);
                     """;
 
-            foreach (var roleId in user.RoleIds)
+            foreach (var roleName in user.RoleNames)
             {
                 command = new CommandDefinition(
                     query, 
-                    new { UserId = user.Id.Value, RoleId = roleId.Value }, 
+                    new { UserId = user.Id.Value, RoleName = roleName.Value }, 
                     transaction, 
                     cancellationToken: cancellationToken);
                 
@@ -390,8 +404,8 @@ public class UserRepository(
                                      email = @Email,
                                      is_mfa_enabled = @IsMfaEnabled,
                                      mfa_secret = @MfaSecret,
-                                     recovery_codes = @RecoveryCodes::jsonb
-                                 WHERE Users.Id = @Id
+                                     recovery_codes_hashes = @RecoveryCodes::jsonb
+                                 WHERE {nameof(User.Id)} = @Id
                              """;
         
         var parameters = new
@@ -404,7 +418,7 @@ public class UserRepository(
             Email = user.Email.Value,
             user.IsMfaEnabled,
             MfaSecret = user.MfaSecret?.Value,
-            RecoveryCodes = user.RecoveryCodes is not null ? JsonSerializer.Serialize(user.RecoveryCodes) : null
+            RecoveryCodes = user.RecoveryCodesHashes is not null ? JsonSerializer.Serialize(user.RecoveryCodesHashes) : null
         };
         
         var command = new CommandDefinition(query, parameters: parameters, cancellationToken: cancellationToken);
@@ -432,10 +446,10 @@ public class UserRepository(
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
         
-        const string query = """
+        const string query = $"""
                                  DELETE
-                                 FROM Users 
-                                 WHERE Users.Id = @Id
+                                 FROM users 
+                                 WHERE {nameof(User.Id)} = @Id
                              """;
         
         var parameters = new { Id = userId };
@@ -473,7 +487,7 @@ public class UserRepository(
                         user.LastName,
                         user.PasswordHash,
                         user.Email,
-                        new List<RoleId> { new (role.Id) },
+                        new List<RoleName> { RoleName.Create(role.Name) },
                         new List<UserPermissionId>(),
                         user.RecoveryCodes,
                         user.IsMfaEnabled,
@@ -482,7 +496,7 @@ public class UserRepository(
                 }
                 else
                 {
-                    userEntry.AddRole(new RoleId(role.Id));
+                    userEntry.AddRole(RoleName.Create(role.Name));
                 }
                 
                 return userEntry;

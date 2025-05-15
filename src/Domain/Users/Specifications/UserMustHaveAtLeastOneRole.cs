@@ -1,16 +1,16 @@
 ﻿using Core;
-using Domain.Roles;
+using Domain.ValueObjects.RoleNames;
 
 namespace Domain.Users.Specifications;
 
-public class UserMustHaveAtLeastOneRole(ICollection<RoleId> roleIds) : ISpecification
+public class UserMustHaveAtLeastOneRole(ICollection<RoleName> roleNames) : ISpecification
 {
     public Result IsSatisfied()
     {
-        if (roleIds is null) return Result.Failure(Error.NullValue);
+        if (roleNames is null) return Result.Failure(Error.NullValue);
         
-        return roleIds.Count == 0 
-            ? Result.Failure<ICollection<RoleId>>(UserErrors.EmptyRolesCollection) 
+        return roleNames.Count == 0 
+            ? Result.Failure<ICollection<RoleName>>(UserErrors.EmptyRolesCollection) 
             : Result.Success();
     }
 }

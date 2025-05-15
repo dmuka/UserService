@@ -1,9 +1,9 @@
 ﻿using Core;
-using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 
 namespace UserService.Domain.Tests.Aggregates;
 
@@ -12,9 +12,10 @@ public class UserTests
 {
     private static readonly Guid AuthorizedUserId = Guid.CreateVersion7();
     private static readonly Guid RoleId = Guid.CreateVersion7();
+    private static readonly RoleName RoleName = RoleName.Create("Role");
     
     private readonly UserId _userId = new(AuthorizedUserId);
-    private readonly ICollection<RoleId> _validRolesIds = new List<RoleId> { new (RoleId) };
+    private readonly ICollection<RoleName> _validRolesNames = new List<RoleName> { RoleName.Create("Role") };
     private readonly ICollection<UserPermissionId> _userPermissionIds = [];
     private readonly ICollection<string> _recoveryCodes = ["recoveryCode"];
 
@@ -38,7 +39,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -52,7 +53,7 @@ public class UserTests
             Assert.That(user.LastName, Is.EqualTo(ValidLastName));
             Assert.That(user.PasswordHash, Is.EqualTo(ValidPasswordHash));
             Assert.That(user.Email, Is.EqualTo(ValidEmail));
-            Assert.That(user.RoleIds, Has.Count.EqualTo(1));
+            Assert.That(user.RoleNames, Has.Count.EqualTo(1));
         }
     }
 
@@ -70,7 +71,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -99,7 +100,7 @@ public class UserTests
             ValidLastName,
             ValidPasswordHash,
             ValidEmail,
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -128,7 +129,7 @@ public class UserTests
             lastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -156,7 +157,7 @@ public class UserTests
             ValidLastName, 
             null!, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -184,7 +185,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             null!, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -240,7 +241,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -265,7 +266,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -295,7 +296,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -320,7 +321,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
@@ -351,19 +352,18 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,
             MfaSecret).Value;
-        var newRoleId = new RoleId(RoleId);
-        user.AddRole(newRoleId);
+        user.AddRole(RoleName);
 
         // Act
-        user.RemoveRole(newRoleId);
+        user.RemoveRole(RoleName);
         
         // Assert
-        Assert.That(user.RoleIds, Has.Count.EqualTo(1));
+        Assert.That(user.RoleNames, Has.Count.EqualTo(1));
     }
 
     [Test]
@@ -377,7 +377,7 @@ public class UserTests
             ValidLastName, 
             ValidPasswordHash, 
             ValidEmail, 
-            _validRolesIds,
+            _validRolesNames,
             _userPermissionIds,
             _recoveryCodes, 
             MfaDisabled,

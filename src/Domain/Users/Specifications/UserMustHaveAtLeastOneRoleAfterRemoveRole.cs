@@ -1,14 +1,14 @@
 ﻿using Core;
-using Domain.Roles;
+using Domain.ValueObjects.RoleNames;
 
 namespace Domain.Users.Specifications;
 
-public class UserMustHaveAtLeastOneRoleAfterRemoveRole(ICollection<RoleId> roleIds) : ISpecification
+public class UserMustHaveAtLeastOneRoleAfterRemoveRole(ICollection<RoleName> roleNames) : ISpecification
 {
     public Result IsSatisfied()
     {
-        return roleIds.Count < 2 
-            ? Result.Failure<ICollection<RoleId>>(UserErrors.LastRoleRemove) 
+        return roleNames.Count < 2 
+            ? Result.Failure<ICollection<RoleName>>(UserErrors.LastRoleRemove) 
             : Result.Success();
     }
 }

@@ -4,6 +4,7 @@ using Domain.RefreshTokens;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
+using Domain.ValueObjects.RoleNames;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -26,8 +27,8 @@ public class SignInUserCommandHandlerTests
     private const string AccessToken = "accessToken";
     private const string RefreshTokenValue = "refreshTokenValue";
 
-    private bool _rememberMe = false;
-    
+    private const bool RememberMe = false;
+
     private IList<Role> _roles;
     
     private readonly CancellationToken _cancellationToken = CancellationToken.None;
@@ -53,7 +54,7 @@ public class SignInUserCommandHandlerTests
             "lastName",
             "hash",
             "email@email.com",
-            _roles.Select(role => role.Id).ToList(),
+            _roles.Select(role => RoleName.Create(role.Name).Value).ToList(),
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,
@@ -74,7 +75,7 @@ public class SignInUserCommandHandlerTests
             .Returns(true);
         
         _tokenProviderMock = new Mock<ITokenProvider>();
-        _tokenProviderMock.Setup(tp => tp.CreateAccessTokenAsync(_existingUser, _rememberMe, _cancellationToken))
+        _tokenProviderMock.Setup(tp => tp.CreateAccessTokenAsync(_existingUser, RememberMe, _cancellationToken))
             .Returns(Task.FromResult(AccessToken));
         _tokenProviderMock.Setup(tp => tp.CreateRefreshToken())
             .Returns(RefreshTokenValue);
@@ -93,9 +94,9 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExistByUsername()
     {
         // Arrange
-        var command = new SignInUserCommand(NonExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(NonExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays);
         _userRepositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))
-            .ReturnsAsync((User)null!);
+            .ReturnsAsync((User?)null);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -112,9 +113,9 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExistByEmail()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays, NonExistingEmail);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays, NonExistingEmail);
         _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(It.IsAny<string>(), _cancellationToken))
-            .ReturnsAsync((User)null!);
+            .ReturnsAsync((User?)null);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -123,7 +124,7 @@ public class SignInUserCommandHandlerTests
         {
             // Assert
             Assert.That(result.IsFailure, Is.True);
-            Assert.That(result.Error, Is.EqualTo(UserErrors.NotFoundByEmail(command.Email!)));
+            Assert.That(result.Error, Is.EqualTo(UserErrors.NotFoundByEmail(command.Email ?? "")));
         }
     }
 
@@ -131,7 +132,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnWrongPassword_WhenPasswordIsIncorrect()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, WrongPassword, _rememberMe, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(ExistingUsername, WrongPassword, RememberMe, RefreshTokenExpirationInDays);
         _passwordHasherMock.Setup(ph => ph.CheckPassword(command.Password, _existingUser.PasswordHash))
             .Returns(false);
 
@@ -150,7 +151,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnSignInResponse_WhenSignInIsSuccessful()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
@@ -167,7 +168,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnSignInResponse_WhenSignInByEmailIsSuccessful()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, _rememberMe, RefreshTokenExpirationInDays, ExistingEmail);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays, ExistingEmail);
 
         // Act
         var result = await _handler.Handle(command, _cancellationToken);

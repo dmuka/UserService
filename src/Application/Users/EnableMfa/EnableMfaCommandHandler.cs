@@ -26,7 +26,7 @@ internal sealed class EnableMfaCommandHandler(IUserRepository userRepository, IT
         
         await userRepository.UpdateUserAsync(user, cancellationToken);
 
-        var recoveryCodesHashes = user.MfaState.RecoveryCodes;
+        var recoveryCodesHashes = user.MfaState.RecoveryCodesHashes;
         
         return recoveryCodesHashes.ToList();
     }

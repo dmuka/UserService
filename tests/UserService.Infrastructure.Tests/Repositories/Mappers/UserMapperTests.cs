@@ -1,9 +1,7 @@
 ﻿using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Infrastructure.Repositories.Dtos;
 using Infrastructure.Repositories.Mappers;
 using Moq;
@@ -15,7 +13,7 @@ public class UserMapperTests
 {
     private static readonly Guid Id = Guid.CreateVersion7();
 
-    private readonly RoleId _roleId = new(Id);
+    private readonly RoleName _roleName = RoleName.Create("Role");
     
     private const string Username = "jdoe";
     private const string FirstName = "John";
@@ -28,7 +26,7 @@ public class UserMapperTests
     private readonly ICollection<string> _recoveryCodes = ["recoveryCode"];
     
     private User _user;
-    private IList<RoleId> _roleIds;
+    private IList<RoleName> _roleNames;
     private IList<UserPermissionId> _userPermissionIds;
     
     private Mock<IRoleRepository> _roleRepositoryMock;
@@ -38,7 +36,7 @@ public class UserMapperTests
     [SetUp]
     public void Setup()
     {
-        _roleIds = [new RoleId(Id)];
+        _roleNames = [_roleName];
         _userPermissionIds = [new UserPermissionId(Id)];
         
         _roleRepositoryMock = new Mock<IRoleRepository>();
@@ -52,7 +50,7 @@ public class UserMapperTests
             LastName,
             Hash,
             Email,
-            _roleIds,
+            _roleNames,
             _userPermissionIds,
             _recoveryCodes,
             MfaDisabled,
@@ -96,7 +94,7 @@ public class UserMapperTests
 
         // Act
         var user = _userMapper.ToEntity(userDto);
-        user.AddRole(_roleIds[0]);
+        user.AddRole(_roleNames[0]);
 
         using (Assert.EnterMultipleScope())
         {
@@ -107,7 +105,7 @@ public class UserMapperTests
             Assert.That(user.LastName, Is.EqualTo(userDto.LastName));
             Assert.That(user.PasswordHash.Value, Is.EqualTo(userDto.PasswordHash));
             Assert.That(user.Email.Value, Is.EqualTo(userDto.Email));
-            Assert.That(user.RoleIds, Has.Count.EqualTo(2));
+            Assert.That(user.RoleNames, Has.Count.EqualTo(2));
         }
     }
 
@@ -115,6 +113,6 @@ public class UserMapperTests
     public void ToEntity_ShouldThrowArgumentNullException_WhenUserDtoIsNull()
     {
         // Act & Assert
-        Assert.Throws<NullReferenceException>(() => _userMapper.ToEntity(null));
+        Assert.Throws<NullReferenceException>(() => _userMapper.ToEntity(null!));
     }
 }

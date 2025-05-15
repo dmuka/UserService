@@ -3,6 +3,7 @@ using Application.Abstractions.Authentication;
 using Application.Users.GetById;
 using Application.Users.Update;
 using Domain.Roles;
+using Domain.ValueObjects.RoleNames;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -49,7 +50,7 @@ public class EditModel(
         [Display(Name = "Is MFA enabled")]
         public bool IsMfaEnabled { get; set; }
         
-        public string MfaSecret { get; set; } = string.Empty;
+        public string? MfaSecret { get; set; }
 
         [Required]
         [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
@@ -140,6 +141,8 @@ public class EditModel(
             Input.MfaSecret = null;
         }
         
+        var selectedRoles = Input.SelectedRoles.Select(name => RoleName.Create(name).Value).ToList();
+        
         var user = Domain.Users.User.Create(
             Input.Id,
             Input.UserName,
@@ -147,7 +150,7 @@ public class EditModel(
             Input.LastName,
             passwordHasher.GetHash(Input.NewPassword),
             Input.Email,
-            Input.SelectedRoles.Select(role => new RoleId(Guid.Parse(role))).ToList(),
+            selectedRoles,
             [],
             [],
             Input.IsMfaEnabled,

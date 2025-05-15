@@ -3,9 +3,7 @@ using Application.Users.GetByName;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
-using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Moq;
 
 namespace UserService.Application.Tests.Users.GetByName;
@@ -63,7 +61,7 @@ public class GetUserByNameQueryHandlerTests
         var query = new GetUserByNameQuery(NonExistingUsername);
         _userContextMock.Setup(uc => uc.UserName).Returns(NonExistingUsername);
         _repositoryMock.Setup(repo => repo.GetUserByUsernameAsync(It.IsAny<string>(), _cancellationToken))
-            .ReturnsAsync((User)null!);
+            .ReturnsAsync((User?)null);
 
         // Act
         var result = await _handler.Handle(query, _cancellationToken);
@@ -88,7 +86,7 @@ public class GetUserByNameQueryHandlerTests
             "lastName",
             "hash",
             "email@email.com",
-            _roles.Select(role => role.Id).ToList(),
+            _roles.Select(role => RoleName.Create(role.Name).Value).ToList(),
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,

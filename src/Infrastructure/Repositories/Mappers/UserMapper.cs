@@ -1,6 +1,7 @@
 ﻿using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
+using Domain.ValueObjects.RoleNames;
 using Infrastructure.Repositories.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -31,7 +32,7 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserId, 
             dto.LastName, 
             dto.PasswordHash, 
             dto.Email, 
-            new List<RoleId> { role.Id },
+            new List<RoleName> { RoleName.Create(role?.Name ?? defaultUserRole) },
             new List<UserPermissionId>(),
             dto.RecoveryCodes,
             dto.IsMfaEnabled,

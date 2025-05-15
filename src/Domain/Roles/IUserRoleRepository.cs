@@ -25,10 +25,10 @@ public interface IUserRoleRepository
     /// Updates the roles associated with a specific user.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
-    /// <param name="rolesIds">A collection of role IDs to associate with the user.</param>
+    /// <param name="rolesNames">A collection of role names to associate with the user.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the number of roles updated.</returns>
-    Task<int> UpdateUserRolesAsync(Guid userId, IEnumerable<Guid> rolesIds, CancellationToken cancellationToken = default);
+    Task<int> UpdateUserRolesAsync(Guid userId, IEnumerable<string> rolesNames, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes all roles from a specific user.

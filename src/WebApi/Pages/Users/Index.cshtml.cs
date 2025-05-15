@@ -1,4 +1,5 @@
 ﻿using Application.Users.GetAll;
+using Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace WebApi.Pages.Users;
 [Authorize(Policy = "UserManagementPolicy")]
 public class IndexModel(ISender sender) : PageModel
 {
-    public PagedResult<UserResponse> PagedData { get; set; } = new();
+    public PagedResult<User> PagedData { get; set; } = new();
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public int VisiblePagesRange { get; set; } = 3;
@@ -35,7 +36,7 @@ public class IndexModel(ISender sender) : PageModel
                 .Where(user =>
                     user.FirstName.Contains(SearchString) ||
                     user.LastName.Contains(SearchString) ||
-                    user.Email.Contains(SearchString))
+                    user.Email.Value.Contains(SearchString))
                 .ToList();
         }
         
@@ -48,7 +49,7 @@ public class IndexModel(ISender sender) : PageModel
         var firstVisiblePage = Math.Max(1, CurrentPage - VisiblePagesRange / 2);
         var lastVisiblePage = Math.Min(pagesCount, firstVisiblePage + VisiblePagesRange - 1);
 
-        PagedData = new PagedResult<UserResponse>()
+        PagedData = new PagedResult<User>()
         {
             Items = currentPageUsers,
             PageNumber = CurrentPage,

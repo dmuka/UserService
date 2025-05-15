@@ -3,10 +3,9 @@ using Application.Users.GetAll;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
-using Domain.ValueObjects;
 using Domain.ValueObjects.Emails;
-using Domain.ValueObjects.MfaSecrets;
 using Domain.ValueObjects.PasswordHashes;
+using Domain.ValueObjects.RoleNames;
 using Moq;
 
 namespace UserService.Application.Tests.Users.GetAll;
@@ -14,6 +13,8 @@ namespace UserService.Application.Tests.Users.GetAll;
 [TestFixture]
 public class GetAllUsersQueryHandlerTests
 {
+    private static readonly RoleName AdminRoleName = RoleName.Create("Admin");
+    
     private readonly User _user = 
         User.Create(
             Guid.CreateVersion7(), 
@@ -22,7 +23,7 @@ public class GetAllUsersQueryHandlerTests
             "Last Name", 
             PasswordHash.Create("hash").Value, 
             Email.Create("email@email.com").Value, 
-            new List<RoleId> { new (Guid.CreateVersion7()) }, 
+            new List<RoleName> { AdminRoleName }, 
             new List<UserPermissionId>(),
             ["recoveryCode"], 
             false,
@@ -41,7 +42,7 @@ public class GetAllUsersQueryHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new GetAllUsersQueryHandler(_userRepositoryMock.Object, _roleRepositoryMock.Object, _userContextMock.Object);
+        _handler = new GetAllUsersQueryHandler(_userRepositoryMock.Object, _userContextMock.Object);
     }
 
     [Test]

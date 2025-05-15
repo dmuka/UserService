@@ -2,15 +2,14 @@
 using Application.Abstractions.Messaging;
 using Core;
 using Domain;
-using Domain.Roles;
 using Domain.Users;
+using Domain.ValueObjects.RoleNames;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
 namespace Application.Users.SignUp;
 
 internal sealed class SignUpUserCommandHandler(
     IUserRepository userRepository,
-    IRoleRepository roleRepository,
     IPasswordHasher passwordHasher,
     IEventDispatcher eventDispatcher) : ICommandHandler<SignUpUserCommand, Guid>
 {
@@ -26,11 +25,11 @@ internal sealed class SignUpUserCommandHandler(
             return Result.Failure<Guid>(UserErrors.EmailAlreadyExists);
         }
 
-        var roleIds = new List<RoleId>();
+        IList<RoleName>? roleNames = null;
         
-        if (command.RolesIds is not null) 
+        if (command.RolesNames is not null) 
         {
-            roleIds = command.RolesIds.Select(roleId => new RoleId(roleId)).ToList();
+            roleNames = command.RolesNames.Select(roleName => RoleName.Create(roleName).Value).ToList();
         }
         
         var passwordHash = passwordHasher.GetHash(command.Password);
@@ -42,9 +41,7 @@ internal sealed class SignUpUserCommandHandler(
             command.LastName, 
             passwordHash,
             command.Email,
-            command.RolesIds is null 
-                ? [(await roleRepository.GetRoleByNameAsync(RoleConstants.DefaultUserRole, cancellationToken)).Id] 
-                : roleIds,
+            roleNames ?? [RoleName.Create(RoleConstants.DefaultUserRole).Value],
             command.UserPermissionIds?.ToList()
             );
 

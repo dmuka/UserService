@@ -4,27 +4,27 @@ using Domain.ValueObjects.MfaSecrets;
 namespace Domain.ValueObjects.MfaState;
 
 /// <summary>
-/// Represents the MFA state of a user, encapsulating the MFA secret and enabled status.
+/// Represents the MFA state of a user, encapsulating the MFA secret, recovery codes hashes and enabled status.
 /// </summary>
 public sealed class MfaState : ValueObject
 {
     public bool IsEnabled { get; private set; }
     public MfaSecret? Secret { get; private set; }
     public DateTime? LastVerificationDate { get; private set; }
-    public IReadOnlyCollection<string> RecoveryCodes => _recoveryCodes.AsReadOnly();
+    public IReadOnlyCollection<string> RecoveryCodesHashes => _recoveryCodesHashes.AsReadOnly();
     
-    private List<string> _recoveryCodes;
+    private List<string> _recoveryCodesHashes;
 
     private MfaState(
         bool isEnabled, 
         MfaSecret? secret,
         DateTime? lastVerificationDate,
-        List<string> recoveryCodes)
+        List<string> recoveryCodesHashes)
     {
         IsEnabled = isEnabled;
         Secret = secret;
         LastVerificationDate = lastVerificationDate;
-        _recoveryCodes = recoveryCodes;
+        _recoveryCodesHashes = recoveryCodesHashes;
     }
 
     /// <summary>
@@ -33,10 +33,10 @@ public sealed class MfaState : ValueObject
     public static MfaState Disabled() => new(false, null, null, []);
 
     /// <summary>
-    /// Creates an MFA state with the secret set but not yet enabled and empty collection of the recovery codes.
+    /// Creates an MFA state with the secret set but not yet enabled and empty collection of the recovery codes hashes.
     /// </summary>
     /// <param name="secret">The MFA secret.</param>
-    /// <param name="recoveryCodesHashes">Collection of the recovery codes.</param>
+    /// <param name="recoveryCodesHashes">Collection of the recovery codes hashes.</param>
     public static Result<MfaState> WithArtifacts(MfaSecret? secret, ICollection<string>? recoveryCodesHashes)
     {
         return secret is null || recoveryCodesHashes is null || recoveryCodesHashes.Count == 0
@@ -45,15 +45,15 @@ public sealed class MfaState : ValueObject
     }
 
     /// <summary>
-    /// Creates an enabled MFA state with the provided secret and collection of the recovery codes.
+    /// Creates an enabled MFA state with the provided secret and collection of the recovery codes hashes.
     /// </summary>
     /// <param name="secret">The MFA secret.</param>
-    /// <param name="recoveryCodes">Collection of the recovery codes.</param>
-    public static Result<MfaState> Enabled(MfaSecret? secret, ICollection<string> recoveryCodes)
+    /// <param name="recoveryCodesHashes">Collection of the recovery codes hashes.</param>
+    public static Result<MfaState> Enabled(MfaSecret? secret, ICollection<string> recoveryCodesHashes)
     {
-        return secret is null || recoveryCodes.Count == 0
+        return secret is null || recoveryCodesHashes.Count == 0
             ? Result.Failure<MfaState>(Users.UserErrors.InvalidMfaState) : 
-            new MfaState(true, secret, DateTime.UtcNow, recoveryCodes.ToList());
+            new MfaState(true, secret, DateTime.UtcNow, recoveryCodesHashes.ToList());
     }
 
     /// <summary>
@@ -61,9 +61,9 @@ public sealed class MfaState : ValueObject
     /// </summary>
     public Result<MfaState> Enable()
     {
-        return Secret is null || _recoveryCodes.Count == 0
+        return Secret is null || _recoveryCodesHashes.Count == 0
             ? Result.Failure<MfaState>(Users.UserErrors.InvalidMfaState) 
-            : new MfaState(true, Secret, DateTime.UtcNow, _recoveryCodes);
+            : new MfaState(true, Secret, DateTime.UtcNow, _recoveryCodesHashes);
     }
 
     /// <summary>
@@ -72,22 +72,22 @@ public sealed class MfaState : ValueObject
     public static MfaState Disable() => Disabled();
 
     /// <summary>
-    /// Adds the recovery code while keeping the enabled status the same.
+    /// Adds the recovery code hash while keeping the enabled status the same.
     /// </summary>
-    /// <param name="code">The new recovery code.</param>
-    public MfaState AddRecoveryCode(string code)
+    /// <param name="hash">The new recovery code.</param>
+    public MfaState AddRecoveryCode(string hash)
     {
-        var codes = new List<string>(_recoveryCodes) { code };
+        var hashes = new List<string>(_recoveryCodesHashes) { hash };
         
-        return new MfaState(IsEnabled, Secret, LastVerificationDate, codes);
+        return new MfaState(IsEnabled, Secret, LastVerificationDate, hashes);
     }
 
     /// <summary>
-    /// Checks if the MFA state is valid (either disabled or has a secret and at least one recovery code if enabled).
+    /// Checks if the MFA state is valid (either disabled or has a secret and at least one recovery code hash if enabled).
     /// </summary>
     public bool IsValid()
     {
-        return (IsEnabled && Secret != null && _recoveryCodes.Count != 0) || !IsEnabled;
+        return (IsEnabled && Secret is not null && _recoveryCodesHashes.Count != 0) || !IsEnabled;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -95,9 +95,9 @@ public sealed class MfaState : ValueObject
         yield return IsEnabled;
         if (Secret != null) yield return Secret;
         if (LastVerificationDate.HasValue) yield return LastVerificationDate.Value;
-        foreach (var code in _recoveryCodes)
+        foreach (var hash in _recoveryCodesHashes)
         {
-            yield return code;
+            yield return hash;
         }
     }
 }
