@@ -24,7 +24,7 @@ internal sealed class GenerateMfaArtifactsCommandHandler(
 
         List<string> codes = [];
         
-        if (user.MfaSecret is null)
+        if (!user.IsMfaEnabled)
         {
             var secretKey = totpProvider.GenerateSecretKey();
             var recoveries = recoveryCodesProvider.GenerateRecoveryCodes();

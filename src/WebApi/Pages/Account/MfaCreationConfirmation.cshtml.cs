@@ -6,11 +6,24 @@ namespace WebApi.Pages.Account;
 public class MfaSuccessModel : PageModel
 {
     [TempData] 
-    public List<string> RecoveryCodes { get; set; } = [];
+    public string[] RecoveryCodes { get; set; } = [];
 
     public IActionResult OnGet()
     {
-        if (RecoveryCodes.Count == 0)
+        if (TempData.TryGetValue("RecoveryCodes", out var rc))
+        {
+            if (rc is string[] recoveryCodesArray)
+            {
+                RecoveryCodes = recoveryCodesArray;
+            }
+            else
+            {
+                RecoveryCodes = [];
+            }            
+            TempData.Keep("RecoveryCodes");
+        }
+        
+        if (RecoveryCodes.Length == 0)
         {
             return RedirectToPage("Mfa");
         }

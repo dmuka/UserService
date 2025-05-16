@@ -19,7 +19,7 @@ public class SetupMfaModel(
     public string VerificationCode { get; set; } = string.Empty;
     
     [TempData]
-    public IList<string> RecoveryCodes { get; set; } = [];
+    public string[] RecoveryCodes { get; set; } = [];
     
     private CancellationToken CancellationToken => HttpContext.RequestAborted;
 
@@ -34,7 +34,8 @@ public class SetupMfaModel(
         {
             logger.LogInformation("Qr code and recovery codes generated successfully.");
             QrCode = result.Value.qr;
-            RecoveryCodes = result.Value.codes;
+            RecoveryCodes = result.Value.codes.ToArray();
+            TempData.Keep();
             
             return Page();
         }
@@ -56,15 +57,15 @@ public class SetupMfaModel(
         
         if (TempData.TryGetValue("RecoveryCodes", out var rc))
         {
-            if (rc is List<string> recoveryCodesArray)
+            if (rc is string[] recoveryCodesArray)
             {
-                RecoveryCodes = recoveryCodesArray.ToList();
+                RecoveryCodes = recoveryCodesArray;            
+                TempData.Keep("RecoveryCodes");
             }
             else
             {
                 RecoveryCodes = [];
-            }            
-            TempData.Keep("RecoveryCodes");
+            }
         }
         
         if (!int.TryParse(VerificationCode, out var code))
