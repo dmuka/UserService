@@ -118,8 +118,6 @@ public class UserRepository(
                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
-                                     users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
-                                     users.mfa_secret AS {nameof(User.MfaSecret)},
                                      CASE
                                          WHEN users.recovery_codes_hashes IS NOT NULL
                                              THEN ARRAY(SELECT jsonb_array_elements_text(users.recovery_codes_hashes))

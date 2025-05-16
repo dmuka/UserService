@@ -57,18 +57,18 @@ public class EditModel(
         [DataType(DataType.Password)]
         [Display(Name = "Old password")]
         public string OldPassword { get; set; } = string.Empty;
-
-        [Required(AllowEmptyStrings = true)]
-        [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
-        [DataType(DataType.Password)]
-        [Display(Name = "New password")]
-        public string NewPassword { get; set; } = string.Empty;
-
-        [Required(AllowEmptyStrings = true)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm new password")]
-        [Compare("NewPassword", ErrorMessage = ErrorMessages.ConfirmPassword)]
-        public string ConfirmNewPassword { get; set; } = string.Empty;
+        //
+        // [Required(AllowEmptyStrings = true)]
+        // [StringLength(Lengths.MaxPassword, ErrorMessage = ErrorMessages.Password, MinimumLength = Lengths.MinPassword)]
+        // [DataType(DataType.Password)]
+        // [Display(Name = "New password")]
+        // public string NewPassword { get; set; } = string.Empty;
+        //
+        // [Required(AllowEmptyStrings = true)]
+        // [DataType(DataType.Password)]
+        // [Display(Name = "Confirm new password")]
+        // [Compare("NewPassword", ErrorMessage = ErrorMessages.ConfirmPassword)]
+        // public string ConfirmNewPassword { get; set; } = string.Empty;
         
         [Display(Name = "User role(s)")]
         public List<string> SelectedRoles { get; set; } = [];
@@ -86,13 +86,13 @@ public class EditModel(
             return Page();
         }
         
-        Input.SelectedRoles = result.Value.Roles.Select(role => role.id.ToString()).ToList();
+        Input.SelectedRoles = result.Value.Roles.Select(role => role.name).ToList();
         AllRoles = (await roleRepository.GetAllRolesAsync())
             .Select(role => new SelectListItem
             {
                 Text = role.Name,
-                Value = role.Id.Value.ToString(),
-                Selected = Input.SelectedRoles.Contains(role.Id.Value.ToString())
+                Value = role.Name,
+                Selected = Input.SelectedRoles.Contains(role.Name)
             })
             .ToList();
         
@@ -113,22 +113,22 @@ public class EditModel(
     {
         if (!ModelState.IsValid) return Page();
 
-        if ((Input.NewPassword != string.Empty || Input.OldPassword != string.Empty)
-            && (Input.NewPassword == string.Empty 
-                || Input.OldPassword == string.Empty 
-                || Input.ConfirmNewPassword == string.Empty))
-        {
-            ModelState.AddModelError(string.Empty, "If you want change password, you must enter old password, new password and confirm new password.");
-
-            return Page();
-        };
-        
-        if (!passwordHasher.CheckPassword(Input.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
-        {
-            ModelState.AddModelError(string.Empty, "Incorrect old password.");
-
-            return Page();
-        }
+        // if ((Input.NewPassword != string.Empty || Input.OldPassword != string.Empty)
+        //     && (Input.NewPassword == string.Empty 
+        //         || Input.OldPassword == string.Empty 
+        //         || Input.ConfirmNewPassword == string.Empty))
+        // {
+        //     ModelState.AddModelError(string.Empty, "If you want change password, you must enter old password, new password and confirm new password.");
+        //
+        //     return Page();
+        // };
+        //
+        // if (!passwordHasher.CheckPassword(Input.OldPassword, TempData["Hash"]?.ToString() ?? string.Empty))
+        // {
+        //     ModelState.AddModelError(string.Empty, "Incorrect old password.");
+        //
+        //     return Page();
+        // }
 
         var cancellationToken = HttpContext.RequestAborted;
 
@@ -160,9 +160,7 @@ public class EditModel(
             Input.UserName,
             Input.FirstName,
             Input.LastName,
-            Input.NewPassword == "" 
-                ? passwordHasher.GetHash(Input.OldPassword) 
-                : passwordHasher.GetHash(Input.NewPassword),
+            passwordHasher.GetHash(Input.OldPassword),
             Input.Email,
             selectedRoles,
             [],
