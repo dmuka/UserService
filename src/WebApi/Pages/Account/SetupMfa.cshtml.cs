@@ -25,7 +25,7 @@ public class SetupMfaModel(
 
     public async Task<IActionResult> OnGetAsync()
     {
-        if (userContext.AuthMethod == "mfa") return RedirectToPage("Mfa");
+        if (userContext.AuthMethod == "mfa") return RedirectToPage(Routes.Mfa);
 
         var command = new GenerateMfaArtifactsCommand(userContext.UserId.ToString());
         var result = await sender.Send(command, CancellationToken);

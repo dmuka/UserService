@@ -1,4 +1,5 @@
 ﻿@page "{id:Guid}"
+@using WebApi.Pages
 @model WebApi.Pages.Roles.EditModel
 @{
     ViewData["Title"] = "Edit role";
@@ -14,7 +15,7 @@
     </div>
     <div class="form-group mt-3">
         <input type="submit" value="Save" class="btn btn-primary"/>
-        <a asp-page="./Index" class="btn btn-secondary">Back to list</a>
+        <a asp-page="@Routes.CurrentIndex" class="btn btn-secondary">Back to list</a>
     </div>
 </form>
 
