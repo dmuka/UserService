@@ -75,9 +75,20 @@ public sealed class MfaState : ValueObject
     /// Adds the recovery code hash while keeping the enabled status the same.
     /// </summary>
     /// <param name="hash">The new recovery code.</param>
-    public MfaState AddRecoveryCode(string hash)
+    public MfaState AddRecoveryCodeHash(string hash)
     {
         var hashes = new List<string>(_recoveryCodesHashes) { hash };
+        
+        return new MfaState(IsEnabled, Secret, LastVerificationDate, hashes);
+    }
+
+    /// <summary>
+    /// Removes the recovery code hash while keeping the enabled status the same.
+    /// </summary>
+    /// <param name="hash">The new recovery code.</param>
+    public MfaState RemoveRecoveryCodeHash(string hash)
+    {
+        var hashes = new List<string>(_recoveryCodesHashes.Except([hash]));
         
         return new MfaState(IsEnabled, Secret, LastVerificationDate, hashes);
     }

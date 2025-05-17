@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Application.Abstractions.Authentication;
 using Application.Users.SignIn;
 using Infrastructure.Options.Authentication;
 using MediatR;
@@ -13,11 +14,13 @@ namespace WebApi.Pages.Account;
 public class SignInModel(
     ISender sender, 
     TokenHandler tokenHandler,
-    IOptions<AuthOptions> authOptions, 
+    IOptions<AuthOptions> authOptions,
     ILogger<SignInModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new ();
+    
+    public bool ShowRecoveryCodeOption { get; set; }
 
     public string? ReturnUrl { get; set; } = string.Empty;
 
@@ -44,6 +47,10 @@ public class SignInModel(
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+        
+        public string? VerificationCode { get; set; }
+
+        public string? RecoveryCode { get; set; }
     }
 
     public void OnGet(string? returnUrl = null)
@@ -63,26 +70,32 @@ public class SignInModel(
         returnUrl ??= Url.Content("~/");
 
         if (!ModelState.IsValid) return Page();
-        
+
         var command = new SignInUserCommand(
             Input.UserName,
             Input.Password,
             Input.RememberMe,
             authOptions.Value.RefreshTokenExpirationInDays,
+            Input.VerificationCode,
+            Input.RecoveryCode,
             Input.Email);
 
         var result = await sender.Send(command, CancellationToken);
-        if (result.IsSuccess)
+        if (result.IsFailure)
         {
-            logger.LogInformation("User logged in.");
-            tokenHandler.StoreToken(result.Value.AccessToken);
-            tokenHandler.StoreSessionId(result.Value.SessionId); 
+            ModelState.AddModelError(string.Empty, $"Invalid login attempt ({result.Error.Description}).");
 
-            return LocalRedirect(returnUrl);
+            ShowRecoveryCodeOption = true;
+            tokenHandler.ClearTokens();
+            logger.LogInformation("User logged out.");
+            
+            return Page();
         }
-        
-        ModelState.AddModelError(string.Empty, "Invalid login attempt");
-        
-        return Page();
+
+        logger.LogInformation("User logged in.");
+        tokenHandler.StoreToken(result.Value.AccessToken);
+        tokenHandler.StoreSessionId(result.Value.SessionId);
+
+        return LocalRedirect(returnUrl);
     }
 }

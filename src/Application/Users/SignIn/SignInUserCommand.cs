@@ -7,4 +7,6 @@ public sealed record SignInUserCommand(
     string Password,
     bool RememberMe,
     int TokenExpirationInDays,
+    string? VerificationCode = null,
+    string? RecoveryCode = null,
     string? Email = null) : ICommand<SignInResponse>;

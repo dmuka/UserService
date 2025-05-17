@@ -12,6 +12,8 @@ internal sealed class SignInUserCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher passwordHasher,
     ITokenProvider tokenProvider,
+    ITotpProvider totpProvider,
+    IRecoveryCodesProvider recoveryCodesProvider,
     ILogger<SignInUserCommandHandler> logger) : ICommandHandler<SignInUserCommand, SignInResponse>
 {
     public async Task<Result<SignInResponse>> Handle(SignInUserCommand command, CancellationToken cancellationToken)
@@ -37,6 +39,36 @@ internal sealed class SignInUserCommandHandler(
             logger.LogWarning("Incorrect password for user: {Username}", user.Username);
             
             return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
+        }
+
+        if (user.IsMfaEnabled)
+        {
+            if (string.IsNullOrEmpty(command.VerificationCode) && string.IsNullOrEmpty(command.RecoveryCode))
+            {
+                return Result.Failure<SignInResponse>(UserErrors.MfaModeEnabled());
+            }
+            
+            if (!string.IsNullOrEmpty(command.VerificationCode))
+            {
+                if (!int.TryParse(command.VerificationCode, out var code) ||
+                    !totpProvider.ValidateTotp(user.MfaSecret ?? "", code))
+                {
+                    return Result.Failure<SignInResponse>(UserErrors.WrongVerificationCode());
+                }
+            }
+            else if (!string.IsNullOrEmpty(command.RecoveryCode) 
+                     && user.RecoveryCodesHashes is not null 
+                     && user.RecoveryCodesHashes.Count > 0)
+            {
+                var usedHash = user.RecoveryCodesHashes.FirstOrDefault(hash =>
+                    recoveryCodesProvider.VerifyRecoveryCode(hash, command.RecoveryCode));
+
+                if (usedHash is null) return Result.Failure<SignInResponse>(UserErrors.WrongRecoveryCode());
+                
+                user.MfaState.RemoveRecoveryCodeHash(usedHash);
+
+                await userRepository.UpdateUserAsync(user, cancellationToken);
+            }
         }
 
         var accessToken = await tokenProvider.CreateAccessTokenAsync(user, command.RememberMe, cancellationToken);

@@ -20,6 +20,18 @@ public static class UserErrors
     public static Error WrongPassword() => Error.Failure(
         Codes.WrongPassword, 
         "You are entered the wrong password.");
+    
+    public static Error WrongRecoveryCode() => Error.Failure(
+        Codes.WrongRecoveryCode, 
+        "You are entered the wrong recovery code.");
+    
+    public static Error WrongVerificationCode() => Error.Failure(
+        Codes.WrongRecoveryCode, 
+        "You are entered the wrong verification code.");
+    
+    public static Error MfaModeEnabled() => Error.Failure(
+        Codes.MfaModeEnabled, 
+        "MFA mode is turned on: please enter verification or recovery code.");
 
     public static Error Unauthorized() => Error.Failure(
         Codes.Unauthorized,

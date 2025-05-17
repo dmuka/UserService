@@ -5,6 +5,9 @@ public static class Codes
     public const string NotFound = "UserNotFound";
     public const string Unauthorized = "UserUnauthorized";
     public const string WrongPassword = "UserWrongPassword";
+    public const string WrongRecoveryCode = "WrongRecoveryCode";
+    public const string WrongVerificationCode = "WrongVerificationCode";
+    public const string MfaModeEnabled = "MfaModeEnabled";
     public const string WrongResetCode = "UserWrongResetCode";
     public const string EmailExists = "EmailAlreadyExists";
     public const string UsernameExists = "UsernameAlreadyExists";

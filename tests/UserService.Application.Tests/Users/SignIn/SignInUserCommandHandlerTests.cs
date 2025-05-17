@@ -39,6 +39,8 @@ public class SignInUserCommandHandlerTests
     private Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private Mock<IPasswordHasher> _passwordHasherMock;
     private Mock<ITokenProvider> _tokenProviderMock;
+    private Mock<ITotpProvider> _totpProviderMock;
+    private Mock<IRecoveryCodesProvider> _recoveryCodesProviderMock;
     private Mock<ILogger<SignInUserCommandHandler>> _loggerMock;
     
     private SignInUserCommandHandler _handler;
@@ -80,6 +82,10 @@ public class SignInUserCommandHandlerTests
         _tokenProviderMock.Setup(tp => tp.CreateRefreshToken())
             .Returns(RefreshTokenValue);
         
+        _totpProviderMock = new Mock<ITotpProvider>();
+        
+        _recoveryCodesProviderMock = new Mock<IRecoveryCodesProvider>();
+        
         _loggerMock = new Mock<ILogger<SignInUserCommandHandler>>();
         
         _handler = new SignInUserCommandHandler(
@@ -87,6 +93,8 @@ public class SignInUserCommandHandlerTests
             _refreshTokenRepositoryMock.Object,
             _passwordHasherMock.Object,
             _tokenProviderMock.Object,
+            _totpProviderMock.Object,
+            _recoveryCodesProviderMock.Object,
             _loggerMock.Object);
     }
 

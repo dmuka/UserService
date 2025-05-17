@@ -49,6 +49,29 @@
                         <i class="fa fa-eye-slash" aria-hidden="true"></i>
                     </a>
                 </div>
+                
+                @if (Model.ShowRecoveryCodeOption)
+                {
+                    <div class="form-group">
+                        <label>Verification Code</label>
+                        <div class="mfa-code-inputs">
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit1" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[0].ToString() : "")" autocomplete="off" />
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit2" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[1].ToString() : "")" autocomplete="off" />
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit3" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[2].ToString() : "")" autocomplete="off" />
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit4" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[3].ToString() : "")" autocomplete="off" />
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit5" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[4].ToString() : "")" autocomplete="off" />
+                            <input type="text" class="mfa-digit" maxlength="1" name="digit6" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[5].ToString() : "")" autocomplete="off" />
+                            <input type="hidden" asp-for="Input.VerificationCode" id="VerificationCode" />
+                        </div>
+                        <span asp-validation-for="Input.VerificationCode" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <label asp-for="Input.RecoveryCode">Or Enter a Recovery Code</label>
+                        <input asp-for="Input.RecoveryCode" class="form-control" placeholder="Enter recovery code" />
+                        <span asp-validation-for="Input.RecoveryCode" class="text-danger"></span>
+                    </div>
+                }
+                
                 <div class="checkbox mb-3">
                     <label asp-for="Input.RememberMe" class="form-label">
                         <input class="form-check-input" type="checkbox" asp-for="Input.RememberMe"/>
@@ -80,5 +103,45 @@
             document.getElementById("emailInput").style.display = (option === "email") ? "block" : "none";
             document.getElementById("usernameInput").style.display = (option === "username") ? "block" : "none";
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const digitInputs = document.querySelectorAll('.mfa-digit');
+            const hiddenInput = document.getElementById('VerificationCode');
+
+            digitInputs.forEach((input, index) => {
+                input.addEventListener('input', () => {
+                    if (input.value.length === 1 && index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+                    updateHiddenInput();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                        digitInputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+                    if (pastedData.length > 0) {
+                        for (let i = 0; i < digitInputs.length && i < pastedData.length; i++) {
+                            digitInputs[i].value = pastedData[i];
+                        }
+                        if (pastedData.length <= digitInputs.length) {
+                            digitInputs[Math.min(pastedData.length, digitInputs.length - 1)].focus();
+                        }
+                        updateHiddenInput();
+                    }
+                });
+            });
+
+            function updateHiddenInput() {
+                hiddenInput.value = Array.from(digitInputs).map(input => input.value).join('');
+            }
+
+            updateHiddenInput();
+        });
     </script>
 }
