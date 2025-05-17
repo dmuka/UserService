@@ -121,7 +121,7 @@ public class SignInUserCommandHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExistByEmail()
     {
         // Arrange
-        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays, NonExistingEmail);
+        var command = new SignInUserCommand(ExistingUsername, CorrectPassword, RememberMe, RefreshTokenExpirationInDays, Email: NonExistingEmail);
         _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync(It.IsAny<string>(), _cancellationToken))
             .ReturnsAsync((User?)null);
 
