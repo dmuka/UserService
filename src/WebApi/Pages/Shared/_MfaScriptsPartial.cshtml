@@ -1,0 +1,43 @@
+﻿<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const digitInputs = document.querySelectorAll('.mfa-digit');
+        const hiddenInput = document.getElementById('VerificationCode');
+
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value.length === 1 && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+                updateHiddenInput();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    const prevInput = digitInputs[index - 1];
+                    prevInput.focus();
+                    prevInput.setSelectionRange(1);
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+                if (pastedData.length > 0) {
+                    for (let i = 0; i < digitInputs.length && i < pastedData.length; i++) {
+                        digitInputs[i].value = pastedData[i];
+                    }
+                    if (pastedData.length <= digitInputs.length) {
+                        digitInputs[Math.min(pastedData.length, digitInputs.length - 1)].focus();
+                    }
+                    updateHiddenInput();
+                }
+            });
+        });
+
+        function updateHiddenInput() {
+            hiddenInput.value = Array.from(digitInputs).map(input => input.value).join('');
+        }
+
+        updateHiddenInput();
+    });
+</script>

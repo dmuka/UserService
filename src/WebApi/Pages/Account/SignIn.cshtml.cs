@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Application.Abstractions.Authentication;
 using Application.Users.SignIn;
 using Infrastructure.Options.Authentication;
 using MediatR;
@@ -49,7 +48,8 @@ public class SignInModel(
         public bool RememberMe { get; set; }
         
         public string? VerificationCode { get; set; }
-
+        
+        [Display(Name = "Or enter recovery code")]
         public string? RecoveryCode { get; set; }
     }
 
