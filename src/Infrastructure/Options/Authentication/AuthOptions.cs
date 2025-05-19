@@ -19,4 +19,6 @@ public record AuthOptions
     public required int RefreshTokenExpirationInDays { get; set; }
     [Required, Range(0, 30)]
     public required int ResetPasswordTokenExpirationInMinutes { get; set; }
+    [Required, Range(0, 24)]
+    public required int EmailConfirmationTokenExpirationInHours { get; set; }
 }

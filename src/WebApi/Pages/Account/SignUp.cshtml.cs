@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Web;
+using Application.Abstractions.Email;
 using Application.Users.SignIn;
 using Application.Users.SignUp;
 using Infrastructure.Options.Authentication;
@@ -7,14 +9,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using WebApi.Infrastructure;
 using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages.Account;
 
 [AllowAnonymous]
 public class SignUpModel(
+    TokenHandler tokenHandler,
     IOptions<AuthOptions> authOptions,
     ISender sender,
+    IEmailService emailService,
     ILogger<SignUpModel> logger) : PageModel
 {
     [BindProperty]
@@ -88,7 +93,19 @@ public class SignUpModel(
         if (result.IsSuccess)
         {
             logger.LogInformation("User with id: {Id} created a new account with password.", result.Value);
-                
+
+            var userId = result.Value.ToString();
+            var token = tokenHandler.GetEmailToken(userId);
+            var confirmationLink = Url.Page(
+                Routes.ConfirmEmail,
+                pageHandler: null,
+                values: new { userId, token = HttpUtility.UrlEncode(token) },
+                protocol: Request.Scheme);
+            
+            var emailBody = $"<p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
+            
+            await emailService.SendEmailAsync(Input.Email, "Confirm your email", emailBody);    
+            
             var signInCommand = new SignInUserCommand(
                 Input.UserName, 
                 Input.Password, 

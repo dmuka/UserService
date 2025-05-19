@@ -87,7 +87,7 @@ public class TokenHandler(
         return refreshToken.Value;
     }
     
-    public string GetPasswordResetToken(string userId)
+    public string GetEmailToken(string userId)
     {
         var data = $"{userId}:{DateTime.UtcNow.Ticks}";
         return _protector.Protect(data);
@@ -104,6 +104,26 @@ public class TokenHandler(
             var tokenAge = DateTime.UtcNow.Ticks - timestamp;
             
             return tokenAge < TimeSpan.FromMinutes(authOptions.Value.ResetPasswordTokenExpirationInMinutes).Ticks;
+        }
+        catch
+        {
+            userId = null;
+            
+            return false;
+        }
+    }
+
+    public bool ValidateEmailToken(string token, out string? userId)
+    {
+        try
+        {
+            var parts = _protector.Unprotect(token).Split(':');
+            
+            userId = parts[0];
+            if (!long.TryParse(parts[1], out var timestamp)) return false;
+            var tokenAge = DateTime.UtcNow.Ticks - timestamp;
+            
+            return tokenAge < TimeSpan.FromHours(authOptions.Value.EmailConfirmationTokenExpirationInHours).Ticks;
         }
         catch
         {

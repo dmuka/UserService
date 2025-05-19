@@ -17,6 +17,10 @@ public static class UserErrors
         Codes.NotFound, 
         $"The user with the email = '{email}' was not found.");
     
+    public static Error EmailAlreadyConfirmed(string email) => Error.Failure(
+        Codes.NotFound, 
+        $"This email = '{email}' already confirmed.");
+    
     public static Error WrongPassword() => Error.Failure(
         Codes.WrongPassword, 
         "You are entered the wrong password.");
@@ -76,6 +80,10 @@ public static class UserErrors
     public static readonly Error InvalidMfaState = Error.Problem(
         Codes.InvalidMfaState,
         "MFA can't be enabled without providing a secret and recovery codes.");
+
+    public static readonly Error UserEmailConfirmationError = Error.Problem(
+        Codes.UserEmailConfirmationError,
+        "User can't confirm his email.");
 
     public static readonly Error EmptyRecoveryCodesCollection = Error.Problem(
         Codes.EmptyRolesCollection,

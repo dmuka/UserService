@@ -20,6 +20,7 @@ public class User : Entity<UserId>, IAggregationRoot
     public string LastName { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
     public Email Email { get; private set; }
+    public bool IsEmailConfirmed { get; private set; }
     public MfaState MfaState { get; private set; }
     private List<RoleName> _roleNames = [];
     public IReadOnlyCollection<RoleName> RoleNames => _roleNames.AsReadOnly();
@@ -146,6 +147,18 @@ public class User : Entity<UserId>, IAggregationRoot
     }
 
     /// <summary>
+    /// Changes the confirmation state of the email address of the user.
+    /// </summary>
+    public Result ConfirmEmail()
+    {
+        if (IsEmailConfirmed) return Result.Failure<Email>(UserErrors.EmailAlreadyConfirmed(Email));
+        
+        IsEmailConfirmed = true;
+    
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Changes the password hash of the user.
     /// </summary>
     /// <param name="newPasswordHash">The new password hash.</param>
@@ -190,11 +203,11 @@ public class User : Entity<UserId>, IAggregationRoot
     /// Adds the role of the user.
     /// </summary>
     /// <param name="roleName">The role id to add.</param>
-    public Result AddRole(RoleName? rolename)
+    public Result AddRole(RoleName? roleName)
     {
-        if (rolename is null) return Result.Failure<RoleName>(Error.NullValue);
+        if (roleName is null) return Result.Failure<RoleName>(Error.NullValue);
         
-        _roleNames.Add(rolename); 
+        _roleNames.Add(roleName); 
         
         return Result.Success();
     }

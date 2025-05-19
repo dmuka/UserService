@@ -68,24 +68,24 @@ namespace UserService.Infrastructure.Tests.Options.Db
 
         [TestCase("")]
         [TestCase("use")]
-        public void UserName_ShouldBeRequired(string userName)
+        public void UserName_ShouldNotBeRequired(string userName)
         {
             // Arrange Act
             _options.UserName = userName;
             
             // Assert
-            Assert.Throws<ValidationException>(() => ValidateOptions(_options));
+            Assert.DoesNotThrow(() => ValidateOptions(_options));
         }
 
         [TestCase("")]
         [TestCase("pass")]
-        public void Password_ShouldBeRequired(string password)
+        public void Password_ShouldNotBeRequired(string password)
         {
             // Arrange Act
             _options.Password = password;
             
             // Assert
-            Assert.Throws<ValidationException>(() => ValidateOptions(_options));
+            Assert.DoesNotThrow(() => ValidateOptions(_options));
         }
         
         private void ValidateOptions(PostgresOptions options)

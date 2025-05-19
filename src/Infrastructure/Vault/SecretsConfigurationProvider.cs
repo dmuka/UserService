@@ -7,12 +7,11 @@ public class SecretsConfigurationProvider(
     string identityUrl,
     string apiUrl,
     string accessToken, 
-    string organizationId)
-    : ConfigurationProvider
+    string organizationId) : ConfigurationProvider
 {
     public override void Load()
     {
-        var secrets = LoadSecretsAsync();
+        var secrets = LoadSecrets();
             
         foreach (var secret in secrets)
         {
@@ -21,7 +20,7 @@ public class SecretsConfigurationProvider(
         }
     }
 
-    private List<SecretResponse> LoadSecretsAsync()
+    private List<SecretResponse> LoadSecrets()
     {
         try
         {

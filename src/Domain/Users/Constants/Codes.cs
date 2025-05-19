@@ -10,6 +10,7 @@ public static class Codes
     public const string MfaModeEnabled = "MfaModeEnabled";
     public const string WrongResetCode = "UserWrongResetCode";
     public const string EmailExists = "EmailAlreadyExists";
+    public const string EmailConfirmed = "EmailAlreadyConfirmed";
     public const string UsernameExists = "UsernameAlreadyExists";
     public const string InvalidUsername = "InvalidUsername";
     public const string InvalidUserId = "InvalidUserId";
@@ -18,6 +19,7 @@ public static class Codes
     public const string InvalidMfaValue = "InvalidMfa";
     public const string InvalidVerificationCode = "InvalidVerificationCode";
     public const string InvalidMfaState = "InvalidMfaState";
+    public const string UserEmailConfirmationError = "UserEmailConfirmationError";
     public const string EmptyRolesCollection = "EmptyRolesCollection";
     public const string EmptyRecoveryCodesCollection = "EmptyRecoveryCodesCollection";
     public const string LastRoleRemove = "LastRoleRemove";

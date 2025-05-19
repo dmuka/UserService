@@ -88,7 +88,8 @@ public class SignInUserByTokenCommandHandlerTests
             AccessTokenCookieExpirationInMinutes = 1,
             SessionIdCookieExpirationInHours = 1,
             RefreshTokenExpirationInDays = 1,
-            ResetPasswordTokenExpirationInMinutes = 10
+            ResetPasswordTokenExpirationInMinutes = 10,
+            EmailConfirmationTokenExpirationInHours = 10
         });
         
         _handler = new SignInUserByTokenCommandHandler(

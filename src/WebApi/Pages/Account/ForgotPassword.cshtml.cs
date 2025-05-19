@@ -42,7 +42,7 @@ public class ForgotPasswordModel(
             return Page();
         }
 
-        var resetCode = tokenHandler.GetPasswordResetToken(user.Id.Value.ToString());
+        var resetCode = tokenHandler.GetEmailToken(user.Id.Value.ToString());
         var callbackUrl = Url.Page(
             Routes.ResetPassword,
             pageHandler: null,
