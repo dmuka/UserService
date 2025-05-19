@@ -10,9 +10,7 @@ public record PostgresOptions
     public required int Port { get; set; }
     [Required, MinLength(2)]
     public required string Database { get; set; } 
-    [Required, MinLength(4)]
     public required string UserName { get; set; }
-    [Required, MinLength(5)]
     public required string Password { get; set; }
     
     public string GetConnectionString()

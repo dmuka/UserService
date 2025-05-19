@@ -4,7 +4,6 @@ namespace Infrastructure.Options.Authentication;
 
 public record AuthOptions
 {
-    [Required, MinLength(32)]
     public required string Secret { get; set; }
     [Required, MinLength(2)]
     public required string Issuer { get; set; } 

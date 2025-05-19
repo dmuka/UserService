@@ -1,6 +1,7 @@
 using Application;
 using Infrastructure;
 using Infrastructure.Options.Email;
+using Infrastructure.Vault;
 using Scalar.AspNetCore;
 using Serilog;
 using WebApi;
@@ -26,6 +27,27 @@ builder.Services.AddRazorPages();
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<SmtpOptions>();
+    builder.Configuration.Add<SecretsConfigurationSource>(source =>
+    {
+        var identityUrl = builder.Configuration["Vault:IdentityUrl"];
+        if (identityUrl is null) throw new InvalidOperationException("Identity URL is not set.");
+        source.IdentityUrl = identityUrl;
+        
+        var apiUrl = builder.Configuration["Vault:ApiUrl"];
+        if (apiUrl is null) throw new InvalidOperationException("API URL is not set.");
+        source.ApiUrl = apiUrl;
+        
+        var vaultAccessToken = builder.Configuration["Vault:AccessToken"];
+        if (vaultAccessToken is null) throw new InvalidOperationException("Vault access token is not set.");
+        source.AccessToken = vaultAccessToken;
+            // Environment.GetEnvironmentVariable("VAULT_ACCESS_TOKEN")
+            //                  ?? throw new InvalidOperationException("Vault access token not set.");
+        var vaultOrganizationId = builder.Configuration["Vault:OrganizationId"];
+        if (vaultOrganizationId is null) throw new InvalidOperationException("Vault organization id is not set.");
+        source.OrganizationId = vaultOrganizationId;
+            // Environment.GetEnvironmentVariable("VAULT_ORGANIZATION_ID")
+            //                     ?? throw new InvalidOperationException("Vault organization id not set.");
+    });
 }
 
 var app = builder.Build();

@@ -33,8 +33,8 @@
          IConfiguration configuration) =>
          services
              .AddAuthentication(configuration)
+             .AddDbConnectionOptions(configuration)
              .AddAuthorizationLogic()
-             .AddDbConnectionOptions()
              .AddHealthCheck()
              .AddEmailService(configuration)
              .AddRepositories()
@@ -68,12 +68,25 @@
          return services;
      }    
      
-     private static IServiceCollection AddDbConnectionOptions(this IServiceCollection services)
+     private static IServiceCollection AddDbConnectionOptions(this IServiceCollection services, IConfiguration configuration)
      {
          services.AddOptions<PostgresOptions>()
              .BindConfiguration("DbConnections:Postgres")
              .ValidateDataAnnotations()
-             .ValidateOnStart();
+             .ValidateOnStart()
+             .PostConfigure(options =>
+             {
+                 var userName = configuration["PostgresOptions__Username"];
+                 var password = configuration["PostgresOptions__Password"];
+
+                 if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                 {
+                     throw new InvalidOperationException("Postgres username or password is not set in the configuration.");
+                 }
+
+                 options.UserName = userName;
+                 options.Password = password;
+             });
          
          return services;
      }
@@ -85,7 +98,18 @@
          services.AddOptions<AuthOptions>()
              .BindConfiguration("Jwt")
              .ValidateDataAnnotations()
-             .ValidateOnStart();
+             .ValidateOnStart()
+             .PostConfigure(options =>
+             {
+                 var secret = configuration["Jwt__Secret"];
+
+                 if (string.IsNullOrEmpty(secret))
+                 {
+                     throw new InvalidOperationException("JWT secret value is not set in the configuration.");
+                 }
+
+                 options.Secret = secret;
+             });
          
          services.AddScoped<ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>, SignInUserByTokenCommandHandler>();
          
@@ -101,7 +125,7 @@
                  jwtBearerOptions.SaveToken = true;
                  jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                  {
-                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt__Secret"]!)),
                      ValidIssuer = configuration["Jwt:Issuer"],
                      ValidAudience = configuration["Jwt:Audience"],
                      ClockSkew = TimeSpan.Zero
@@ -112,11 +136,15 @@
                      {
                          var user = context.Principal;
                          Log.Information("Token validated for user: {UserName}", user?.Identity?.Name);
-                         foreach (var claim in user?.Claims)
-                         {
-                             Log.Information("Principal claim type: {ClaimType}, claim value: {ClaimValue}", claim.Type, claim.Value);
-                         }
                          
+                         if (user?.Claims is null) return Task.CompletedTask;
+                         
+                         foreach (var claim in user.Claims)
+                         {
+                             Log.Information("Principal claim type: {ClaimType}, claim value: {ClaimValue}",
+                                 claim.Type, claim.Value);
+                         }
+
                          return Task.CompletedTask;
                      },
                      OnAuthenticationFailed = async context =>
@@ -158,8 +186,8 @@
          
          services.Configure<SmtpOptions>(options =>
          {
-             var userName = configuration["SmtpOptionsSecrets:Username"];
-             var password = configuration["SmtpOptionsSecrets:Password"];
+             var userName = configuration["SmtpOptions__Username"];
+             var password = configuration["SmtpOptions__Password"];
              
              if (string.IsNullOrWhiteSpace(userName) || userName.Length < 3 || userName.Length > 50)
              {
