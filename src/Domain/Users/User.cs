@@ -290,7 +290,6 @@ public class User : Entity<UserId>, IAggregationRoot
             new MustBeNonNullValue<string>(passwordHash).IsSatisfied(),
             new EmailMustBeValid(email).IsSatisfied(),
             new UserMustHaveAtLeastOneRole(roleNames).IsSatisfied(),
-            new MustBeNonNullValue<ICollection<UserPermissionId>>(userPermissionIds).IsSatisfied(),
             new UserMustHaveValidMfaState(mfaSecret, isMfaEnabled, recoveryCodes).IsSatisfied()
         };
             

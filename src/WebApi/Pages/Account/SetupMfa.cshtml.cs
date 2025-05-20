@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Users.EnableMfa;
 using Application.Users.GenerateMfaArtifacts;
+using Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -38,6 +39,13 @@ public class SetupMfaModel(
             TempData.Keep();
             
             return Page();
+        }
+
+        if (result.Error.Code == UserErrors.UserEmailNotConfirmedYet.Code)
+        {
+            TempData["ErrorMessage"] = "You must confirm your email before enabling MFA.";
+            
+            return RedirectToPage(Routes.Mfa);
         }
         
         ModelState.AddModelError(string.Empty, result.Error.Description);

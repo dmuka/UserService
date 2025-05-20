@@ -22,6 +22,8 @@ internal sealed class GenerateMfaArtifactsCommandHandler(
         var user = await userRepository.GetUserByIdAsync(userId, cancellationToken);
         if (user is null) return Result.Failure<(string, List<string>)>(UserErrors.NotFound(userId));
 
+        if (!user.IsEmailConfirmed) return Result.Failure<(string, List<string>)>(UserErrors.UserEmailNotConfirmedYet);
+        
         List<string> codes = [];
         
         if (!user.IsMfaEnabled)

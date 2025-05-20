@@ -85,6 +85,10 @@ public static class UserErrors
         Codes.UserEmailConfirmationError,
         "User can't confirm his email.");
 
+    public static readonly Error UserEmailNotConfirmedYet = Error.Problem(
+        Codes.UserEmailNotConfirmedYet,
+        "User email not confirmed yet.");
+
     public static readonly Error EmptyRecoveryCodesCollection = Error.Problem(
         Codes.EmptyRolesCollection,
         "User must have at least one recovery code if MFA is enabled.");

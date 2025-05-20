@@ -41,7 +41,7 @@ public class UserRepository(
         await using var connection = new NpgsqlConnection(_connectionString);
             
         const string query = $"""
-                                 SELECT COUNT({nameof(User.Username)})
+                                 SELECT COUNT(users.user_name)
                                  FROM users
                                  WHERE users.user_name = @UserName
                              """;
@@ -78,7 +78,7 @@ public class UserRepository(
         await using var connection = new NpgsqlConnection(_connectionString);
             
         const string query = $"""
-                                 SELECT COUNT({nameof(User.Email)})
+                                 SELECT COUNT(users.email)
                                  FROM users
                                  WHERE users.email = @Email
                              """;
@@ -326,16 +326,16 @@ public class UserRepository(
         try
         {
             var query = $"""
-                            INSERT INTO Users 
-                                ({nameof(User.Id)}, 
-                                {nameof(User.Username)}, 
-                                {nameof(User.FirstName)}, 
-                                {nameof(User.LastName)}, 
-                                {nameof(User.PasswordHash)}, 
-                                {nameof(User.Email)}, 
-                                {nameof(User.IsMfaEnabled)}, 
-                                {nameof(User.MfaSecret)}, 
-                                {nameof(User.RecoveryCodesHashes)})
+                            INSERT INTO users 
+                                (id, 
+                                user_name, 
+                                first_name, 
+                                last_name, 
+                                password_hash, 
+                                email, 
+                                is_mfa_enabled, 
+                                mfa_secret, 
+                                recovery_codes_hashes)
                             VALUES (@Id, @Username, @FirstName, @LastName, @PasswordHash, @Email, @IsMfaEnabled, @MfaSecret, @RecoveryCodes::jsonb)
                             RETURNING Id
                         """;
@@ -358,15 +358,28 @@ public class UserRepository(
             var userId = await connection.ExecuteScalarAsync<Guid>(command);
             
             query = """
+                        SELECT roles.id
+                        FROM roles
+                        WHERE roles.name IN (@RoleNames);
+                    """;
+            
+            command = new CommandDefinition(
+                query,
+                new { RoleNames = string.Join(',', user.RoleNames.Select(name => name.Value)) },
+                cancellationToken: cancellationToken);
+            
+            var rolesIds = await connection.QueryAsync<Guid>(command);
+            
+            query = """
                         INSERT INTO user_roles (user_id, role_id)
                         VALUES (@UserId, @RoleId);
                     """;
 
-            foreach (var roleName in user.RoleNames)
+            foreach (var roleId in rolesIds)
             {
                 command = new CommandDefinition(
                     query, 
-                    new { UserId = user.Id.Value, RoleName = roleName.Value }, 
+                    new { UserId = user.Id.Value, RoleId = roleId }, 
                     transaction, 
                     cancellationToken: cancellationToken);
                 

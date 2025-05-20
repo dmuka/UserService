@@ -18,7 +18,7 @@ public class ConfirmEmailModel(
     {
         if (string.IsNullOrEmpty(userId) 
             || string.IsNullOrEmpty(token) 
-            || tokenHandler.ValidatePasswordResetToken(token, out var tokenUserId)
+            || !tokenHandler.ValidateEmailToken(token, out var tokenUserId)
             || userId != tokenUserId)
         {
             Message = "Invalid email confirmation link.";

@@ -20,6 +20,7 @@ public static class Codes
     public const string InvalidVerificationCode = "InvalidVerificationCode";
     public const string InvalidMfaState = "InvalidMfaState";
     public const string UserEmailConfirmationError = "UserEmailConfirmationError";
+    public const string UserEmailNotConfirmedYet = "UserEmailNotConfirmedYet";
     public const string EmptyRolesCollection = "EmptyRolesCollection";
     public const string EmptyRecoveryCodesCollection = "EmptyRecoveryCodesCollection";
     public const string LastRoleRemove = "LastRoleRemove";
