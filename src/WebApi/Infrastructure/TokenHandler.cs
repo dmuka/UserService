@@ -69,9 +69,9 @@ public class TokenHandler(
         var userId = userContext.UserId;
         var refreshToken = await refreshTokenRepository.GetTokenByUserIdAsync(userId, cancellationToken);
 
-        if (refreshToken is null || refreshToken.ExpiresUtc < DateTime.UtcNow) return null;
+        if (refreshToken.IsFailure) return null;
         
-        return refreshToken.Value;
+        return refreshToken.Value.Value;
     }
 
     public async Task<string?> GetRefreshTokenBySessionIdAsync(CancellationToken cancellationToken = default)

@@ -1,4 +1,5 @@
-﻿using Domain.RefreshTokens;
+﻿using Core;
+using Domain.RefreshTokens;
 using Domain.Users;
 
 namespace Application.Abstractions.Authentication;
@@ -14,16 +15,16 @@ public interface IRefreshTokenRepository
     /// <param name="user">The user whose refresh token is to be retrieved.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>The refresh token associated with the user, or <c>null</c> if not found.</returns>
-    Task<RefreshToken?> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default);
-    Task<RefreshToken?> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<Result<RefreshToken?>> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default);
+    Task<Result<RefreshToken>> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Retrieves a refresh token associated with a specific id.
     /// </summary>
-    /// <param name="id">The id of specific refresh token.</param>
+    /// <param name="id">The id of the specific refresh token.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>The refresh token associated with the id, or <c>null</c> if not found.</returns>
-    Task<RefreshToken?> GetTokenByIdAsync(Guid id, CancellationToken cancellationToken = default);    
+    Task<RefreshToken> GetTokenByIdAsync(Guid id, CancellationToken cancellationToken = default);    
     
     /// <summary>
     /// Retrieves a refresh token by its value.

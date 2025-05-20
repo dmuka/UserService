@@ -18,9 +18,7 @@ public class GetRoleByNameQueryHandlerTests
         _repositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
 
-        _handler = new GetRoleByNameQueryHandler(
-            _repositoryMock.Object, 
-            _userContextMock.Object);
+        _handler = new GetRoleByNameQueryHandler(_repositoryMock.Object);
     }
 
     [Test]

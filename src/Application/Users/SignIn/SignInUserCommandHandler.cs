@@ -75,7 +75,7 @@ internal sealed class SignInUserCommandHandler(
 
         var validRefreshToken = await refreshTokenRepository.GetTokenByUserAsync(user, cancellationToken);
 
-        if (validRefreshToken is null || validRefreshToken.ExpiresUtc < DateTime.UtcNow)
+        if (validRefreshToken.IsFailure)
         {
             var result = RefreshToken.Create(
                 Guid.CreateVersion7(),
@@ -92,9 +92,9 @@ internal sealed class SignInUserCommandHandler(
 
             validRefreshToken = result.Value;
 
-            await refreshTokenRepository.AddTokenAsync(validRefreshToken, cancellationToken);
+            await refreshTokenRepository.AddTokenAsync(validRefreshToken.Value, cancellationToken);
         }
 
-        return new SignInResponse(accessToken, validRefreshToken.Id.Value);
+        return new SignInResponse(accessToken, validRefreshToken.Value.Id.Value);
     }
 }

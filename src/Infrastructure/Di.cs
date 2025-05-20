@@ -147,11 +147,13 @@
 
                          return Task.CompletedTask;
                      },
-                     OnAuthenticationFailed = async context =>
+                     OnAuthenticationFailed = context =>
                      {
                          var user = context.Principal;
                          
                          Log.Error(context.Exception, "Authentication failed ({User})", user?.Identity is null ? "Unknown" : user.Identity.Name);
+
+                         return Task.CompletedTask;
                      }
                  };
              });

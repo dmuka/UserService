@@ -8,8 +8,7 @@ namespace Application.Users.Remove;
 
 public class RemoveUserCommandHandler(
     IUserRepository repository,
-    IUserRoleRepository userRoleRepository,
-    IUserContext userContext) 
+    IUserRoleRepository userRoleRepository) 
     : ICommandHandler<RemoveUserCommand, int>
 {
     public async Task<Result<int>> Handle(

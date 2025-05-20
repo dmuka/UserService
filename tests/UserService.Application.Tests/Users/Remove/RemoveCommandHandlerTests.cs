@@ -22,7 +22,7 @@ public class RemoveUserCommandHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _userRoleRepositoryMock = new Mock<IUserRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new RemoveUserCommandHandler(_userRepositoryMock.Object, _userRoleRepositoryMock.Object, _userContextMock.Object);
+        _handler = new RemoveUserCommandHandler(_userRepositoryMock.Object, _userRoleRepositoryMock.Object);
     }
 
     [Test]

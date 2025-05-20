@@ -29,7 +29,7 @@ public class AddRoleCommandHandlerTests
         _userContextMock = new Mock<IUserContext>();
         _eventDispatcherMock = new Mock<IEventDispatcher>();
         
-        _handler = new AddRoleCommandHandler(_roleRepositoryMock.Object, _userContextMock.Object, _eventDispatcherMock.Object);
+        _handler = new AddRoleCommandHandler(_roleRepositoryMock.Object, _eventDispatcherMock.Object);
     }
 
     [Test]

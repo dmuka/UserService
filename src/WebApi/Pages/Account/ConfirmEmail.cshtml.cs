@@ -10,7 +10,7 @@ public class ConfirmEmailModel(
     TokenHandler tokenHandler,
     ISender sender) : PageModel
 {
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
     
     private CancellationToken CancellationToken => HttpContext.RequestAborted;
 

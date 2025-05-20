@@ -1,7 +1,17 @@
 ﻿@page
+@using WebApi.Pages
 @model WebApi.Pages.IndexModel
 @{
     ViewData["Title"] = "Standards - User management system";
 }
 
 <h1>Welcome to Standards user management system.</h1>
+@if (User.Identity is not null && User.Identity.IsAuthenticated && !Model.IsEmailConfirmed)
+{
+    <div class="alert alert-warning">
+        Please confirm your email address to access all features. Check your inbox for a confirmation email.
+        <form asp-page="@Routes.ResendConfirmationEmail" method="post" class="d-inline">
+            <button type="submit" class="btn btn-link">Resend confirmation email</button>
+        </form>
+    </div>
+}

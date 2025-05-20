@@ -27,10 +27,7 @@ public class RemoveRoleCommandHandlerTests
             
         _userContextMock = new Mock<IUserContext>();
             
-        _handler = new RemoveRoleCommandHandler(
-            _roleRepositoryMock.Object, 
-            _userRoleRepositoryMock.Object, 
-            _userContextMock.Object);
+        _handler = new RemoveRoleCommandHandler(_roleRepositoryMock.Object, _userRoleRepositoryMock.Object);
     }
 
     [Test]

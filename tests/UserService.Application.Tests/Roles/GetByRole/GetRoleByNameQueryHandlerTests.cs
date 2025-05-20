@@ -22,7 +22,7 @@ public class GetRoleByNameQueryHandlerTests
     {
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new GetRoleByNameQueryHandler(_roleRepositoryMock.Object, _userContextMock.Object);
+        _handler = new GetRoleByNameQueryHandler(_roleRepositoryMock.Object);
     }
 
     [Test]

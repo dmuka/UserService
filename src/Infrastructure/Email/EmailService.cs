@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Email;
 
-public class EmailService(IOptions<SmtpOptions> options, IConfiguration configuration) : IEmailService
+public class EmailService(IOptions<SmtpOptions> options) : IEmailService
 {
     private readonly SmtpClient _smtpClient = new(options.Value.SmtpHost, options.Value.SmtpPort)
     {

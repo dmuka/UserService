@@ -16,6 +16,7 @@ public static class Routes
     public const string ForgotPasswordConfirmation = "/Account/ForgotPasswordConfirmation";
     public const string ResetPassword = "/Account/ResetPassword";
     public const string ConfirmEmail = "/Account/ConfirmEmail";
+    public const string ResendConfirmationEmail = "/Account/ResendConfirmationEmail";
     public const string ResetPasswordConfirmation = "/Account/ResetPasswordConfirmation";
     public const string Logout = "/Account/Logout";
     

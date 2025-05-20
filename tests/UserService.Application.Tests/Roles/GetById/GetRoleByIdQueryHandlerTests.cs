@@ -22,7 +22,7 @@ public class GetRoleByIdQueryHandlerTests
     {
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _userContextMock = new Mock<IUserContext>();
-        _handler = new GetRoleByIdQueryHandler(_roleRepositoryMock.Object, _userContextMock.Object);
+        _handler = new GetRoleByIdQueryHandler(_roleRepositoryMock.Object);
     }
 
     [Test]

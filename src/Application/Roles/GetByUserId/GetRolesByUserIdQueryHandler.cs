@@ -6,7 +6,7 @@ using Domain.Users;
 
 namespace Application.Roles.GetByUserId;
 
-public class GetRolesByUserIdQueryHandler(IRoleRepository repository, IUserContext userContext) 
+public class GetRolesByUserIdQueryHandler(IRoleRepository repository) 
     : IQueryHandler<GetRolesByUserIdQuery, RolesResponse>
 {
     public async Task<Result<RolesResponse>> Handle(

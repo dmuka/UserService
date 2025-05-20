@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Authentication;
+using Core;
 using Dapper;
 using Domain.RefreshTokens;
 using Domain.Users;
@@ -38,7 +39,7 @@ public class RefreshTokenRepository(
     /// <param name="user">The user whose associated refresh token needs to be retrieved.</param>
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete, or the default value if not provided.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains the refresh token associated with the user, or null if no token is found.</returns>
-    public async Task<RefreshToken?> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<Result<RefreshToken>> GetTokenByUserAsync(User user, CancellationToken cancellationToken = default)
     {
         return await GetTokenByUserIdAsync(user.Id.Value, cancellationToken);
     }
@@ -53,7 +54,7 @@ public class RefreshTokenRepository(
     /// The task result contains the refresh token associated with the given user ID,
     /// or null if no token is found.
     /// </returns>
-    public async Task<RefreshToken?> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<RefreshToken>> GetTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var tokens = GetFromCache<RefreshToken, RefreshTokenId>();
         
@@ -82,13 +83,13 @@ public class RefreshTokenRepository(
             
             var token = tokenDtos.OrderByDescending(t => t.ExpiresUtc).FirstOrDefault();
             
-            if (token == null) return null;
+            if (token == null || token.ExpiresUtc < DateTime.UtcNow) return Result.Failure<RefreshToken?>(Error.NullValue);
 
             return RefreshToken.Create(
                 token.Id,
                 token.Value,
                 token.ExpiresUtc,
-                new UserId(userId)).Value;
+                new UserId(userId));
         }
         catch (Exception e)
         {

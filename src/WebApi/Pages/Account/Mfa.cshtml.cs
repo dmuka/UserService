@@ -10,8 +10,7 @@ namespace WebApi.Pages.Account;
 public class MfaModel(
     IUserContext userContext, 
     IUserRepository userRepository,
-    ISender sender,
-    ITotpProvider totpProvider) : PageModel
+    ISender sender) : PageModel
 {
     public bool IsMfaEnabled { get; set; }
     public int RecoveryCodesCount { get; set; }

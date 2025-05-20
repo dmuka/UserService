@@ -8,7 +8,7 @@ public class RoleAuthorizationHandler : AuthorizationHandler<RolesAuthorizationR
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RolesAuthorizationRequirement requirement)
     {
-        if (!context.User.Identity.IsAuthenticated) return Task.CompletedTask;
+        if (context.User.Identity is not null && !context.User.Identity.IsAuthenticated) return Task.CompletedTask;
         
         var userRoles = context.User
             .FindAll(ClaimTypes.Role).Select(c => c.Value);

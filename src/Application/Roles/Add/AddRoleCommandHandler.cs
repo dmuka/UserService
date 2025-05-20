@@ -8,7 +8,6 @@ namespace Application.Roles.Add;
 
 public class AddRoleCommandHandler(
     IRoleRepository repository, 
-    IUserContext userContext,
     IEventDispatcher eventDispatcher) 
     : ICommandHandler<AddRoleCommand, Guid>
 {

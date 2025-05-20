@@ -7,8 +7,7 @@ namespace Application.Roles.Remove;
 
 public class RemoveRoleCommandHandler(
     IRoleRepository repository,
-    IUserRoleRepository userRoleRepository,
-    IUserContext userContext) 
+    IUserRoleRepository userRoleRepository) 
     : ICommandHandler<RemoveRoleCommand, int>
 {
     public async Task<Result<int>> Handle(
