@@ -86,10 +86,7 @@ public class SetupMfaModel(
         var command = new EnableMfaCommand(userContext.UserId.ToString(), code);
         var result = await sender.Send(command, CancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return RedirectToPage("MfaCreationConfirmation");
-        }
+        if (result.IsSuccess) return RedirectToPage("MfaCreationConfirmation");
 
         ModelState.AddModelError("MFA error", result.Error.Description);
         

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApi.Pages;
 
-[Authorize(Policy = "UserManagementPolicy")]
+//[Authorize(Policy = "UserManagementPolicy")]
 public class IndexModel(IUserRepository userRepository, IUserContext userContext) : PageModel
 {
     public bool IsEmailConfirmed { get; set; }
