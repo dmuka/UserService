@@ -13,11 +13,11 @@ public class SetupMfaModel(
     IUserContext userContext, 
     ILogger<SetupMfaModel> logger) : PageModel
 {
-    [TempData]
-    public string QrCode { get; set; } = string.Empty;
-    
     [BindProperty]
     public string VerificationCode { get; set; } = string.Empty;
+
+    [TempData]
+    public string QrCode { get; set; } = string.Empty;
     
     [TempData]
     public string[] RecoveryCodes { get; set; } = [];

@@ -12,10 +12,9 @@ public class ResendConfirmationEmailModel(
     IUserContext userContext,
     IUserRepository userRepository,
     TokenHandler tokenHandler,
-    IEmailService emailService,
-    string message) : PageModel
+    IEmailService emailService) : PageModel
 {
-    public string Message { get; set; } = message;
+    public string Message { get; set; } = string.Empty;
 
     public async Task<IActionResult> OnPostAsync()
     {

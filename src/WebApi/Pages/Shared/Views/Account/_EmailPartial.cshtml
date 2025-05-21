@@ -1,0 +1,7 @@
+﻿@model dynamic
+
+<div class="form-floating mb-3">
+    <input asp-for="@Model" class="form-control" placeholder="Email address" autocomplete="username" aria-required="true"/>
+    <label asp-for="@Model">Email address</label>
+    <span asp-validation-for="@Model" class="text-danger"></span>
+</div>

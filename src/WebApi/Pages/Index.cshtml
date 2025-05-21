@@ -9,8 +9,8 @@
 @if (User.Identity is not null && User.Identity.IsAuthenticated && !Model.IsEmailConfirmed)
 {
     <div class="alert alert-warning">
-        Please confirm your email address to access all features. Check your inbox for a confirmation email.
         <form asp-page="@Routes.ResendConfirmationEmail" method="post" class="d-inline">
+            <p>Please confirm your email address to access all features. Check your inbox for a confirmation email.</p>
             <button type="submit" class="btn btn-link">Resend confirmation email</button>
         </form>
     </div>

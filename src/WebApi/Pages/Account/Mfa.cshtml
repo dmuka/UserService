@@ -7,19 +7,27 @@
 
 <h1>@ViewData["Title"]</h1>
 
-@if (Model.IsMfaEnabled)
-{
-    <p>MFA is enabled for your account.</p>
-    <h3>Recovery Codes</h3>
-    <p>You have @Model.RecoveryCodesCount unused recovery codes.</p>
-    
-    <form method="post">
-        <button type="submit" class="btn btn-primary" asp-page-handler="RegenerateCodes">Regenerate Recovery Codes</button>
-        <button type="submit" class="btn btn-danger" asp-page-handler="Disable">Disable MFA</button>
-    </form>
-}
-else
-{
-    <p>MFA is not enabled for your account.</p>
-    <a asp-page="@Routes.SetupMfa" class="btn btn-primary">Enable MFA</a>
-}
+<div class="center-container">
+    <div class="form-container">
+        @if (Model.IsMfaEnabled)
+        {
+            <p>MFA is enabled for your account.</p>
+            <h3>Recovery Codes</h3>
+            <p>You have @Model.RecoveryCodesCount unused recovery codes.</p>
+            
+            <form method="post">
+                <div class="button-container">
+                    <button type="submit" class="btn btn-primary" asp-page-handler="RegenerateCodes">Regenerate Recovery Codes</button>
+                    <button type="submit" class="btn btn-danger" asp-page-handler="Disable">Disable MFA</button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <p>MFA is not enabled for your account.</p>
+            <div class="button-container">
+                <a asp-page="@Routes.SetupMfa" class="btn btn-primary">Enable MFA</a>
+            </div>
+        }
+    </div>
+</div>

@@ -25,51 +25,19 @@
                 </div>
 
                 <div id="emailInput" style="display: none">
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.Email" class="form-control" placeholder="Email address" autocomplete="username" aria-required="true"/>
-                        <label asp-for="Input.Email">Email address</label>
-                        <span asp-validation-for="Input.Email" class="text-danger"></span>
-                    </div>
+                    <partial name="Shared/Views/Account/_EmailPartial" for="Input.Email"/>
                 </div>
 
                 <div id="usernameInput" style="display: block">
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.UserName" name="Input.UserName" class="form-control" placeholder="User name" autocomplete="username" aria-required="true"/>
-                        <label asp-for="Input.UserName" class="form-label">User name</label>
-                        <span asp-validation-for="Input.UserName" class="text-danger"></span>
-                    </div>
+                    <partial name="Shared/Views/Account/_UsernamePartial" for="Input.UserName"/>
                 </div>
-
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" name="Input.Password" type="password" class="form-control" placeholder="Password" autocomplete="current-password" aria-required="true"/>
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-
-                    <a href="#" class="password-icon-overlay">
-                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
-                    </a>
-                </div>
+                
+                <partial name="Shared/Views/Account/_PasswordPartial" for="Input.Password"/>
                 
                 @if (Model.ShowRecoveryCodeOption)
                 {
-                    <div class="form-group mb-3">
-                        <label>Verification Code</label>
-                        <div class="mfa-code-inputs">
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit1" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[0].ToString() : "")" autocomplete="off" />
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit2" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[1].ToString() : "")" autocomplete="off" />
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit3" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[2].ToString() : "")" autocomplete="off" />
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit4" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[3].ToString() : "")" autocomplete="off" />
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit5" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[4].ToString() : "")" autocomplete="off" />
-                            <input type="text" class="mfa-digit" maxlength="1" name="digit6" value="@(Model.Input.VerificationCode?.Length > 0 ? Model.Input.VerificationCode[5].ToString() : "")" autocomplete="off" />
-                            <input type="hidden" asp-for="Input.VerificationCode" id="VerificationCode" />
-                        </div>
-                        <span asp-validation-for="Input.VerificationCode" class="text-danger"></span>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.RecoveryCode" class="form-control" placeholder="Or enter recovery code" />
-                        <label asp-for="Input.RecoveryCode" class="form-label">Or enter a recovery code</label>
-                        <span asp-validation-for="Input.RecoveryCode" class="text-danger"></span>
-                    </div>
+                    <partial name="Shared/Views/Account/_VerificationCodePartial" for="Input.VerificationCode"/>
+                    <partial name="Shared/Views/Account/_RecoveryCodePartial" for="Input.RecoveryCode"/>
                 }
                 
                 <div class="checkbox mb-3">
@@ -105,4 +73,4 @@
             document.getElementById("usernameInput").style.display = (option === "username") ? "block" : "none";
         }
     </script>
-}
+}}

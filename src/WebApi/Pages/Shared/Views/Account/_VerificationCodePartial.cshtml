@@ -1,0 +1,15 @@
+﻿@model dynamic
+
+<div class="form-group mb-3">
+    <label>Verification Code</label>
+    <div class="mfa-code-inputs">
+        <input type="text" class="mfa-digit" maxlength="1" name="digit1" value="@(Model.Length > 0 ? Model[0].ToString() : "")" autocomplete="off" />
+        <input type="text" class="mfa-digit" maxlength="1" name="digit2" value="@(Model.Length > 0 ? Model[1].ToString() : "")" autocomplete="off" />
+        <input type="text" class="mfa-digit" maxlength="1" name="digit3" value="@(Model.Length > 0 ? Model[2].ToString() : "")" autocomplete="off" />
+        <input type="text" class="mfa-digit" maxlength="1" name="digit4" value="@(Model.Length > 0 ? Model[3].ToString() : "")" autocomplete="off" />
+        <input type="text" class="mfa-digit" maxlength="1" name="digit5" value="@(Model.Length > 0 ? Model[4].ToString() : "")" autocomplete="off" />
+        <input type="text" class="mfa-digit" maxlength="1" name="digit6" value="@(Model.Length > 0 ? Model[5].ToString() : "")" autocomplete="off" />
+        <input type="hidden" asp-for="@Model" id="VerificationCode" />
+    </div>
+    <span asp-validation-for="@Model" class="text-danger"></span>
+</div>
