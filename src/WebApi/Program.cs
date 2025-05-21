@@ -1,3 +1,4 @@
+using System.Net;
 using Application;
 using Infrastructure;
 using Infrastructure.Options.Email;
@@ -15,6 +16,27 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configu
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+var certificatePath = Environment.GetEnvironmentVariable("CertificatePath")
+                      ?? throw new InvalidOperationException("Certificate path is not set.");
+            
+var certificatePassword = Environment.GetEnvironmentVariable("CertificatePassword")
+             ?? throw new InvalidOperationException("Certificate password is not set.");
+
+Host.CreateDefaultBuilder(args)
+    .ConfigureWebHostDefaults(webBuilder =>
+    {
+        webBuilder.UseStartup<Program>()
+            .UseKestrel(options =>
+            {
+                options.Listen(IPAddress.Any, 5000);
+                options.Listen(IPAddress.Any, 5001, listenOptions =>
+                {
+                    listenOptions.UseHttps(certificatePath, certificatePassword);
+                });
+                
+            });
+    });
 
 builder.Services
     .AddApplication()
