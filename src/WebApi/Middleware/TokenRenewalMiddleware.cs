@@ -33,10 +33,11 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         {
             Log.Information("Access token is missing or expired, attempting to renew.");
             
-            var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
+            var resultToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
             
-            if (refreshToken != null && refreshToken.ExpiresUtc > DateTime.UtcNow)
+            if (resultToken.IsSuccess)
             {
+                var refreshToken = resultToken.Value;
                 var command = new SignInUserByTokenCommand(refreshToken.Value, authOptions.Value.RefreshTokenExpirationInDays);
                 var result = await sender.Send(command);
 

@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories;
 /// <summary>
 /// Provides functionality for managing refresh tokens within the system.
 /// This repository supports operations such as retrieving, adding, updating, and removing refresh tokens.
-/// It utilizes caching for optimized performance and interacts with the database when necessary.
+/// It uses caching for optimized performance and interacts with the database when necessary.
 /// </summary>
 public class RefreshTokenRepository(
     ICacheService cache,
@@ -83,7 +83,7 @@ public class RefreshTokenRepository(
             
             var token = tokenDtos.OrderByDescending(t => t.ExpiresUtc).FirstOrDefault();
             
-            if (token == null || token.ExpiresUtc < DateTime.UtcNow) return Result.Failure<RefreshToken?>(Error.NullValue);
+            if (token is null || token.ExpiresUtc < DateTime.UtcNow) return Result.Failure<RefreshToken>(Error.NullValue);
 
             return RefreshToken.Create(
                 token.Id,
@@ -104,9 +104,9 @@ public class RefreshTokenRepository(
     /// <param name="id">The unique identifier of the refresh token.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// The refresh token associated with the specified identifier, or null if no matching token is found.
+    /// The refresh token associated with the specified identifier or null if no matching token is found.
     /// </returns>
-    public async Task<RefreshToken?> GetTokenByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<RefreshToken>> GetTokenByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var tokens = GetFromCache<RefreshToken, RefreshTokenId>();
         
@@ -135,7 +135,7 @@ public class RefreshTokenRepository(
                 .OrderByDescending(token => token.ExpiresUtc)
                 .FirstOrDefault();
             
-            if (token == null) return null;
+            if (token is null || token.ExpiresUtc < DateTime.UtcNow) return Result.Failure<RefreshToken>(Error.NullValue);
 
             return RefreshToken.Create(
                 token.Id,

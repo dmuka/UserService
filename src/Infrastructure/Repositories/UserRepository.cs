@@ -115,6 +115,7 @@ public class UserRepository(
                                      users.first_name AS {nameof(User.FirstName)},
                                      users.last_name AS {nameof(User.LastName)},
                                      users.email AS {nameof(User.Email)},
+                                     users.is_email_confirmed AS {nameof(User.IsEmailConfirmed)},
                                      users.is_mfa_enabled AS {nameof(User.IsMfaEnabled)},
                                      users.mfa_secret AS {nameof(User.MfaSecret)},
                                      users.password_hash AS {nameof(User.PasswordHash)},
@@ -506,7 +507,8 @@ public class UserRepository(
                         new List<UserPermissionId>(),
                         user.RecoveryCodesHashes,
                         user.IsMfaEnabled,
-                        user.MfaSecret).Value;
+                        user.MfaSecret,
+                        user.IsEmailConfirmed).Value;
                     userDictionary.Add(user.Id, userEntry);
                 }
                 else

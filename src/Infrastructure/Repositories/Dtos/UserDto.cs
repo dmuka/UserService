@@ -9,6 +9,7 @@ public record UserDto : IDto
     public string PasswordHash { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public bool IsMfaEnabled { get; set; }
+    public bool IsEmailConfirmed { get; set; }
     public string? MfaSecret { get; set; }
     public string[]? RecoveryCodesHashes { get; set; }
 }

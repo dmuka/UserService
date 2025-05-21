@@ -16,6 +16,9 @@ public class UserMapper(IRoleRepository roleRepository) : IMapper<User, UserId, 
             Username = user.Username,
             FirstName = user.FirstName,
             LastName = user.LastName,
+            IsMfaEnabled = user.IsMfaEnabled,
+            MfaSecret = user.MfaSecret ?? (string?)null,
+            IsEmailConfirmed = user.IsEmailConfirmed,
             PasswordHash = user.PasswordHash,
             Email = user.Email
         };

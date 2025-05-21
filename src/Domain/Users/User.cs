@@ -50,6 +50,7 @@ public class User : Entity<UserId>, IAggregationRoot
     /// <param name="recoveryCodes">A collection of the user's recovery codes.</param>
     /// <param name="isMfaEnabled">Indicates whether multifactor authentication is enabled.</param>
     /// <param name="mfaSecret">The multifactor authentication secret value.</param>
+    /// <param name="isEmailConfirmed">Indicates whether the email address is confirmed.</param>
     /// <returns>A <see cref="Result{TValue}"/> containing the created user or the validation errors.</returns>
     public static Result<User> Create(
         Guid userId,
@@ -62,7 +63,8 @@ public class User : Entity<UserId>, IAggregationRoot
         ICollection<UserPermissionId>? userPermissionIds,
         ICollection<string>? recoveryCodes = null,
         bool isMfaEnabled = false,
-        string? mfaSecret = null)
+        string? mfaSecret = null,
+        bool isEmailConfirmed = false)
     {
         var resultsWithFailures = ValidateUserDetails(
             userName,
@@ -98,7 +100,8 @@ public class User : Entity<UserId>, IAggregationRoot
             Email.Create(email),
             mfaState,
             roleNames,
-            userPermissionIds);
+            userPermissionIds,
+            isEmailConfirmed);
     
         var userRegisteredEvent = new UserRegisteredDomainEvent(userId);
         user.AddDomainEvent(userRegisteredEvent);
@@ -115,7 +118,8 @@ public class User : Entity<UserId>, IAggregationRoot
         Email email,
         MfaState mfaState,
         ICollection<RoleName> roleNames,
-        ICollection<UserPermissionId>? userPermissionIds)
+        ICollection<UserPermissionId>? userPermissionIds,
+        bool isEmailConfirmed = false)
     {
         Id = userId;
         Username = userName;
@@ -123,6 +127,7 @@ public class User : Entity<UserId>, IAggregationRoot
         LastName = lastName;
         PasswordHash = passwordHash;
         Email = email;
+        IsEmailConfirmed = isEmailConfirmed;
         MfaState = mfaState;
         _roleNames = new List<RoleName>(roleNames);
         _userPermissionIds = userPermissionIds is not null 

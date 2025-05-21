@@ -80,9 +80,11 @@ public class TokenHandler(
         
         if (sessionId is null) return null;
         
-        var refreshToken = await refreshTokenRepository.GetTokenByIdAsync(sessionId.Value, cancellationToken);
+        var result = await refreshTokenRepository.GetTokenByIdAsync(sessionId.Value, cancellationToken);
 
-        if (refreshToken is null || refreshToken.ExpiresUtc < DateTime.UtcNow) return null;
+        if (result.IsFailure) return null;
+        
+        var refreshToken = result.Value;
         
         return refreshToken.Value;
     }
