@@ -18,8 +18,7 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configu
 builder.Services.AddOpenApi();
 
 var certificatePath = Environment.GetEnvironmentVariable("CertificatePath")
-                      ?? throw new InvalidOperationException("Certificate path is not set.");
-            
+                      ?? throw new InvalidOperationException("Certificate path is not set.");            
 var certificatePassword = Environment.GetEnvironmentVariable("CertificatePassword")
              ?? throw new InvalidOperationException("Certificate password is not set.");
 

@@ -31,7 +31,9 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         if (string.IsNullOrEmpty(accessToken) ||
             (!string.IsNullOrEmpty(accessToken) && !tokenProvider.ValidateAccessToken(accessToken)))
         {
-            Log.Information("Access token is missing or expired, attempting to renew.");
+            if (string.IsNullOrEmpty(accessToken)) Log.Information("Access token is missing");
+            if (!string.IsNullOrEmpty(accessToken) && !tokenProvider.ValidateAccessToken(accessToken)) Log.Information("Access token is expired, attempting to renew.");
+            Log.Information("Attempting to renew access token.");
             
             var resultToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
             

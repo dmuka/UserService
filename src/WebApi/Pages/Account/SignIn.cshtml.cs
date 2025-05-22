@@ -37,7 +37,7 @@ public class SignInModel(
 
         [EmailAddress]
         [Display(Name = "Email")]
-        public string? Email { get; set; }
+        public string? Email { get; set; } = string.Empty;
 
         [Required]
         [StringLength(Lengths.MaxPassword, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = Lengths.MinPassword)]
@@ -47,10 +47,10 @@ public class SignInModel(
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
         
-        public string? VerificationCode { get; set; }
+        public string VerificationCode { get; set; } = string.Empty;
         
         [Display(Name = "Or enter recovery code")]
-        public string? RecoveryCode { get; set; }
+        public string? RecoveryCode { get; set; } = string.Empty;
     }
 
     public void OnGet(string? returnUrl = null)
