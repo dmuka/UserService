@@ -17,7 +17,7 @@ internal sealed class ValidationPipelineBehavior<TRequest, TResponse>(
     {
         var validationFailures = await ValidateAsync(request);
 
-        if (validationFailures.Length == 0) return await next();
+        if (validationFailures.Length == 0) return await next(cancellationToken);
 
         if (typeof(TResponse).IsGenericType &&
             typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
@@ -30,7 +30,7 @@ internal sealed class ValidationPipelineBehavior<TRequest, TResponse>(
 
             if (failureMethod is not null)
             {
-                return (TResponse)failureMethod.Invoke(null, [CreateValidationError(validationFailures)]);
+                return (TResponse)failureMethod.Invoke(null, [CreateValidationError(validationFailures)])!;
             }
         }
         else if (typeof(TResponse) == typeof(Result))

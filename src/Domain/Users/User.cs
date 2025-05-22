@@ -15,13 +15,13 @@ namespace Domain.Users;
 /// </summary>
 public class User : Entity<UserId>, IAggregationRoot
 {
-    public string Username { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public PasswordHash PasswordHash { get; private set; }
-    public Email Email { get; private set; }
+    public string Username { get; private set; } = string.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public PasswordHash PasswordHash { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
     public bool IsEmailConfirmed { get; private set; }
-    public MfaState MfaState { get; private set; }
+    public MfaState MfaState { get; private set; } = null!;
     private List<RoleName> _roleNames = [];
     public IReadOnlyCollection<RoleName> RoleNames => _roleNames.AsReadOnly();
     private List<UserPermissionId> _userPermissionIds = [];
@@ -29,7 +29,7 @@ public class User : Entity<UserId>, IAggregationRoot
     
     public bool IsMfaEnabled => MfaState.IsEnabled;
     public MfaSecret? MfaSecret => MfaState.Secret;
-    public IReadOnlyCollection<string>? RecoveryCodesHashes => MfaState.RecoveryCodesHashes;
+    public IReadOnlyCollection<string> RecoveryCodesHashes => MfaState.RecoveryCodesHashes;
 
     /// <summary>
     /// Default constructor for ORM compatibility.

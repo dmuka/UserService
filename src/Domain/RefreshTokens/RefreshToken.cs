@@ -8,9 +8,9 @@ namespace Domain.RefreshTokens;
 
 public class RefreshToken : Entity<RefreshTokenId>
 {
-    public string Value { get; private set; }
+    public string Value { get; private set; } = string.Empty;
     public DateTime ExpiresUtc { get; private set; }
-    public UserId UserId { get; private set; }
+    public UserId UserId { get; private set; } = null!;
 
     /// <summary>
     /// Default constructor for ORM compatibility.

@@ -6,8 +6,8 @@ namespace Domain.UserPermissions;
 
 public class UserPermission : Entity<UserPermissionId>
 {
-    public UserId UserId { get; private set; }
-    public PermissionId PermissionId { get; private set; }
+    public UserId UserId { get; private set; } = null!;
+    public PermissionId PermissionId { get; private set; } = null!;
 
     /// <summary>
     /// Default constructor for ORM compatibility.

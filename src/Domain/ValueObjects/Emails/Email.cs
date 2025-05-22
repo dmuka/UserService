@@ -102,7 +102,8 @@ public sealed class Email : ValueObject
     public static bool operator ==(Email? left, Email? right)
     {
         if (left is null) return right is null;
-        return left.Equals(right);
+        
+        return right is not null && left.Equals(right);
     }
 
     /// <summary>

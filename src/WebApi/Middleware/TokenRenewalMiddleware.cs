@@ -16,7 +16,8 @@ public class TokenRenewalMiddleware(RequestDelegate next)
         ITokenProvider tokenProvider,
         IRefreshTokenRepository refreshTokenRepository,
         IOptions<AuthOptions> authOptions,
-        ISender sender)
+        ISender sender,
+        ILogger<TokenRenewalMiddleware> logger)
     {
         var sessionId = context.Request.Cookies[CookiesNames.SessionId];
 
@@ -28,12 +29,9 @@ public class TokenRenewalMiddleware(RequestDelegate next)
 
         var accessToken = context.Request.Cookies[CookiesNames.AccessToken];
         
-        if (string.IsNullOrEmpty(accessToken) ||
-            (!string.IsNullOrEmpty(accessToken) && !tokenProvider.ValidateAccessToken(accessToken)))
+        if (!tokenProvider.ValidateAccessToken(accessToken))
         {
-            if (string.IsNullOrEmpty(accessToken)) Log.Information("Access token is missing");
-            if (!string.IsNullOrEmpty(accessToken) && !tokenProvider.ValidateAccessToken(accessToken)) Log.Information("Access token is expired, attempting to renew.");
-            Log.Information("Attempting to renew access token.");
+            logger.LogInformation("Attempting to renew access token.");
             
             var resultToken = await refreshTokenRepository.GetTokenByIdAsync(Guid.Parse(sessionId));
             
@@ -63,9 +61,9 @@ public class TokenRenewalMiddleware(RequestDelegate next)
                 context.Response.Cookies.Append(CookiesNames.AccessToken, result.Value.AccessToken);
                 
                 Log.Information("Access token successfully renewed.");
-                
-                await next(context);
             }
+                
+            await next(context);
             
             return;
         }

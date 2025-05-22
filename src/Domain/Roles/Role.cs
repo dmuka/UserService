@@ -7,8 +7,8 @@ namespace Domain.Roles;
 
 public class Role : Entity<RoleId>, IAggregationRoot
 {
-    public string Name { get; private set; }
-    public ICollection<UserId> UserIds { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public ICollection<UserId> UserIds { get; private set; } = [];
 
     protected Role() { }
 

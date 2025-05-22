@@ -5,6 +5,7 @@ using Domain.ValueObjects.RoleNames;
 using Infrastructure.Authentication;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -22,6 +23,8 @@ public class TokenProviderTests
     private Mock<IRoleRepository> _roleRepositoryMock;
     private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
     private Mock<IServiceScope> _serviceScopeMock;
+    private Mock<ILogger<TokenProvider>> _loggerMock;
+    
     private TokenProvider _tokenProvider;
 
     [SetUp]
@@ -53,7 +56,9 @@ public class TokenProviderTests
         _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
         _serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(_serviceScopeMock.Object);
     
-        _tokenProvider = new TokenProvider(_authOptionsMock.Object, _serviceScopeFactoryMock.Object);
+        _loggerMock = new Mock<ILogger<TokenProvider>>();
+        
+        _tokenProvider = new TokenProvider(_authOptionsMock.Object, _serviceScopeFactoryMock.Object, _loggerMock.Object);
     }
 
     [Test]

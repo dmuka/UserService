@@ -8,13 +8,18 @@ using Domain.Roles;
 using Domain.Users;
 using Infrastructure.Options.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceScopeFactory scopeFactory) : ITokenProvider
+internal sealed class TokenProvider(
+    IOptions<AuthOptions> authOptions, 
+    IServiceScopeFactory scopeFactory,
+    ILogger<TokenProvider> logger) : ITokenProvider
 {
     public async Task<string> CreateAccessTokenAsync(
         User user, 
@@ -58,6 +63,13 @@ internal sealed class TokenProvider(IOptions<AuthOptions> authOptions, IServiceS
     
     public bool ValidateAccessToken(string? accessToken)
     {
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            if (string.IsNullOrEmpty(accessToken)) logger.LogInformation("Access token is missing.");
+            
+            return false;
+        }
+        
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(authOptions.Value.Secret);
 

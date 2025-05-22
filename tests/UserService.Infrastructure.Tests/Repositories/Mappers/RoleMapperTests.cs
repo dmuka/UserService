@@ -56,6 +56,6 @@ public class RoleMapperTests
     public void ToEntity_ShouldThrowArgumentNullException_WhenRoleDtoIsNull()
     {
         // Act & Assert
-        Assert.Throws<NullReferenceException>(() => _roleMapper.ToEntity(null));
+        Assert.Throws<NullReferenceException>(() => _roleMapper.ToEntity(null!));
     }
 }

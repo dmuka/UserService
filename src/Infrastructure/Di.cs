@@ -101,14 +101,10 @@
              .ValidateOnStart()
              .PostConfigure(options =>
              {
-                 var secret = configuration["Jwt__Secret"];
-
-                 if (string.IsNullOrEmpty(secret))
-                 {
-                     throw new InvalidOperationException("JWT secret value is not set in the configuration.");
-                 }
-
-                 options.Secret = secret;
+                 var jwtSecret = configuration["Jwt__Secret"];
+                 if (string.IsNullOrEmpty(jwtSecret)) throw new InvalidOperationException("JWT secret value is not set in the configuration.");
+                 
+                 options.Secret = jwtSecret;
              });
          
          services.AddScoped<ICommandHandler<SignInUserByTokenCommand, SignInUserByTokenResponse>, SignInUserByTokenCommandHandler>();
@@ -121,11 +117,14 @@
              })
              .AddJwtBearer(jwtBearerOptions =>
              {
+                 var jwtSecret = configuration["Jwt__Secret"];
+                 if (string.IsNullOrEmpty(jwtSecret)) throw new InvalidOperationException("JWT secret value is not set in the configuration.");
+                 
                  jwtBearerOptions.RequireHttpsMetadata = false;
                  jwtBearerOptions.SaveToken = true;
                  jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                  {
-                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt__Secret"]!)),
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
                      ValidIssuer = configuration["Jwt:Issuer"],
                      ValidAudience = configuration["Jwt:Audience"],
                      ClockSkew = TimeSpan.Zero
