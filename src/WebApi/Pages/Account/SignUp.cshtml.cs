@@ -16,10 +16,8 @@ namespace WebApi.Pages.Account;
 
 [AllowAnonymous]
 public class SignUpModel(
-    TokenHandler tokenHandler,
     IOptions<AuthOptions> authOptions,
     ISender sender,
-    IEmailService emailService,
     ILogger<SignUpModel> logger) : PageModel
 {
     [BindProperty]

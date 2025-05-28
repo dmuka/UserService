@@ -178,8 +178,6 @@
          services.AddHealthChecks()
              .AddCheck<PostgresHealthCheck>(nameof(PostgresHealthCheck), tags: ["postgres"])
              .AddCheck<CacheHealthCheck>(nameof(CacheHealthCheck), tags: ["cache"]);
-
-         services.AddTransient<INpgsqlConnectionFactory, NpgsqlConnectionFactory>();
          
          return services;
      }

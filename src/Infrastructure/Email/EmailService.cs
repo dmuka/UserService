@@ -2,7 +2,6 @@
 using System.Net.Mail;
 using Application.Abstractions.Email;
 using Infrastructure.Options.Email;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Email;
