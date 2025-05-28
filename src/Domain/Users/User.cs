@@ -1,6 +1,6 @@
 ﻿using Core;
 using Domain.UserPermissions;
-using Domain.Users.DomainEvents;
+using Domain.Users.Events.Domain;
 using Domain.Users.Specifications;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.MfaSecrets;

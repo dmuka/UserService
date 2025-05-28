@@ -1,6 +1,6 @@
 ﻿using Core;
 
-namespace Domain.Users.DomainEvents;
+namespace Domain.Users.Events.Domain;
 
 /// <summary>
 /// Event raised when a user's email is changed.

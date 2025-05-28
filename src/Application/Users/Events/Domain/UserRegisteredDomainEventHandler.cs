@@ -1,10 +1,10 @@
-﻿using System.Web;
-using Application.Abstractions.Email;
+﻿using Application.Abstractions.Email;
+using Application.Abstractions.Kafka;
 using Domain;
-using Domain.Users;
-using Domain.Users.DomainEvents;
+using Domain.Users.Events.Domain;
+using Domain.Users.Events.Integration;
 
-namespace Application.Users.Events;
+namespace Application.Users.Events.Domain;
 
 /// <summary>
 /// Handles the UserRegisteredDomainEvent.
@@ -12,7 +12,8 @@ namespace Application.Users.Events;
 public class UserRegisteredDomainEventHandler(
     ITokenHandler tokenHandler,
     IUrlGenerator urlGenerator,
-    IEmailService emailService) : IEventHandler<UserRegisteredDomainEvent>
+    IEmailService emailService,
+    IEventPublisher eventPublisher) : IEventHandler<UserRegisteredDomainEvent>
 {
     public async Task HandleAsync(UserRegisteredDomainEvent @event, CancellationToken cancellationToken = default)
     { 
@@ -22,5 +23,8 @@ public class UserRegisteredDomainEventHandler(
         var emailBody = $"<p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
             
         await emailService.SendEmailAsync(@event.Email, "Confirm your email", emailBody);
+        
+        var userRegisteredIntegrationEvent = new UserRegisteredIntegrationEvent(@event.UserId, @event.Email, @event.RegisteredAt);
+        await eventPublisher.PublishAsync("user-registered", userRegisteredIntegrationEvent, cancellationToken);
     }
 }

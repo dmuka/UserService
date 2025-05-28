@@ -16,6 +16,7 @@
  using Infrastructure.Options.Authentication;
  using Infrastructure.Options.Db;
  using Infrastructure.Options.Email;
+ using Infrastructure.Options.Kafka;
  using Infrastructure.Repositories;
  using Microsoft.AspNetCore.Authentication.JwtBearer;
  using Microsoft.AspNetCore.Authorization;
@@ -53,6 +54,11 @@
 
      private static IServiceCollection AddEventDispatcher(this IServiceCollection services)
      {
+         services.AddOptions<ProduceOptions>()
+             .BindConfiguration("Kafka")
+             .ValidateDataAnnotations()
+             .ValidateOnStart();
+         
          services.AddScoped<IEventDispatcher, EventDispatcher>();
          
          return services;

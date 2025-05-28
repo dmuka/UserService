@@ -3,7 +3,7 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain;
 using Domain.Users;
-using Domain.Users.DomainEvents;
+using Domain.Users.Events.Domain;
 using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.RoleNames;
 using RoleConstants = Domain.Roles.Constants.Roles;

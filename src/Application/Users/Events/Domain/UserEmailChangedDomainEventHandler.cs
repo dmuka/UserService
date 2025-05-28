@@ -1,10 +1,7 @@
-﻿using Application.Users.GetById;
-using Core;
-using Domain;
-using Domain.Users;
-using Domain.Users.DomainEvents;
+﻿using Domain;
+using Domain.Users.Events.Domain;
 
-namespace Application.Users.Events;
+namespace Application.Users.Events.Domain;
 
 /// <summary>
 /// Handles the UserEmailChangedEvent.
