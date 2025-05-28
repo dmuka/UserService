@@ -51,8 +51,7 @@ internal sealed class SignUpUserCommandHandler(
 
         var userId = await userRepository.AddUserAsync(user.Value, cancellationToken);
 
-        var @event =
-            new UserRegisteredDomainEvent(new UserId(userId), Email.Create(command.Email), DateTime.UtcNow);
+        var @event = new UserRegisteredDomainEvent(new UserId(userId), Email.Create(command.Email), DateTime.UtcNow);
         
         await eventDispatcher.DispatchAsync(@event, cancellationToken);
 

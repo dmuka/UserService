@@ -2,15 +2,17 @@
 using Application.Abstractions.Kafka;
 using Confluent.Kafka;
 using Core;
-using Microsoft.Extensions.Configuration;
-using Error = Confluent.Kafka.Error;
+using Infrastructure.Options.Kafka;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Kafka;
 
-public class EventPublisher(IConfiguration configuration) : IEventPublisher
+public class EventPublisher(IOptions<ProduceOptions> options) : IEventPublisher
 {
-    private readonly IProducer<Null, string> _producer = new ProducerBuilder<Null, string>(new ProducerConfig { BootstrapServers = configuration["Kafka:BootstrapServers"] }).Build();
-    private readonly string _topicPrefix = configuration["Kafka:TopicPrefix"] ?? throw new ProduceException<Null, string>(new Error(ErrorCode.TopicException), new DeliveryResult<Null, string>());
+    private readonly IProducer<Null, string> _producer = new ProducerBuilder<Null, string>(
+        new ProducerConfig { BootstrapServers = options.Value.BootstrapServers })
+        .Build();
+    private readonly string _topicPrefix = options.Value.TopicPrefix;
 
     public async Task PublishAsync<T>(string topic, T @event, CancellationToken cancellationToken = default) where T : IIntegrationEvent
     {
