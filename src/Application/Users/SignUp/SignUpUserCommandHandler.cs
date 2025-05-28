@@ -3,6 +3,8 @@ using Application.Abstractions.Messaging;
 using Core;
 using Domain;
 using Domain.Users;
+using Domain.Users.DomainEvents;
+using Domain.ValueObjects.Emails;
 using Domain.ValueObjects.RoleNames;
 using RoleConstants = Domain.Roles.Constants.Roles;
 
@@ -49,11 +51,10 @@ internal sealed class SignUpUserCommandHandler(
 
         var userId = await userRepository.AddUserAsync(user.Value, cancellationToken);
 
-        foreach (var domainEvent in user.Value.DomainEvents)
-        {
-            await eventDispatcher.DispatchAsync(domainEvent, cancellationToken);
-        }
-        user.Value.ClearDomainEvents();
+        var @event =
+            new UserRegisteredDomainEvent(new UserId(userId), Email.Create(command.Email), DateTime.UtcNow);
+        
+        await eventDispatcher.DispatchAsync(@event, cancellationToken);
 
         return userId;
     }

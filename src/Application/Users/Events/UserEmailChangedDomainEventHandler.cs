@@ -9,9 +9,9 @@ namespace Application.Users.Events;
 /// <summary>
 /// Handles the UserEmailChangedEvent.
 /// </summary>
-public class UserEmailChangedDomainEventHandler() : IEventHandler<UserEmailChangedEvent>
+public class UserEmailChangedDomainEventHandler() : IEventHandler<UserEmailChangedDomainEvent>
 {
-    public async Task HandleAsync(UserEmailChangedEvent domainEvent, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(UserEmailChangedDomainEvent domainDomainEvent, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

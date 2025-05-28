@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Authentication;
+using Application.Abstractions.Email;
 using Core;
 using Infrastructure.Options.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -12,7 +13,7 @@ public class TokenHandler(
     ITokenProvider tokenProvider,
     IRefreshTokenRepository refreshTokenRepository,
     IDataProtectionProvider provider,
-    IOptions<AuthOptions> authOptions)
+    IOptions<AuthOptions> authOptions) : ITokenHandler
 {
     private readonly IDataProtector _protector = provider.CreateProtector("PasswordReset");
     

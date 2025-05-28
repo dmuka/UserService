@@ -103,7 +103,7 @@ public class User : Entity<UserId>, IAggregationRoot
             userPermissionIds,
             isEmailConfirmed);
     
-        var userRegisteredEvent = new UserRegisteredDomainEvent(userId);
+        var userRegisteredEvent = new UserRegisteredDomainEvent(new UserId(userId), Email.Create(email), DateTime.UtcNow);
         user.AddDomainEvent(userRegisteredEvent);
 
         return user;
@@ -145,7 +145,7 @@ public class User : Entity<UserId>, IAggregationRoot
         
         Email = newEmail;
     
-        var emailChangedEvent = new UserEmailChangedEvent(Id.Value, newEmail.Value);
+        var emailChangedEvent = new UserEmailChangedDomainEvent(Id.Value, newEmail.Value);
         AddDomainEvent(emailChangedEvent);
     
         return Result.Success();

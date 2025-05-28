@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using Application.Abstractions.Email;
 using Grpc.Infrastructure.Interceptors;
+using Infrastructure.Email;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebApi.Infrastructure;
 
@@ -50,7 +52,8 @@ public static class Di
     
     private static IServiceCollection AddPresentationServices(this IServiceCollection services)
     {
-        services.AddScoped<TokenHandler>();
+        services.AddSingleton<ITokenHandler, TokenHandler>();
+        services.AddSingleton<IUrlGenerator, UrlGenerator>();
 
         return services;
     }
