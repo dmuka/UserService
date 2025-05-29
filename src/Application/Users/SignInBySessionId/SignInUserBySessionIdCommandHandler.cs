@@ -14,23 +14,14 @@ public sealed class SignInUserBySessionIdCommandHandler(
     public async Task<Result<SignInUserBySessionIdResponse>> Handle(SignInUserBySessionIdCommand command, CancellationToken cancellationToken)
     {
         var result = await refreshTokenRepository.GetTokenByIdAsync(command.SessionId, cancellationToken);
-
         if (result.IsFailure)
         {
             return Result.Failure<SignInUserBySessionIdResponse>(RefreshTokenErrors.NotFound(command.SessionId));
         }
         
         var refreshToken = result.Value;
-
-        if (refreshToken.ExpiresUtc <= DateTime.UtcNow)
-        {
-            await refreshTokenRepository.RemoveExpiredTokensAsync(cancellationToken);
-            
-            return Result.Failure<SignInUserBySessionIdResponse>(RefreshTokenErrors.InvalidExpiresDate);
-        }
         
         var user = await userRepository.GetUserByIdAsync(refreshToken.UserId.Value, cancellationToken);
-
         if (user is null)
         {
             return Result.Failure<SignInUserBySessionIdResponse>(UserErrors.NotFound(refreshToken.UserId.Value));
