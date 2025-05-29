@@ -80,7 +80,7 @@ public class GetAllUsersQueryHandlerTests
         {
             // Assert
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value.Count(), Is.EqualTo(users.Count));
+            Assert.That(result.Value, Has.Count.EqualTo(users.Count));
         }
     }
 }
