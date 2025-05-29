@@ -1,5 +1,8 @@
 ﻿using Application.Abstractions.Behaviors;
+using Application.Abstractions.Kafka;
+using Application.Users.Events.Domain;
 using Domain;
+using Domain.Users.Events.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 
@@ -16,6 +19,8 @@ public static class Di
             config.AddOpenBehavior(typeof(RequestLoggingPipelineBehavior<,>));
             config.AddOpenBehavior(typeof(ValidationPipelineBehavior<,>));
         });
+
+        services.AddTransient<IEventHandler<UserRegisteredDomainEvent>, UserRegisteredDomainEventHandler>();
 
         services.AddValidatorsFromAssembly(typeof(Di).Assembly, includeInternalTypes: true);
 

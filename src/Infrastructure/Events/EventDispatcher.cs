@@ -15,7 +15,7 @@ public class EventDispatcher(IServiceProvider serviceProvider) : IEventDispatche
         foreach (var handler in handlers)
         {
             var handleMethod = handlerType.GetMethod("HandleAsync");
-            var task = handleMethod?.Invoke(handler, [domainEvent]);
+            var task = handleMethod?.Invoke(handler, [domainEvent, cancellationToken]);
             if (task != null) await (Task)task;
         }
     }

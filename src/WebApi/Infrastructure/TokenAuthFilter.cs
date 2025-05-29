@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Abstractions.Email;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using WebApi.Pages;
 
 namespace WebApi.Infrastructure;
 
-public class TokenAuthFilter(TokenHandler tokenHandler) : IAsyncPageFilter
+public class TokenAuthFilter(ITokenHandler tokenHandler) : IAsyncPageFilter
 {
     public async Task OnPageHandlerExecutionAsync(
         PageHandlerExecutingContext context, 

@@ -1,6 +1,7 @@
 ﻿ using System.Text;
  using Application.Abstractions.Authentication;
  using Application.Abstractions.Email;
+ using Application.Abstractions.Kafka;
  using Application.Abstractions.Messaging;
  using Application.Users.SignInByToken;
  using Domain;
@@ -13,6 +14,7 @@
  using Infrastructure.Email;
  using Infrastructure.Events;
  using Infrastructure.HealthChecks;
+ using Infrastructure.Kafka;
  using Infrastructure.Options.Authentication;
  using Infrastructure.Options.Db;
  using Infrastructure.Options.Email;
@@ -60,6 +62,7 @@
              .ValidateOnStart();
          
          services.AddScoped<IEventDispatcher, EventDispatcher>();
+         services.AddScoped<IEventPublisher, EventPublisher>();
          
          return services;
      }
@@ -165,7 +168,7 @@
          
          services.AddHttpContextAccessor();
          services.AddScoped<IUserContext, UserContext>();
-         services.AddSingleton<ITokenProvider, TokenProvider>();
+         services.AddScoped<ITokenProvider, TokenProvider>();
          services.AddScoped<IPasswordHasher, PasswordHasher>();
          services.AddScoped<ITotpProvider, TotpProvider>();
          services.AddScoped<IRecoveryCodesProvider, RecoveryCodesProvider>();

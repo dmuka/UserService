@@ -1,18 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Application.Abstractions.Email;
 using Application.Users.SignIn;
 using Infrastructure.Options.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using WebApi.Infrastructure;
 using WebApi.Infrastructure.PagesConstants;
 
 namespace WebApi.Pages.Account;
 
 public class SignInModel(
     ISender sender, 
-    TokenHandler tokenHandler,
+    ITokenHandler tokenHandler,
     IOptions<AuthOptions> authOptions,
     ILogger<SignInModel> logger) : PageModel
 {

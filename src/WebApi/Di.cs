@@ -52,7 +52,7 @@ public static class Di
     
     private static IServiceCollection AddPresentationServices(this IServiceCollection services)
     {
-        services.AddSingleton<ITokenHandler, TokenHandler>();
+        services.AddScoped<ITokenHandler, TokenHandler>();
         services.AddSingleton<IUrlGenerator, UrlGenerator>();
 
         return services;
