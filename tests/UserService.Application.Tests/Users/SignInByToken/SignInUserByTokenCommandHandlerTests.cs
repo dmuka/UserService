@@ -2,6 +2,7 @@
 using Application.Users.SignInByToken;
 using Core;
 using Domain.RefreshTokens;
+using Domain.RefreshTokens.Constants;
 using Domain.Roles;
 using Domain.UserPermissions;
 using Domain.Users;
@@ -19,6 +20,7 @@ public class SignInUserByTokenCommandHandlerTests
     private const int RefreshTokenExpirationInDaysOneDay = 1;
     
     private const string ValidToken = "validToken";
+    private const string InvalidToken = "invalidToken";
 
     private const bool RememberMe = false;
 
@@ -63,6 +65,10 @@ public class SignInUserByTokenCommandHandlerTests
             _user.Id).Value;
         
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _refreshTokenRepositoryMock.Setup(repository => repository.GetTokenAsync(ValidToken, _cancellationToken))
+            .ReturnsAsync(_validRefreshToken);
+        _refreshTokenRepositoryMock.Setup(repository => repository.GetTokenAsync(InvalidToken, _cancellationToken))
+            .ReturnsAsync(Result.Failure<RefreshToken>(RefreshTokenErrors.NotFoundByValue(InvalidToken)));
         
         _tokenProviderMock = new Mock<ITokenProvider>();
         _tokenProviderMock.Setup(provider => provider.CreateAccessTokenAsync(_user, RememberMe, _cancellationToken))
@@ -104,9 +110,6 @@ public class SignInUserByTokenCommandHandlerTests
         // Arrange
         var command = new SignInUserByTokenCommand(ValidToken, RefreshTokenExpirationInDays);
 
-        _refreshTokenRepositoryMock.Setup(r => r.GetTokenAsync(command.RefreshToken, _cancellationToken))
-            .ReturnsAsync(_validRefreshToken);
-
         // Act
         var result = await _handler.Handle(command, _cancellationToken);
 
@@ -116,6 +119,46 @@ public class SignInUserByTokenCommandHandlerTests
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.AccessToken, Is.EqualTo("newAccessToken"));
             Assert.That(result.Value.SessionId, Is.EqualTo(_refreshTokenGuid));
+            _refreshTokenRepositoryMock.Verify(repository => repository.UpdateTokenAsync(It.IsAny<RefreshToken>(), _cancellationToken), Times.Once);
+        }
+    }
+
+    [Test]
+    public async Task Handle_InvalidRefreshToken_ShouldReturnFailure()
+    {
+        // Arrange
+        var command = new SignInUserByTokenCommand(InvalidToken, RefreshTokenExpirationInDays);
+
+        // Act
+        var result = await _handler.Handle(command, _cancellationToken);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo(Codes.NotFound));
+            _refreshTokenRepositoryMock.Verify(repository => repository.UpdateTokenAsync(It.IsAny<RefreshToken>(), _cancellationToken), Times.Never);
+        }
+    }
+
+    [Test]
+    public async Task Handle_WhenUserIdNonExistent_ShouldReturnFailure()
+    {
+        // Arrange
+        var command = new SignInUserByTokenCommand(ValidToken, RefreshTokenExpirationInDays);
+        _userRepositoryMock.Setup(repository => repository.GetUserByIdAsync(_validRefreshToken.UserId, _cancellationToken))
+            .ReturnsAsync((User)null!);
+        
+        // Act
+        var result = await _handler.Handle(command, _cancellationToken);
+        
+        using (Assert.EnterMultipleScope())
+        {
+
+            // Assert
+            Assert.That(result.IsFailure, Is.True);
+            Assert.That(result.Error.Code, Is.EqualTo(Domain.Users.Constants.Codes.NotFound));
+            _tokenProviderMock.Verify(provider => provider.CreateAccessTokenAsync(It.IsAny<User>(), RememberMe, _cancellationToken), Times.Never);
         }
     }
 }

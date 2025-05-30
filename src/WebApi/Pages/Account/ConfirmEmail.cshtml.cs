@@ -1,4 +1,5 @@
-﻿using Application.Users.ConfirmEmail;
+﻿using Application.Abstractions.Email;
+using Application.Users.ConfirmEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,7 +8,7 @@ using WebApi.Infrastructure;
 namespace WebApi.Pages.Account;
 
 public class ConfirmEmailModel(
-    TokenHandler tokenHandler,
+    ITokenHandler tokenHandler,
     ISender sender) : PageModel
 {
     public string Message { get; set; } = string.Empty;
