@@ -19,6 +19,7 @@
  using Infrastructure.Options.Db;
  using Infrastructure.Options.Email;
  using Infrastructure.Options.Kafka;
+ using Infrastructure.Options.Outbox;
  using Infrastructure.Repositories;
  using Microsoft.AspNetCore.Authentication.JwtBearer;
  using Microsoft.AspNetCore.Authorization;
@@ -58,6 +59,11 @@
      {
          services.AddOptions<ProduceOptions>()
              .BindConfiguration("Kafka")
+             .ValidateDataAnnotations()
+             .ValidateOnStart();
+         
+         services.AddOptions<OutboxOptions>()
+             .BindConfiguration("Outbox")
              .ValidateDataAnnotations()
              .ValidateOnStart();
          

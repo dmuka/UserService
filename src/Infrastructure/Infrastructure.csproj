@@ -19,6 +19,7 @@
       <PackageReference Include="Microsoft.OpenApi" />
       <PackageReference Include="Npgsql" />
       <PackageReference Include="Otp.NET" />
+      <PackageReference Include="Polly" />
       <PackageReference Include="QRCoder" />
     </ItemGroup>
 

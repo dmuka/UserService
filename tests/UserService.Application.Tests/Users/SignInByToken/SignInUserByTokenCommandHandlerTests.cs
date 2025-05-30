@@ -154,7 +154,6 @@ public class SignInUserByTokenCommandHandlerTests
         
         using (Assert.EnterMultipleScope())
         {
-
             // Assert
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error.Code, Is.EqualTo(Domain.Users.Constants.Codes.NotFound));
