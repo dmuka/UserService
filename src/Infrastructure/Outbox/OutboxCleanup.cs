@@ -19,7 +19,9 @@ public class OutboxCleanupService(
         {
             logger.LogInformation("Outbox cleanup service started.");
 
-            var outboxRepository = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IOutboxRepository>();
+            using var scope = scopeFactory.CreateScope();
+            
+            var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
             
             await outboxRepository.CleanUpAsync(outboxOptions.Value.RetentionDays, stoppingToken);
                 
