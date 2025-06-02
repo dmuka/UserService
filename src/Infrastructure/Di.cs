@@ -20,12 +20,15 @@
  using Infrastructure.Options.Email;
  using Infrastructure.Options.Kafka;
  using Infrastructure.Options.Outbox;
+ using Infrastructure.Outbox;
  using Infrastructure.Repositories;
  using Microsoft.AspNetCore.Authentication.JwtBearer;
  using Microsoft.AspNetCore.Authorization;
  using Microsoft.Extensions.Configuration;
  using Microsoft.Extensions.DependencyInjection;
+ using Microsoft.Extensions.Options;
  using Microsoft.IdentityModel.Tokens;
+ using Npgsql;
  using Serilog;
 
  namespace Infrastructure;
@@ -33,17 +36,20 @@
  public static class Di
  {
      public static IServiceCollection AddInfrastructure(
-         this IServiceCollection services,
+         this IServiceCollection services, 
          IConfiguration configuration) =>
          services
              .AddAuthentication(configuration)
              .AddDbConnectionOptions(configuration)
+             .AddNpgsqlDataSource(services.BuildServiceProvider().GetRequiredService<IOptions<PostgresOptions>>())
+             .AddOutbox()
              .AddAuthorizationLogic()
              .AddHealthCheck()
              .AddEmailService(configuration)
              .AddRepositories()
              .AddCache()
-             .AddEventDispatcher();
+             .AddEventDispatcher()
+             .AddHostedServices();
 
      private static IServiceCollection AddCache(this IServiceCollection services)
      {
@@ -55,6 +61,17 @@
          return services;
      }
 
+     private static IServiceCollection AddOutbox(this IServiceCollection services)
+     {
+         services.AddOptions<OutboxOptions>()
+             .BindConfiguration("Outbox")
+             .ValidateDataAnnotations()
+             .ValidateOnStart();
+         services.AddScoped<IOutboxProcessor, OutboxProcessor>();
+         
+         return services;
+     }
+
      private static IServiceCollection AddEventDispatcher(this IServiceCollection services)
      {
          services.AddOptions<ProduceOptions>()
@@ -62,13 +79,16 @@
              .ValidateDataAnnotations()
              .ValidateOnStart();
          
-         services.AddOptions<OutboxOptions>()
-             .BindConfiguration("Outbox")
-             .ValidateDataAnnotations()
-             .ValidateOnStart();
-         
          services.AddScoped<IEventDispatcher, EventDispatcher>();
          services.AddScoped<IEventPublisher, EventPublisher>();
+         
+         return services;
+     }
+
+     private static IServiceCollection AddHostedServices(this IServiceCollection services)
+     {
+         services.AddHostedService<OutboxPublisher>();
+         services.AddHostedService<OutboxCleanupService>();
          
          return services;
      }
@@ -79,11 +99,13 @@
          services.AddScoped<IRoleRepository, RoleRepository>();
          services.AddScoped<IUserRoleRepository, UserRoleRepository>();
          services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+         services.AddScoped<IOutboxRepository, OutboxRepository>();
          
          return services;
-     }    
-     
-     private static IServiceCollection AddDbConnectionOptions(this IServiceCollection services, IConfiguration configuration)
+     }
+
+     private static IServiceCollection AddDbConnectionOptions(this IServiceCollection services,
+         IConfiguration configuration)
      {
          services.AddOptions<PostgresOptions>()
              .BindConfiguration("DbConnections:Postgres")
@@ -96,11 +118,24 @@
 
                  if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
                  {
-                     throw new InvalidOperationException("Postgres username or password is not set in the configuration.");
+                     throw new InvalidOperationException(
+                         "Postgres username or password is not set in the configuration.");
                  }
 
                  options.UserName = userName;
                  options.Password = password;
+             });
+
+         return services;
+     }
+
+     private static IServiceCollection AddNpgsqlDataSource(this IServiceCollection services, IOptions<PostgresOptions> postgresOptions)
+         {
+             services.AddSingleton<NpgsqlDataSource>(_ =>
+             {
+                 var connectionString = postgresOptions.Value.GetConnectionString();
+                 
+                 return NpgsqlDataSource.Create(connectionString);
              });
          
          return services;

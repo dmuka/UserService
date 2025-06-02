@@ -14,4 +14,6 @@ public class OutboxOptions
     public int MaxRetryAttempts { get; set; }
     [Required, Range(1, 10)]
     public int RetryIntervalSeconds { get; set; }
+    [Required, Range(1, 10)]
+    public int CleanupPauseHours { get; set; }
 }

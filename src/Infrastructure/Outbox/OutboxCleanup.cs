@@ -1,15 +1,14 @@
-﻿using Application.Abstractions.Kafka;
-using Dapper;
-using Infrastructure.Options.Outbox;
+﻿using Infrastructure.Options.Outbox;
+using Infrastructure.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Npgsql;
 
 namespace Infrastructure.Outbox;
 
 public class OutboxCleanupService(
-    NpgsqlDataSource dataSource,
+    IServiceScopeFactory scopeFactory,
     ILogger<OutboxProcessor> logger,
     IOptions<OutboxOptions> outboxOptions) : BackgroundService
 {
@@ -19,18 +18,12 @@ public class OutboxCleanupService(
         while (!stoppingToken.IsCancellationRequested)
         {
             logger.LogInformation("Outbox cleanup service started.");
+
+            var outboxRepository = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IOutboxRepository>();
             
-            await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
-            
-            await connection.ExecuteAsync(
-                """
-                DELETE FROM outbox_messages
-                WHERE processed_on_utc IS NOT NULL
-                AND processed_on_utc < @cutoffDate
-                """,
-                new { cutoffDate = DateTime.UtcNow.AddDays(-outboxOptions.Value.RetentionDays) });
+            await outboxRepository.CleanUpAsync(outboxOptions.Value.RetentionDays, stoppingToken);
                 
-            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromHours(outboxOptions.Value.CleanupPauseHours), stoppingToken);
             
             logger.LogInformation("Outbox cleanup service stopped.");
         }

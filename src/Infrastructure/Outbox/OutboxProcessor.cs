@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Application.Abstractions.Kafka;
 using Core;
-using Dapper;
 using Infrastructure.Options.Outbox;
+using Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -17,8 +17,9 @@ public interface IOutboxProcessor
 }
 
 public class OutboxProcessor(
-    NpgsqlDataSource dataSource,
+    IOutboxRepository outboxRepository,
     IEventPublisher eventPublisher,
+    NpgsqlDataSource dataSource,
     ILogger<OutboxProcessor> logger,
     IOptions<OutboxOptions> outboxOptions) : IOutboxProcessor
 {
@@ -26,8 +27,8 @@ public class OutboxProcessor(
         .Handle<Exception>()
         .WaitAndRetryAsync(
             retryCount: outboxOptions.Value.MaxRetryAttempts,
-            sleepDurationProvider: attempt => TimeSpan.FromSeconds(outboxOptions.Value.RetryIntervalSeconds),
-            onRetry: (ex, delay, attempt, context) => 
+            sleepDurationProvider: _ => TimeSpan.FromSeconds(outboxOptions.Value.RetryIntervalSeconds),
+            onRetry: (ex, _, attempt, context) => 
             {
                 logger.LogWarning(ex, 
                     "Retry attempt {Attempt}/{MaxAttempts} for message {MessageId}",
@@ -41,10 +42,10 @@ public class OutboxProcessor(
 
         try
         {
-            var messages = await GetPendingMessagesAsync(connection, transaction, batchSize, cancellationToken);
+            var messages = await GetPendingMessagesAsync(batchSize, cancellationToken);
 
             var outboxMessages = messages as OutboxMessage[] ?? messages.ToArray();
-            if (!outboxMessages.Any())
+            if (outboxMessages.Length == 0)
             {
                 logger.LogDebug("No pending outbox messages found.");
                 return;
@@ -67,24 +68,11 @@ public class OutboxProcessor(
         }
     }
 
-    private static async Task<IEnumerable<OutboxMessage>> GetPendingMessagesAsync(
-        NpgsqlConnection connection,
-        NpgsqlTransaction transaction,
-        int batchSize,
-        CancellationToken cancellationToken)
+    private async Task<IEnumerable<OutboxMessage>> GetPendingMessagesAsync(int batchSize, CancellationToken cancellationToken)
     {
-        return await connection.QueryAsync<OutboxMessage>(
-            new CommandDefinition(
-                """
-                SELECT * FROM outbox_messages 
-                WHERE processed_on_utc IS NULL 
-                ORDER BY occurred_on_utc
-                FOR UPDATE SKIP LOCKED
-                LIMIT @batchSize
-                """,
-                new { batchSize },
-                transaction: transaction,
-                cancellationToken: cancellationToken));
+        var result = await outboxRepository.GetPendingAsync(batchSize, cancellationToken);
+        
+        return result;
     }
 
     private async Task ProcessSingleMessageAsync(
@@ -95,9 +83,9 @@ public class OutboxProcessor(
     {
         try
         {
-            var (eventType, integrationEvent) = DeserializeMessage(message);
+            var (_, integrationEvent) = DeserializeMessage(message);
 
-            await _retryPolicy.ExecuteAsync(async (context) => 
+            await _retryPolicy.ExecuteAsync(async _ => 
             {
                 await eventPublisher.PublishAsync(message.Topic, integrationEvent, cancellationToken);
             }, new Context { { "MessageId", message.Id.ToString() } });
@@ -138,24 +126,10 @@ public class OutboxProcessor(
     private async Task MarkMessageAsProcessedAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,
-        Guid messageId,
+        Guid messageId, 
         CancellationToken cancellationToken)
     {
-        var updated = await connection.ExecuteAsync(
-            new CommandDefinition(
-                """
-                UPDATE outbox_messages 
-                SET processed_on_utc = @now 
-                WHERE id = @id AND processed_on_utc IS NULL
-                """,
-                new { now = DateTime.UtcNow, id = messageId },
-                transaction: transaction,
-                cancellationToken: cancellationToken));
-
-        if (updated == 0)
-        {
-            logger.LogWarning("Message {MessageId} was already processed by another instance", messageId);
-        }
+        await outboxRepository.MarkAsProcessedAsync(connection, transaction, messageId, cancellationToken);
     }
 
     private async Task HandleProcessingErrorAsync(
@@ -167,7 +141,7 @@ public class OutboxProcessor(
     {
         logger.LogError(exception, "Failed to process outbox message {MessageId}", messageId);
 
-        var attemptCount = await GetAttemptCountAsync(connection, transaction, messageId, cancellationToken);
+        var attemptCount = await GetAttemptCountAsync(connection, messageId, cancellationToken);
 
         if (attemptCount >= outboxOptions.Value.MaxRetryAttempts - 1)
         {
@@ -189,16 +163,12 @@ public class OutboxProcessor(
 
     private async Task<int> GetAttemptCountAsync(
         NpgsqlConnection connection,
-        NpgsqlTransaction transaction,
-        Guid messageId,
+        Guid messageId, 
         CancellationToken cancellationToken)
     {
-        return await connection.QuerySingleOrDefaultAsync<int>(
-            new CommandDefinition(
-                "SELECT error_count FROM outbox_messages WHERE id = @id",
-                new { id = messageId },
-                transaction: transaction,
-                cancellationToken: cancellationToken));
+        var result = await outboxRepository.GetAttemptCountAsync(connection, messageId, cancellationToken);
+        
+        return result;
     }
 
     private async Task RecordFailedAttemptAsync(
@@ -208,22 +178,7 @@ public class OutboxProcessor(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        await connection.ExecuteAsync(
-            new CommandDefinition(
-                """
-                UPDATE outbox_messages 
-                SET 
-                    error = @error,
-                    error_count = error_count + 1
-                WHERE id = @id
-                """,
-                new 
-                { 
-                    error = $"{exception.GetType().Name}: {exception.Message}",
-                    id = messageId
-                },
-                transaction: transaction,
-                cancellationToken: cancellationToken));
+        await outboxRepository.RecordFailedAttemptAsync(connection, transaction, messageId, $"{exception.GetType().Name}: {exception.Message}", cancellationToken);
     }
 
     private async Task MoveToDeadLetterQueueAsync(
@@ -232,28 +187,6 @@ public class OutboxProcessor(
         Guid messageId,
         CancellationToken cancellationToken)
     {
-        await connection.ExecuteAsync(
-            new CommandDefinition(
-                """
-                INSERT INTO dead_letter_messages
-                (id, topic, type, content, error, original_occurred_on, archived_at)
-                SELECT 
-                    id, 
-                    topic, 
-                    type, 
-                    content, 
-                    error, 
-                    occurred_on_utc,
-                    @archivedAt
-                FROM outbox_messages
-                WHERE id = @id
-                """,
-                new 
-                { 
-                    id = messageId,
-                    archivedAt = DateTime.UtcNow
-                },
-                transaction: transaction,
-                cancellationToken: cancellationToken));
+        await outboxRepository.MoveToDeadLetterQueueAsync(connection, transaction, messageId, cancellationToken);
     }
 }
