@@ -82,7 +82,7 @@ public class OutboxCleanupServiceTests
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Outbox cleanup service started")),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("Outbox cleanup service started")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
@@ -93,7 +93,6 @@ public class OutboxCleanupServiceTests
     {
         // Arrange
         var cleanupCount = 0;
-            
         _mockOutboxRepository
             .Setup(x => x.CleanUpAsync(_outboxOptions.RetentionDays, It.IsAny<CancellationToken>()))
             .ReturnsAsync(10)
@@ -106,8 +105,8 @@ public class OutboxCleanupServiceTests
         var serviceTask = Task.Run(async () => 
         {
             await _service.StartAsync(_cts.Token);
-            await Task.Delay(100); // Give service time to start
-            await _cts.CancelAsync(); // Cancel to exit the loop
+            await Task.Delay(100);
+            await _cts.CancelAsync();
         });
             
         await Task.WhenAny(serviceTask, Task.Delay(5000));
@@ -115,6 +114,7 @@ public class OutboxCleanupServiceTests
         _mockOutboxRepository.Verify(
             x => x.CleanUpAsync(_outboxOptions.RetentionDays, It.IsAny<CancellationToken>()),
             Times.AtLeastOnce);
+        Assert.That(cleanupCount, Is.GreaterThan(0));
     }
         
     [Test]
@@ -126,16 +126,16 @@ public class OutboxCleanupServiceTests
             .ReturnsAsync(10);
                 
         // Act
-        var serviceTask = _service.StartAsync(_cts.Token);
-        await Task.Delay(100); // Give time for the service to start
-        await _service.StopAsync(_cts.Token); // Cancel to exit the loop
+        await _service.StartAsync(_cts.Token);
+        await Task.Delay(100);
+        await _service.StopAsync(_cts.Token);
             
         // Assert
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Outbox cleanup service started.")),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("Outbox cleanup service started.")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
@@ -153,7 +153,7 @@ public class OutboxCleanupServiceTests
             {
                 if (cleanupCalled) return;
                 cleanupCalled = true;
-                _cts.CancelAfter(5);
+                _cts.CancelAfter(50);
             })
             .ReturnsAsync(10);
         
@@ -163,7 +163,7 @@ public class OutboxCleanupServiceTests
             var serviceTask = _service.StartAsync(_cts.Token);
             
             await Task.WhenAny(serviceTask, Task.Delay(1000, CancellationToken.None));
-            await _service.StopAsync(CancellationToken.None);
+            await _service.StopAsync(_cts.Token);
             
             // Assert
             _mockLogger.Verify(
