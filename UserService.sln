@@ -1,10 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{7CE20AA1-2E97-4DDF-A526-01DD8361607D}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0521C078-BE28-471F-A04E-393E8FD2A131}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D6496B32-0A12-4EFE-BA91-12E7042764F2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{7CE20AA1-2E97-4DDF-A526-01DD8361607D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests_integration", "tests_integration", "{55A9EE6C-81BF-477F-900E-F13BA6C82859}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "src\WebApi\WebApi.csproj", "{8E574311-A5E4-490C-8E8D-511B9903E81A}"
 EndProject
@@ -12,11 +14,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{81F8EF7D-3B0E-4F93-91BB-BFF5F27428AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{7136219D-4F5D-42E0-AEF0-89C33D4763A7}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{36CF5224-B883-4DC7-9C02-6B83E9AEA147}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Domain.Tests", "tests\UserService.Domain.Tests\UserService.Domain.Tests.csproj", "{941EFD91-4777-429F-B572-E02440496D49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc", "src\Grpc\Grpc.csproj", "{782D888C-126A-4415-AEF9-FC5848FB1A6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{7136219D-4F5D-42E0-AEF0-89C33D4763A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Domain.Tests", "tests\UserService.Domain.Tests\UserService.Domain.Tests.csproj", "{941EFD91-4777-429F-B572-E02440496D49}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Application.Tests", "tests\UserService.Application.Tests\UserService.Application.Tests.csproj", "{908DDEC7-A127-4693-8438-BEEDD3619928}"
 EndProject
@@ -24,11 +28,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Core.Tests", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Infrastructure.Tests", "tests\UserService.Infrastructure.Tests\UserService.Infrastructure.Tests.csproj", "{C8D25B75-3AE2-4169-BA69-30881F06F305}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc", "src\Grpc\Grpc.csproj", "{782D888C-126A-4415-AEF9-FC5848FB1A6D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Grpc.Tests", "tests\UserService.Grpc.Tests\UserService.Grpc.Tests.csproj", "{ED86363A-B5E0-4456-A229-D48B5558228B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.WebApi.Tests", "tests\UserService.WebApi.Tests\UserService.WebApi.Tests.csproj", "{3AD52C0A-B96A-4275-BE1C-BF46880091AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Infrastructure.IntegrationTests", "tests_integration\UserService.Infrastructure.IntegrationTests\UserService.Infrastructure.IntegrationTests.csproj", "{32124DFA-641F-4973-BD62-54813F43D1AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +52,7 @@ Global
 		{782D888C-126A-4415-AEF9-FC5848FB1A6D} = {0521C078-BE28-471F-A04E-393E8FD2A131}
 		{ED86363A-B5E0-4456-A229-D48B5558228B} = {D6496B32-0A12-4EFE-BA91-12E7042764F2}
 		{3AD52C0A-B96A-4275-BE1C-BF46880091AA} = {D6496B32-0A12-4EFE-BA91-12E7042764F2}
+		{32124DFA-641F-4973-BD62-54813F43D1AC} = {55A9EE6C-81BF-477F-900E-F13BA6C82859}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8E574311-A5E4-490C-8E8D-511B9903E81A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -98,5 +103,9 @@ Global
 		{3AD52C0A-B96A-4275-BE1C-BF46880091AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AD52C0A-B96A-4275-BE1C-BF46880091AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD52C0A-B96A-4275-BE1C-BF46880091AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32124DFA-641F-4973-BD62-54813F43D1AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32124DFA-641F-4973-BD62-54813F43D1AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32124DFA-641F-4973-BD62-54813F43D1AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32124DFA-641F-4973-BD62-54813F43D1AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

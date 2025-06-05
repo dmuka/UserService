@@ -9,7 +9,7 @@ namespace Infrastructure.Outbox;
 
 public class OutboxCleanupService(
     IServiceScopeFactory scopeFactory,
-    ILogger<OutboxProcessor> logger,
+    ILogger<OutboxCleanupService> logger,
     IOptions<OutboxOptions> outboxOptions) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -23,7 +23,7 @@ public class OutboxCleanupService(
             
             var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
             
-            await outboxRepository.CleanUpAsync(outboxOptions.Value.RetentionDays, stoppingToken);
+            var deletedMessagesCount = await outboxRepository.CleanUpAsync(outboxOptions.Value.RetentionDays, stoppingToken);
                 
             await Task.Delay(TimeSpan.FromHours(outboxOptions.Value.CleanupPauseHours), stoppingToken);
             

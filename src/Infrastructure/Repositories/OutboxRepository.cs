@@ -14,7 +14,7 @@ public interface IOutboxRepository
     Task<int> GetAttemptCountAsync(NpgsqlConnection connection, Guid messageId, CancellationToken cancellationToken);
     Task RecordFailedAttemptAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, Guid messageId, string error, CancellationToken cancellationToken);
     Task MoveToDeadLetterQueueAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, Guid messageId, CancellationToken cancellationToken);
-    Task CleanUpAsync(int retentionDays, CancellationToken cancellationToken);
+    Task<int> CleanUpAsync(int retentionDays, CancellationToken cancellationToken);
 }
 
 public class OutboxRepository(NpgsqlDataSource dataSource, ILogger<OutboxRepository> logger) : IOutboxRepository
@@ -184,16 +184,18 @@ public class OutboxRepository(NpgsqlDataSource dataSource, ILogger<OutboxReposit
         }
     }
 
-    public async Task CleanUpAsync(int retentionDays, CancellationToken cancellationToken)
+    public async Task<int> CleanUpAsync(int retentionDays, CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
             
-        await connection.ExecuteAsync(
+        var deletedMessagesCount = await connection.ExecuteAsync(
             """
             DELETE FROM outbox_messages
             WHERE processed_on_utc IS NOT NULL
             AND processed_on_utc < @cutoffDate
             """,
             new { cutoffDate = DateTime.UtcNow.AddDays(-retentionDays) });
+
+        return deletedMessagesCount;
     }
 }
