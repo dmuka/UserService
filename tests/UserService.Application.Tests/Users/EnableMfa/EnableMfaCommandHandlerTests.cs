@@ -49,7 +49,7 @@ public class EnableMfaCommandHandlerTests
             .ReturnsAsync(_user);
         
         _mockTotpProvider = new Mock<ITotpProvider>();
-        _mockTotpProvider.Setup(provider => provider.ValidateTotp(_user.MfaSecret, VerificationCode))
+        _mockTotpProvider.Setup(provider => provider.ValidateTotp(_user.MfaSecret!, VerificationCode))
             .Returns(true);
 
         _handler = new EnableMfaCommandHandler(_mockUserRepository.Object, _mockTotpProvider.Object);

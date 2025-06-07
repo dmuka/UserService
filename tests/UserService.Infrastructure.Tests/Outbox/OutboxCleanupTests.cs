@@ -100,8 +100,6 @@ public class OutboxCleanupServiceTests
         
         _outboxOptions.CleanupPauseHours = 1;
             
-        var expectedDelay = TimeSpan.FromHours(_outboxOptions.CleanupPauseHours);
-            
         var serviceTask = Task.Run(async () => 
         {
             await _service.StartAsync(_cts.Token);
@@ -146,6 +144,7 @@ public class OutboxCleanupServiceTests
     {
         // Arrange
         _outboxOptions.CleanupPauseHours = 0;
+        var cts = _cts;
         var cleanupCalled = false;
         _mockOutboxRepository
             .Setup(x => x.CleanUpAsync(_outboxOptions.RetentionDays, It.IsAny<CancellationToken>()))
@@ -153,7 +152,7 @@ public class OutboxCleanupServiceTests
             {
                 if (cleanupCalled) return;
                 cleanupCalled = true;
-                _cts.CancelAfter(50);
+                cts.CancelAfter(50);
             })
             .ReturnsAsync(10);
         

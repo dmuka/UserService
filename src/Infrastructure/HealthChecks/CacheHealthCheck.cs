@@ -10,21 +10,24 @@ public class CacheHealthCheck(ICacheService cache) : IHealthCheck
     
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        try
+        return await Task.Run(() =>
         {
-            var role = Role.Create(Guid.CreateVersion7(), Name).Value;
-            
-            cache.Create(Name, role);
+            try
+            {
+                var role = Role.Create(Guid.CreateVersion7(), Name).Value;
 
-            _ = cache.GetEntity<Role>(Name);
-            
-            cache.Remove(Name);
-            
-            return HealthCheckResult.Healthy("Cache instance is healthy.");
-        }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Unhealthy("Cache instance is unhealthy.", ex);
-        }
+                cache.Create(Name, role);
+
+                _ = cache.GetEntity<Role>(Name);
+
+                cache.Remove(Name);
+
+                return HealthCheckResult.Healthy("Cache instance is healthy.");
+            }
+            catch (Exception ex)
+            {
+                return HealthCheckResult.Unhealthy("Cache instance is unhealthy.", ex);
+            }
+        }, cancellationToken);
     }
 }
