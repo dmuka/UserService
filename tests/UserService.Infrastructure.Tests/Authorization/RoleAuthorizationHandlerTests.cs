@@ -17,6 +17,7 @@ public class RoleAuthorizationHandlerTests
     private ClaimsPrincipal _adminPrincipalMock;
     private RolesAuthorizationRequirement[] _adminAuthorizationRequirements;
     private RolesAuthorizationRequirement[] _multipleRolesAuthorizationRequirements;
+    private RolesAuthorizationRequirement[] _emptyAuthorizationRequirements;
     
     private RoleAuthorizationHandler _handler;
 
@@ -30,6 +31,7 @@ public class RoleAuthorizationHandlerTests
         
         _adminAuthorizationRequirements = [new RolesAuthorizationRequirement([Admin])];
         _multipleRolesAuthorizationRequirements = [new RolesAuthorizationRequirement([Admin, SuperAdmin])];
+        _emptyAuthorizationRequirements = [];
         
         _handler = new RoleAuthorizationHandler();
     }
@@ -40,7 +42,7 @@ public class RoleAuthorizationHandlerTests
     public async Task HandleRequirementAsync_Authorization_ShouldBehaveCorrectly(
         bool expectedSuccess, 
         string? userRole, 
-        string requiredRole)
+        string? requiredRole)
     {
         // Arrange
         var principal = userRole == null 
@@ -53,6 +55,24 @@ public class RoleAuthorizationHandlerTests
 
         // Assert
         Assert.That(context.HasSucceeded, Is.EqualTo(expectedSuccess));
+    }
+    
+    [TestCase(Admin, Description = "User has required role")]
+    [TestCase(User, Description = "User does not have required role")]
+    [TestCase(null, Description = "User is not authenticated")]
+    public async Task HandleRequirementAsync_AuthorizationWithEmptyRequirements_ShouldBehaveCorrectly(string? userRole)
+    {
+        // Arrange
+        var principal = userRole == null 
+            ? new ClaimsPrincipal(new ClaimsIdentity()) 
+            : new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, userRole)], MockAuthType));
+        var context = new AuthorizationHandlerContext(_emptyAuthorizationRequirements, principal, null);
+
+        // Act
+        await _handler.HandleAsync(context);
+
+        // Assert
+        Assert.That(context.HasSucceeded, Is.False);
     }
     
     [Test]
