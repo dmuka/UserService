@@ -10,6 +10,7 @@ public class UrlGenerator(IConfiguration configuration) : IUrlGenerator
     public string GenerateEmailConfirmationLink(UserId userId, string token)
     {
         var baseUrl = configuration["App:BaseUrl"] ?? "https://localhost:5001";
+        baseUrl = baseUrl.TrimEnd('/');
         
         return $"{baseUrl}/Account/ConfirmEmail?userId={userId.Value}&token={HttpUtility.UrlEncode(token)}";
     }
