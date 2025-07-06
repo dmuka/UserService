@@ -7,8 +7,8 @@ public abstract class TypedId(Guid value) : IEquatable<TypedId>
     /// <summary>
     /// Implicitly converts a <see cref="Result{TypedId}" /> to a <see cref="TypedId" />.
     /// </summary>
-    /// <param name="TypedIdResult">The result with the user id to convert.</param>
-    public static implicit operator TypedId(Result<TypedId> TypedIdResult) => TypedIdResult.Value;
+    /// <param name="typedIdResult">The result with the user id to convert.</param>
+    public static implicit operator TypedId(Result<TypedId> typedIdResult) => typedIdResult.Value;
     
     /// <summary>
     /// Implicitly converts a <see cref="TypedId"/> to a guid.

@@ -20,7 +20,8 @@ public static class Di
             .AddExceptionHandler<GlobalExceptionHandler>()
             .AddProblemDetails()
             .AddHttpClient()
-            .AddPresentationServices();
+            .AddPresentationServices()
+            .EnableCORS();
         
         return services;
     }
@@ -31,6 +32,21 @@ public static class Di
         {
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<LoggingInterceptor>();
+        });
+         
+        return services;
+    }
+
+    private static IServiceCollection EnableCORS(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend",
+                builder => builder
+                    .WithOrigins("https://localhost:3000")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
         });
          
         return services;

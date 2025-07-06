@@ -124,4 +124,6 @@ app.MapLocalGrpcServices();
 
 app.MapRazorPages();
 
+app.UseCors("AllowFrontend");
+
 await app.RunAsync();
