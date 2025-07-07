@@ -83,7 +83,7 @@ public class SignInModel(
         var result = await sender.Send(command, CancellationToken);
         if (result.IsFailure)
         {
-            ModelState.AddModelError(string.Empty, $"Invalid login attempt ({result.Error.Description}).");
+            ModelState.AddModelError(string.Empty, $"Invalid login attempt ({result.Error.Description})");
 
             ShowRecoveryCodeOption = true;
             tokenHandler.ClearTokens();

@@ -18,7 +18,7 @@ internal sealed class SignInUserCommandHandler(
 {
     public async Task<Result<SignInResponse>> Handle(SignInUserCommand command, CancellationToken cancellationToken)
     {
-        var user = command.Email is null 
+        var user = string.IsNullOrEmpty(command.Email) 
             ? await userRepository.GetUserByUsernameAsync(command.Username, cancellationToken)
             : await userRepository.GetUserByEmailAsync(command.Email, cancellationToken);
 
@@ -32,16 +32,18 @@ internal sealed class SignInUserCommandHandler(
             return Result.Failure<SignInResponse>(errorMessage);
         }
 
-        var isPasswordCorrect = passwordHasher.CheckPassword(command.Password, user.PasswordHash);
-
-        if (!isPasswordCorrect)
+        if (!string.IsNullOrEmpty(command.Password))
         {
-            logger.LogWarning("Incorrect password for user: {Username}", user.Username);
-            
-            return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
-        }
+            var isPasswordCorrect = passwordHasher.CheckPassword(command.Password, user.PasswordHash);
 
-        if (user.IsMfaEnabled)
+            if (!isPasswordCorrect)
+            {
+                logger.LogWarning("Incorrect password for user: {Username}", user.Username);
+
+                return Result.Failure<SignInResponse>(UserErrors.WrongPassword());
+            }
+        } 
+        else if (user.IsMfaEnabled)
         {
             if (string.IsNullOrEmpty(command.VerificationCode) && string.IsNullOrEmpty(command.RecoveryCode))
             {
@@ -69,6 +71,10 @@ internal sealed class SignInUserCommandHandler(
 
                 await userRepository.UpdateUserAsync(user, cancellationToken);
             }
+        }
+        else
+        {
+            return Result.Failure<SignInResponse>(UserErrors.NoAuthData());
         }
 
         var accessToken = await tokenProvider.CreateAccessTokenAsync(user, command.RememberMe, cancellationToken);

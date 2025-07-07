@@ -7,6 +7,7 @@ public static class Codes
     public const string WrongPassword = "UserWrongPassword";
     public const string WrongRecoveryCode = "WrongRecoveryCode";
     public const string WrongVerificationCode = "WrongVerificationCode";
+    public const string NoAuthData = "NoAuthData";
     public const string MfaModeEnabled = "MfaModeEnabled";
     public const string WrongResetCode = "UserWrongResetCode";
     public const string EmailExists = "EmailAlreadyExists";

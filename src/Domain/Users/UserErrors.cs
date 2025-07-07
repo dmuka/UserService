@@ -33,6 +33,10 @@ public static class UserErrors
         Codes.WrongRecoveryCode, 
         "You are entered the wrong verification code.");
     
+    public static Error NoAuthData() => Error.Failure(
+        Codes.NoAuthData, 
+        "You are must use some of the auth data: password, verification ot recovery code.");
+    
     public static Error MfaModeEnabled() => Error.Failure(
         Codes.MfaModeEnabled, 
         "MFA mode is turned on: please enter verification or recovery code.");

@@ -9,7 +9,7 @@ namespace WebApi.Endpoints.Users;
 
 internal sealed class SignIn(IOptions<AuthOptions> authOptions) : IEndpoint
 {
-    public sealed record Request(string Username, string Password, string? Email = null);
+    public sealed record Request(string Username, string Password, string? Email = null, string? VerificationCode = null, string? RecoveryCode = null);
     
     public void MapEndpoint(IEndpointRouteBuilder builder)
     {
@@ -20,6 +20,8 @@ internal sealed class SignIn(IOptions<AuthOptions> authOptions) : IEndpoint
                 request.Password,
                 false,
                 authOptions.Value.RefreshTokenExpirationInDays,
+                request.VerificationCode,
+                request.RecoveryCode,
                 request.Email);
 
             var result = await sender.Send(command, cancellationToken);
