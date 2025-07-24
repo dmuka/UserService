@@ -4,8 +4,8 @@ using Domain.ValueObjects.Emails;
 namespace Domain.Users.Events.Domain;
 
 public sealed record UserRegisteredDomainEvent(
-    UserId UserId, 
+    Guid UserId, 
     string FirstName, 
     string LastName, 
-    Email Email, 
+    string Email, 
     DateTime RegisteredAt) : IDomainEvent;

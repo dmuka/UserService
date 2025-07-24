@@ -4,5 +4,5 @@ namespace Application.Abstractions.Email;
 
 public interface IUrlGenerator
 {
-    string GenerateEmailConfirmationLink(UserId userId, string token);
+    string GenerateEmailConfirmationLink(Guid userId, string token);
 }

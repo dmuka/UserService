@@ -107,7 +107,7 @@ public class User : Entity<UserId>, IAggregationRoot
             new UserId(userId),
             firstName,
             lastName,
-            Email.Create(email), 
+            email, 
             DateTime.UtcNow);
         user.AddDomainEvent(userRegisteredEvent);
 

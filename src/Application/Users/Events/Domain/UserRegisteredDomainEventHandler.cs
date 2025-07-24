@@ -17,7 +17,7 @@ public class UserRegisteredDomainEventHandler(
 {
     public async Task HandleAsync(UserRegisteredDomainEvent @event, CancellationToken cancellationToken = default)
     { 
-        var token = tokenHandler.GetEmailToken(@event.UserId.Value.ToString());
+        var token = tokenHandler.GetEmailToken(@event.UserId.ToString());
         var confirmationLink = urlGenerator.GenerateEmailConfirmationLink(@event.UserId, token);
             
         var emailBody = $"<p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
