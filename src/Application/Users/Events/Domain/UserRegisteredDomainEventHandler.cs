@@ -24,7 +24,12 @@ public class UserRegisteredDomainEventHandler(
             
         await emailService.SendEmailAsync(@event.Email, "Confirm your email", emailBody);
         
-        var userRegisteredIntegrationEvent = new UserRegisteredIntegrationEvent(@event.UserId, @event.Email, @event.RegisteredAt);
+        var userRegisteredIntegrationEvent = new UserRegisteredIntegrationEvent(
+            @event.UserId,
+            @event.FirstName,
+            @event.LastName,
+            @event.Email, 
+            @event.RegisteredAt);
         await eventPublisher.PublishAsync("user-registered", userRegisteredIntegrationEvent, cancellationToken);
     }
 }

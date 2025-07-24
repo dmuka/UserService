@@ -103,7 +103,12 @@ public class User : Entity<UserId>, IAggregationRoot
             userPermissionIds,
             isEmailConfirmed);
     
-        var userRegisteredEvent = new UserRegisteredDomainEvent(new UserId(userId), Email.Create(email), DateTime.UtcNow);
+        var userRegisteredEvent = new UserRegisteredDomainEvent(
+            new UserId(userId),
+            firstName,
+            lastName,
+            Email.Create(email), 
+            DateTime.UtcNow);
         user.AddDomainEvent(userRegisteredEvent);
 
         return user;
